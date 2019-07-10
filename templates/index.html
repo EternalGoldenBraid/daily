@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+ <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Symbol</th>
+      <th scope="col">Name</th>
+      <th scope="col">Current Price</th>
+      <th scope="col">Shares</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for dict in range(size) %}
+    <tr>
+      <td>{{ portfolio[dict]['symbol'] }}</td>
+      <td>{{ portfolio[dict]['name'] }}</td>
+      <td>{{ prices[dict]}}</td>
+      <td>{{ portfolio[dict]['shares'] }}</td>
+    </tr>
+        {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
