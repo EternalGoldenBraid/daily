@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Portfolio
+	Daily
 {% endblock %}
 
 {% block main %}
@@ -15,14 +15,9 @@
     </tr>
   </thead>
   <tbody>
-    {% for dict in range(size) %}
     <tr>
-      <td>{{ portfolio[dict]['symbol'] }}</td>
-      <td>{{ portfolio[dict]['name'] }}</td>
-      <td>{{ prices[dict]}}</td>
-      <td>{{ portfolio[dict]['shares'] }}</td>
+      <td>Some data</td>
     </tr>
-        {% endfor %}
   </tbody>
 </table>
 {% endblock %}

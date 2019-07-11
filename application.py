@@ -1,7 +1,7 @@
 import os
 import datetime
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, session
 
 
 from helpers import login_required
@@ -11,26 +11,29 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     """ Show current data on daily """
-
     return render_template("index.html")
 
 
-@app.route("/login")
-@login_required
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    error = None
+
+
+    # Forget any user_id
+    session.clear()
 
     # Request method was POST
     if request.method == 'POST':
 
+        # Ensure valid user input
+        if not request.form.get("username"):
+            return ("Invalid username")
+
         # Query db for existing credentials
-        if db.execute("SELECT ..."):
 
            # Log user in
-           log_in
-           return redirect("/")
         else:
-           error = 'Invalid username/password'
+            return redirect("/")
 
     # Request method was GET
-    return render_template('login.html', error = error)
+    else:
+        return render_template("login.html")
