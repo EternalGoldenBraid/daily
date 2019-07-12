@@ -2,11 +2,15 @@ import os
 import datetime
 
 from flask import Flask, render_template, request, redirect, session
+from flask_session import Session
 
 
 from helpers import login_required
 
 app = Flask(__name__)
+
+# Set the secret key
+app.secret_key = 
 
 @app.route("/")
 def index():
