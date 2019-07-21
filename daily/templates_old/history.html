@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Symbol</th>
+                <th scope="col">Price</th>
+                <th scope="col">Shares</th>
+                <th scope="col">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(size) %}
+            <tr>
+                <td> {{ users_id[i] }}</td>
+                <td> {{ date[i] }}</td>
+                <td> {{ symbols[i] }}</td>
+                <td> {{ prices[i] }}</td>
+                <td> {{ actions[i] }}</td>
+                <td> {{ shares[i] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
