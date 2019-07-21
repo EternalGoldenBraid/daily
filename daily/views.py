@@ -17,7 +17,7 @@ def index():
 def login():
 
 
-    # Forget any user_id
+    # Forget user_id
     session.clear()
 
     # Request method was POST
