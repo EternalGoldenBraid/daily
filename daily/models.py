@@ -14,8 +14,8 @@ class User(db.Model):
         return '<User {}>'.format(self.username)
 
 # Define daily table
-class Days(db.Model):
-    __tablename__ = 'days'
+class Rating(db.Model):
+    __tablename__ = 'rating'
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, unique=True, nullable=False)
@@ -24,9 +24,10 @@ class Days(db.Model):
     cw = db.Column(db.Integer, nullable=False)
     screen = db.Column(db.Time, nullable=False)
     rating_day = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return '<Rating of the day {}>'.format(self.rating_day)
+        return '<Rating of the day: {}, User_id: {}>'.format(self.rating_day, self.user_id)
     
 # Define tags table
 
@@ -42,5 +43,9 @@ class Tags(db.Model):
         return '<Tags {}>'.format(self.username)
 
 # Define relationships with tags and days
-class DaysTags(db.Model):
-    __tablename__ = 'daystags'
+class Tagmap(db.Model):
+    __tablename__ = 'tagmap'
+
+    id = db.Column(db.Integer, primary_key=True)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
+    rating_id = db.Column(db.Integer, db.ForeignKey('rating.id'))
