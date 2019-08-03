@@ -6,9 +6,10 @@ class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(80), index=True, unique=True, nullable=False)
+    email = db.Column(db.String(120) ,index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
+    ratings = db.relationships('Post', backref='')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -19,7 +20,7 @@ class Rating(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, unique=True, nullable=False)
-    rating_sleep = db.Column(db.Integer, nullable=False)
+    rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False)
     cw = db.Column(db.Integer, nullable=False)
     screen = db.Column(db.Time, nullable=False)
