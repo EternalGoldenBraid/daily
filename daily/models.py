@@ -9,7 +9,8 @@ class User(db.Model):
     username = db.Column(db.String(80), index=True, unique=True, nullable=False)
     email = db.Column(db.String(120) ,index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
-    ratings = db.relationships('Post', backref='')
+    
+    ratings = db.relationships('Rating', backref='user')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -38,7 +39,9 @@ class Tags(db.Model):
     __tablename__ = 'tags'
 
     id = db.Column(db.Integer, primary_key=True)
-    tag = db.Column(db.Integer, unique=True, nullable=False)
+    duration = db.Column(db.Integer, default=0)
+    tag_id = db.Column(db.String, unique=True, nullable=False)
+    rating_date = db.Column(db.Date, db.ForeignKey('rating.date'), index=True, nullable=False)
 
     def __repr__(self):
         return '<Tags {}>'.format(self.username)
