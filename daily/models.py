@@ -10,7 +10,9 @@ class User(db.Model):
     email = db.Column(db.String(120) ,index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
     
-    ratings = db.relationships('Rating', backref='user')
+    # Establish Rating objects on User called User.ratings.
+    # Establish a .user attribute on Rating which referes to the parent User object
+    ratings = db.relationship('Rating', backref='user')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -22,34 +24,42 @@ class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, unique=True, nullable=False)
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
-    meditation = db.Column(db.Integer, nullable=False)
-    cw = db.Column(db.Integer, nullable=False)
-    screen = db.Column(db.Time, nullable=False)
+    meditation = db.Column(db.Integer, nullable=False) # Duration of daily meditation.
+    cw = db.Column(db.Integer, nullable=False) # Duration of daily creative work.
+    screen = db.Column(db.Time, nullable=False) # When did user stop bright light exposure.
     rating_day = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True, nullable=False)
+
+    # Establish Event objects on Rating called Rating.events.
+    # Establish .rating attribute on Event, which refer to the parent Rating object.
+    events = db.relationship('Event', backref='rating')
 
     def __repr__(self):
         return '<Rating of the day: {}, User_id: {}>'.format(self.rating_day, self.user_id)
     
-# Define tags table
+# Define events table
 
 # Read here http://howto.philippkeller.com/2005/04/24/Tags-Database-schemas/
 
-class Tags(db.Model):
-    __tablename__ = 'tags'
+class Event(db.Model):
+    __tablename__ = 'event'
 
     id = db.Column(db.Integer, primary_key=True)
-    duration = db.Column(db.Integer, default=0)
-    tag_id = db.Column(db.String, unique=True, nullable=False)
+    duration = db.Column(db.Integer) # In future integrate with Toggl API 
     rating_date = db.Column(db.Date, db.ForeignKey('rating.date'), index=True, nullable=False)
+
+    tags = db.relationship('Tag', backref='event')
 
     def __repr__(self):
         return '<Tags {}>'.format(self.username)
 
 # Define relationships with tags and days
-class Tagmap(db.Model):
-    __tablename__ = 'tagmap'
+class Tag(db.Model):
+    __tablename__ = 'tag'
 
     id = db.Column(db.Integer, primary_key=True)
-    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
-    rating_id = db.Column(db.Integer, db.ForeignKey('rating.id'))
+
+    
+
+
+
