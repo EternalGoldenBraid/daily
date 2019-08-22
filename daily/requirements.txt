@@ -2,8 +2,6 @@ alembic==1.0.11
 certifi==2019.6.16
 chardet==3.0.4
 Click==7.0
-# Editable Git install with no remote (daily==0.0.0)
--e /home/nicklas/Projects/daily
 Flask==1.1.0
 Flask-Migrate==2.5.2
 Flask-Session==0.3.1
