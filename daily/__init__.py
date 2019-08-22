@@ -13,3 +13,6 @@ migrate = Migrate(app, db)
 
 #View module (view functions) must be imported after the application object is created.
 from daily import views, models
+from flask_login import LoginManager
+
+login = LoginManager(app)
