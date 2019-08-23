@@ -1,9 +1,9 @@
 import os
 import datetime
 
-from flask import render_template, request, redirect, session
-from flask_session import Session
+from flask import render_template, redirect, flash 
 from daily import app
+from daily.forms import LoginForm
 
 from daily.helpers import login_required
 
@@ -15,25 +15,9 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    # Forget user_id
-    session.clear()
-
-    # Request method was POST
-    if request.method == 'POST':
-
-        # Ensure valid user input
-        if not request.form.get("username"):
-            return ("Invalid username")
-
-        # Query db for existing credentials
-
-           # Log user in
-        else:
-            return redirect("/")
-
-    # Request method was GET
-    else:
-        return render_template("login.html")
+    form = LoginForm()
+    form.validate_on_submit
+    if form.validate_on_submit():
+        flash('Login {}, Remember me {}'.format(form.username.data, form.remember_me.data))
+        return redirect('/')
+    return render_template('login.html', title='Log In', form=form)
