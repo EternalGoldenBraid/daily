@@ -1,5 +1,4 @@
-from daily import db
-from werkzeug.security import generate_password_hash, check_password_hash
+from daily import db, login
 
 
 # Define users table
@@ -17,6 +16,8 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+
 
 # Define daily table
 class Rating(db.Model):
@@ -69,4 +70,6 @@ class Tag(db.Model):
         return '<Tag name is {}>'.format(self.tag_name)
 
 
-
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))

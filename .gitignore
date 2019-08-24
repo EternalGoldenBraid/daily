@@ -1,1 +1,5 @@
+bin
 daily/env/
+eggs
+daily.egg-info
+*.pyc
