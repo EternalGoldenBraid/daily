@@ -1,5 +1,9 @@
-bin
-daily/env/
-eggs
-daily.egg-info
-*.pyc
+# Compiled python modules
+/*.pyc
+
+# Python egg metadata
+/*.egg-info
+/*.egg
+
+# venv
+/env
