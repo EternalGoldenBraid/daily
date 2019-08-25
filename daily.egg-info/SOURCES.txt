@@ -1,9 +1,0 @@
-setup.py
-daily/__init__.py
-daily/application_finance.py
-daily/helpers.py
-daily.egg-info/PKG-INFO
-daily.egg-info/SOURCES.txt
-daily.egg-info/dependency_links.txt
-daily.egg-info/requires.txt
-daily.egg-info/top_level.txt
