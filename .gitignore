@@ -1,9 +1,10 @@
 # Compiled python modules
 /*.pyc
+**/__pycache__
 
 # Python egg metadata
 /*.egg-info
 /*.egg
 
 # venv
-/env
+**/env
