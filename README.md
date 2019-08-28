@@ -12,7 +12,7 @@ Initialize a virtual environment within `daily/` to exclude your main system's p
 
 Activate the virtual environment with `source /daily/env/bin/activate`
 
-Set the environmental `FLASK_APP` variable with `export FLASK_APP`
+Set the environmental `FLASK_APP` variable with `export FLASK_APP=daily`
 
 Run the application with `flask run` and test using the provided URL
 
