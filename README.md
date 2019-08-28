@@ -2,7 +2,7 @@
 
 ## Project Status
 
-This project is currently in development. The initial database models are finished, entries that amount to 2-3 months will be inserted shortly alongside a web interface. Useful and insightul trend plots will follow.
+This project is currently in development. The initial database models are finished, entries that amount to 2-3 months will be inserted shortly along side a web interface. Useful and insightul trend plots will follow.
 
 ## Installation and Setup Instructions
 
