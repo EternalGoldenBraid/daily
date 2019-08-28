@@ -2,9 +2,14 @@
 /*.pyc
 **/__pycache__
 
-# Python egg metadata
-/*.egg-info
-/*.egg
+# Distribution and Packaging
+*.egg-info/
+*.eggs/
+eggs/
+MANIFEST
 
-# venv
-**/env
+# Environments
+.env
+.venv
+env/
+venv/
