@@ -14,9 +14,11 @@ This project is currently in development. The initial database models are finish
 
 Clone this repository with `git clone git@github.com:EternalGoldenBraid/daily.git`.
 
-Initialize a virtual environment within `daily/` to exclude your main system's python modules from interfering: `python -m venv env`.
+Initialize a virtual environment within `daily/` to prevent your main system's python packages from interfering: `python -m venv env`.
 
 Activate the virtual environment with `source /daily/env/bin/activate`.
+
+Install required python packages with from daily/requirements.txt with `pip install -r requirements.txt`.
 
 Set the environmental `FLASK_APP` variable with `export FLASK_APP=daily`.
 
@@ -24,11 +26,11 @@ Run the application with `flask run` and test using the provided URL.
 
 ## Task List
 
-Read and implement from SQLAlchemy Documentation [x]
+Read and setup from SQLAlchemy, Flask and it's plugins' Documentation [x]
 
 Create database models [x]
 
-Implement a web UI with data visualisation []
+Implement a web UI with data visualisation []  * * In progress * *
 
 Deploy to cloud []
 
