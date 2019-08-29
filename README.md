@@ -2,9 +2,9 @@
 
 ## Project Description
 
-The sole puprose of the application for now is to track my daily activities, and the ratings I give to either those activities, or the days themselves as a whole. These ratings coupled with daily events will generate patters that allow me to find events that have a negative impact on my daily well being (i.e. events that consistently lead to a negative sore). 
+The sole purpose of this application for now is to track my daily activities, and the ratings I give to either those activities, or the days themselves as a whole. These ratings coupled with daily events will generate patters that allow me to find events that have a negative impact on my daily well being (i.e. events that consistently lead to a negative sore). 
 
-The project is also relevant for me to play around with machine learning in the near future.
+The project is also relevant for me to play around with machine learning in the near future. Paired with learning to graph clear and insightful graphs with the data.s
 
 ## Project Status
 
@@ -23,10 +23,15 @@ Set the environmental `FLASK_APP` variable with `export FLASK_APP=daily`
 Run the application with `flask run` and test using the provided URL
 
 ## Task List
+
 Read and implement from SQLAlchemy Documentation [x]
 
 Create database models [x]
 
-Implement a web UI []
+Implement a web UI with data visualisation []
 
 Deploy to cloud []
+
+Add multi-user suport, and creation of their db models []
+
+
