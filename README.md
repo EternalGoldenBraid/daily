@@ -30,7 +30,7 @@ Read and setup from SQLAlchemy, Flask and it's plugins' Documentation [x]
 
 Create database models [x]
 
-Implement a web UI with data visualisation []  *In progress*
+Implement a web UI with data visualisation []  **In progress**
 
 Deploy to cloud []
 
