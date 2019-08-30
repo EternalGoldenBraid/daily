@@ -17,7 +17,7 @@ def login():
     if current_user.is_authenticated:
         return rediret(url_for('index'))
     form = LoginForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit(): # Check if request was a POST request 
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')

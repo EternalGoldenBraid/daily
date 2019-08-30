@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
+from flask_login import LoginManager
 
 
 app = Flask(__name__)
@@ -12,7 +13,5 @@ migrate = Migrate(app, db)
 
 
 #View module (view functions) must be imported after the application object is created.
-from daily import views, models
-from flask_login import LoginManager
-
 login = LoginManager(app)
+from daily import  models, views

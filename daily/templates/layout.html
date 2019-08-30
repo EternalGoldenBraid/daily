@@ -35,20 +35,17 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
-                {% if session.user_id %}
+                {% if current_user.is_anonymoys %}
                     <ul class="navbar-nav mr-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/buy">Route2</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/sell">Route3</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/history">Route4</a></li>
-                    </ul>
-                    <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/index">index</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
+												<li class="nav-item"><a class="nav-link" href="/graphs">Graphs</a></li>
+
                     </ul>
                 {% endif %}
             </div>
