@@ -4,7 +4,7 @@ import datetime
 from flask import render_template, redirect, flash, url_for 
 from daily import app # unnecessary
 from daily.forms import LoginForm
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
 from daily.models import User
 
 
@@ -17,7 +17,7 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return rediret(url_for('index'))
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit(): # Check if request was a POST request 
         user = User.query.filter_by(username=form.username.data).first()
@@ -27,3 +27,14 @@ def login():
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('login.html', title='Log In', form=form)
+
+# Log user out
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+# User grahs and statistics 
+@app.route("/graphs")
+def graphs():
+    return render_template("graphs.html")

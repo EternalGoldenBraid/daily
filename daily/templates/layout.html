@@ -37,14 +37,14 @@
             <div class="collapse navbar-collapse" id="navbar">
                 {% if current_user.is_anonymoys %}
                     <ul class="navbar-nav mr-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Log In</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/index">index</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
-												<li class="nav-item"><a class="nav-link" href="/graphs">Graphs</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Index</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ url_for('graphs') }}">Graphs</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logou</a></li>
 
                     </ul>
                 {% endif %}

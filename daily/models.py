@@ -1,9 +1,10 @@
 from daily import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 
 # Define users table
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
