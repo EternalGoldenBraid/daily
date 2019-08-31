@@ -2,8 +2,10 @@ import os
 import datetime
 
 from flask import render_template, redirect, flash, url_for 
-from daily import app 
+from daily import app # unnecessary
 from daily.forms import LoginForm
+from flask_login import current_user, login_user
+from daily.models import User
 
 
 @app.route("/")
@@ -11,7 +13,7 @@ def index():
     """ Show current data on daily """
     return render_template("index.html")
 
-
+# Route for logging the user in
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
