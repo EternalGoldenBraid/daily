@@ -35,16 +35,17 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
-                {% if current_user.is_anonymoys %}
-                    <ul class="navbar-nav mr-auto mt-2">
+								{% if current_user.is_anonymous %}
+                    <ul class="navbar-nav ml-auto mt-2">
 											<li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Log In</a></li>
-											<li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+											<li class="nav-item"><a class="nav-link" href="">About</a></li>
+
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
 											<li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Index</a></li>
 											<li class="nav-item"><a class="nav-link" href="{{ url_for('graphs') }}">Graphs</a></li>
-											<li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logou</a></li>
+											<li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log out</a></li>
 
                     </ul>
                 {% endif %}

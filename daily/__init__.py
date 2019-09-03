@@ -15,3 +15,4 @@ migrate = Migrate(app, db)
 #View module (view functions) must be imported after the application object is created.
 login = LoginManager(app)
 from daily import  models, views
+login.login_view = 'login'
