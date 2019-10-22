@@ -2,9 +2,9 @@
 
 ## Project Description
 
-The sole purpose of this application for now is to track my daily activities, and the ratings I give to either those activities, or the days themselves as a whole. These ratings coupled with daily events will generate patterns that allow me to find events that have a negative impact on my daily well being (i.e. events that consistently lead to a negative sore). 
+The sole purpose of this application for now is to track my daily activities, and the ratings I give to either those activities, or the days themselves as a whole. These ratings coupled with daily events will generate patterns that allow me to find events that have a negative impact on my daily well being (i.e. events that consistently lead to a negative score). 
 
-The project is also relevant for me to learn machine learning in the near future in the form of predictive machine learning algorithms. Paired with learning to graph clear and insightful graphs with the dataset.
+The project also coincides with my intereset in data and extracting patterns that can be used to support optimization and long term oriented planning. Visualizing data sets is a large component of this and I am keen on adding that in as well.
 
 ## Project Status
 
