@@ -55,7 +55,7 @@ class Event(db.Model):
     __tablename__ = 'event'
 
     id = db.Column(db.Integer, primary_key=True)
-    duration = db.Column(db.Integer) # Duration of the event, In future integrate with Toggl API 
+    duration = db.Column(db.Integer) # Duration of the event, In future integrate with Toggl API, measured in minutes
     rating_date = db.Column(db.DateTime, db.ForeignKey('rating.date'), index=True, nullable=False) # Date of the event
     event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), index=True, nullable=False) # Description/tag of the event
     # Add start/stop time pauses?
