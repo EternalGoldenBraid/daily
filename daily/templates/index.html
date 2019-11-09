@@ -2,9 +2,16 @@
 
 {% block title %}
 	Daily
+
 {% endblock %}
 
 {% block main %}
+
+	{% block content %}
+		<h1> Hi, {{ current_user.username }}!</h1>
+		
+	{% endblock %}
+
  <table class="table">
   <thead>
     <tr>

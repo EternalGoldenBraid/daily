@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial migration
 
-Revision ID: 6cfecdcb3479
+Revision ID: 3e48b91a1b5c
 Revises: 
-Create Date: 2019-08-19 20:49:39.845306
+Create Date: 2019-11-09 16:48:29.633564
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6cfecdcb3479'
+revision = '3e48b91a1b5c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,7 +35,7 @@ def upgrade():
     op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
     op.create_table('rating',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('date', sa.DateTime(), nullable=False),
     sa.Column('rating_sleep', sa.Integer(), nullable=False),
     sa.Column('meditation', sa.Integer(), nullable=False),
     sa.Column('cw', sa.Integer(), nullable=False),
@@ -51,7 +51,7 @@ def upgrade():
     op.create_table('event',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('duration', sa.Integer(), nullable=True),
-    sa.Column('rating_date', sa.Date(), nullable=False),
+    sa.Column('rating_date', sa.DateTime(), nullable=False),
     sa.Column('event_tag', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['event_tag'], ['tag.tag_name'], ),
     sa.ForeignKeyConstraint(['rating_date'], ['rating.date'], ),
