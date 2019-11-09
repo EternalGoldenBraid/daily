@@ -43,7 +43,7 @@ class Rating(db.Model):
     events = db.relationship('Event', backref='rating', lazy='dynamic')
 
     def __repr__(self):
-        return '<Date: {}, Rating of the day: {}, User_id: {}>'.format(iself.date, self.rating_day, self.user_id)
+        return '<Date: {}, Rating of the day: {}, User {} with id : {} meditated for {} minutes>'.format(self.date, self.rating_day, self.user.username, self.user_id, self.meditation)
     
 # Define events table, by design will have multiple date entries due to multiple unique tags.
 # Can probably be improved
@@ -62,7 +62,7 @@ class Event(db.Model):
 
     
     def __repr__(self):
-        return '<Event on {}>'.format(self.rating_date)
+        return '<Date of event is : {}, The even tag is: {}, which had the duration of {}>'.format(self.rating_date, self.event_tag, self.duration)
 
 # Define relationships with tags and days
 class Tag(db.Model):
