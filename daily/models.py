@@ -1,9 +1,9 @@
-from daily import db, login
+from daily import db, login, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
 # Define users table
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -16,7 +16,7 @@ class User(db.Model):
     ratings = db.relationship('Rating', backref='user', lazy='dynamic')
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '{},{}'.format(self.id, self.username)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

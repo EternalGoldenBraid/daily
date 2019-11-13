@@ -1,24 +1,29 @@
 import os
 import datetime
 
-from flask import render_template, redirect, flash, url_for 
-from daily import app # unnecessary
+from flask import render_template, redirect, flash, url_for, request
+from daily import app, db # unnecessary
 from daily.forms import LoginForm
 from flask_login import current_user, login_user, logout_user, login_required
-from daily.models import User
+from daily.models import User, Rating
 
 @app.route("/index")
 @app.route("/")
-#@login_required
+@login_required
 def index():
     """ Show current data on daily """
-    return render_template("index.html")
+    user = current_user
+    id = User.query.filter_by(username=current_user.id)
+    rating = db.session.query(Rating).filter_by(user_id=current_user.id)
+    for i in  rating:
+        list = 1
+    return render_template("index.html", user=current_user.id, id=id, rating=rating) #SQLinjection?
 
 # Route for logging the user in
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return rediret(url_for('index'))
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit(): # Check if request was a POST request 
         
