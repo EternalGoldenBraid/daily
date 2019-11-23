@@ -30,7 +30,7 @@ class Rating(db.Model):
     __tablename__ = 'rating'
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, unique=True, nullable=False) # SHOULD DATE BE UNIQUE? 
+    date = db.Column(db.DateTime, unique=True, nullable=False) # SHOULD DATE BE UNIQUE?  Ok for single user
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False) # Duration of daily meditation.
     cw = db.Column(db.Integer, nullable=False) # Duration of daily creative work. IMPRO: Change to floating point values

@@ -5,19 +5,23 @@ from flask import render_template, redirect, flash, url_for, request
 from daily import app, db # unnecessary
 from daily.forms import LoginForm
 from flask_login import current_user, login_user, logout_user, login_required
-from daily.models import User, Rating
+from daily.models import User, Rating, Tag, Event
+from werkzeug.urls import url_parse
 
 @app.route("/index")
 @app.route("/")
 @login_required
 def index():
     """ Show current data on daily """
-    user = current_user
-    id = User.query.filter_by(username=current_user.id)
-    rating = db.session.query(Rating).filter_by(user_id=current_user.id)
-    for i in  rating:
-        list = 1
-    return render_template("index.html", user=current_user.id, id=id, rating=rating) #SQLinjection?
+    rating = Rating.query.filter_by(user_id=current_user.id)
+    x = db.session.query(Rating, Event).filter(
+                Rating.date==Event.rating_date).all()
+    rating_dates = []
+    #for r in rating:
+    #    rating_dates.append(r.date.stftime('%Y-%m-%d'))
+    #event = [(),()]
+    #event = Event.query.filter_by(rating_date=)
+    return render_template("index.html", rating=rating, x=x) #SQLinjection?
 
 # Route for logging the user in
 @app.route("/login", methods=["GET", "POST"])

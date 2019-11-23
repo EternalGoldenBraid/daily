@@ -25,12 +25,20 @@
     </tr>
   </thead>
   <tbody>
-	  <!-- Render per user  -->
-    <tr>
-			<td scope="data"> {{ user }}</td>
-			<td scope="data"> {{ id }}</td>
-			<td scope="data"> {{ rating }}</td>
-    </tr>
+	  <!-- Render per date in ratings table -->
+		{% for r in rating %}
+			<tr>
+				<td scope="data"> {{r.date.strftime('%Y-%m-%d')}}</td>
+				<td scope="data"> {{r.rating_sleep}}</td>
+				<td scope="data"> {{r.meditation}}</td>
+				{%  for event in descriptions %}
+				<td scope="data"> {{event.duration}}:{{ event.tag_name }}</td>
+				{% endfor %}
+				<td scope="data"> {{r.screen}}</td>
+				<td scope="data"> {{r.rating_day}}</td>
+				<td scope="data"> {{r.cw}}</td>
+    	</tr>             
+		{% endfor %}
   </tbody>
 </table>
 {% endblock %}
