@@ -33,7 +33,7 @@ class Rating(db.Model):
     date = db.Column(db.DateTime, unique=True, nullable=False) # SHOULD DATE BE UNIQUE?  Ok for single user
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False) # Duration of daily meditation.
-    cw = db.Column(db.Integer, nullable=False) # Duration of daily creative work. IMPRO: Change to floating point values
+    cw = db.Column(db.Numeric(4,2), nullable=False) # Duration of daily creative work. IMPRO: Change to floating point values
     screen = db.Column(db.Time, nullable=False) # When did user stop/reduce bright light exposure.
     rating_day = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True, nullable=False)
@@ -43,7 +43,9 @@ class Rating(db.Model):
     events = db.relationship('Event', backref='rating', lazy='dynamic')
 
     def __repr__(self):
-        return '<Date: {}, Rating of the day: {}, User {} with id : {} meditated for {} minutes>'.format(self.date, self.rating_day, self.user.username, self.user_id, self.meditation)
+        return '<User: {} Date: {}, Rating_date : {}, M : {}, CW: {}, Screens: {}>'.format(
+    self.user.username, self.date, self.rating_day, self.meditation,
+            self.cw, self.screen)
     
 # Define events table, by design will have multiple date entries due to multiple unique tags.
 # Can probably be improved
@@ -55,7 +57,7 @@ class Event(db.Model):
     __tablename__ = 'event'
 
     id = db.Column(db.Integer, primary_key=True)
-    duration = db.Column(db.Integer) # Duration of the event, In future integrate with Toggl API, measured in minutes
+    duration = db.Column(db.Numeric(4,2)) # Duration of the event, In future integrate with Toggl API, measured in minutes
     rating_date = db.Column(db.DateTime, db.ForeignKey('rating.date'), index=True, nullable=False) # Date of the event
     event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), index=True, nullable=False) # Description/tag of the event
     # Add start/stop time pauses?

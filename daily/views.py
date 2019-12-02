@@ -14,14 +14,15 @@ from werkzeug.urls import url_parse
 def index():
     """ Show current data on daily """
     rating = Rating.query.filter_by(user_id=current_user.id)
-    x = db.session.query(Rating, Event).filter(
+    rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
     rating_dates = []
     #for r in rating:
     #    rating_dates.append(r.date.stftime('%Y-%m-%d'))
     #event = [(),()]
     #event = Event.query.filter_by(rating_date=)
-    return render_template("index.html", rating=rating, x=x) #SQLinjection?
+    return render_template("index.html", rating=rating,
+                rating_event=x) #SQLinjection?
 
 # Route for logging the user in
 @app.route("/login", methods=["GET", "POST"])
