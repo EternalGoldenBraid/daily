@@ -1,5 +1,8 @@
 from daily import db, login, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlite3 import Connection as SQLite3connection
 
 
 # Define users table
@@ -85,3 +88,11 @@ class Tag(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+# SQLite3 foreign key constraints to be enforced on engine connect
+@event.listens_for(Engine, "connect")
+def set_sqlite_foreign_key(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, SQLite3connection):
+       cursor=dbapi_connection.cursor()
+       cursor.execute("PRAGMA foreign_keys=ON;")
+       cursor.close()

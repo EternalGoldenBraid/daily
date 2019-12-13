@@ -25,15 +25,22 @@
     </tr>
   </thead>
   <tbody>
-	  <!-- Render per date in ratings table -->
-		{% for r in rating_event %}
+	  <!-- Render per date in ratings table, join event_date==rating_date -->
+		{% for i in rating%}
 			<tr>
-				<td scope="data"> {{r.Rating.date.strftime('%Y-%m-%d')}}</td>
-				<td scope="data"> {{r.Rating.rating_sleep}}</td>
-				<td scope="data"> {{r.Rating.meditation}}</td>
-				<td scope="data"> {{r.Rating.screen}}</td>
-				<td scope="data"> {{r.Rating.rating_day}}</td>
-				<td scope="data"> {{r.Rating.cw}}</td>
+				<td scope="data"> {{i.date.strftime('%Y-%m-%d')}}</td>
+				<td scope="data"> {{i.rating_sleep}}</td>
+				<td scope="data"> {{i.meditation}}</td>
+				<td scope="data">
+					{% for r in rating_event %}
+						{% if i.date==r.Event.rating_date %}
+							{{r.Event.event_tag}}:{{r.Event.duration}},
+						{% endif %}
+					{% endfor %}
+				</td>
+				<td scope="data"> {{i.screen.strftime('%H:%M')}}</td>
+				<td scope="data"> {{i.rating_day}}</td>
+				<td scope="data"> {{i.cw}}</td>
     	</tr>             
 		{% endfor %}
   </tbody>
