@@ -3,25 +3,26 @@ import datetime
 
 from flask import render_template, redirect, flash, url_for, request
 from daily import app, db # unnecessary
-from daily.forms import LoginForm
+from daily.forms import LoginForm, EntryForm
 from flask_login import current_user, login_user, logout_user, login_required
 from daily.models import User, Rating, Tag, Event
 from werkzeug.urls import url_parse
 
-@app.route("/index")
-@app.route("/")
+@app.route("/index", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     """ Show current data on daily """
     rating = Rating.query.filter_by(user_id=current_user.id)
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
+    form=EntryForm()
     #for r in rating:
     #    rating_dates.append(r.date.stftime('%Y-%m-%d'))
     #event = [(),()]
     #event = Event.query.filter_by(rating_date=)
     return render_template("index.html", 
-            rating_event=rating_event, rating=rating) #SQLinjection?
+            rating_event=rating_event, rating=rating, form=form) #SQLinjection?
 
 # Route for logging the user in
 @app.route("/login", methods=["GET", "POST"])

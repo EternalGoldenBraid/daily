@@ -46,6 +46,34 @@
   </tbody>
 </table>
 
-<h3> How was your day? </h3>
-<p> {{form.date.label}}
+<div class="form-container">
+<h2> How was your day? </h2>
+<div class="form-row"> 
+  {{ form.date.label }} <br>
+  {{ form.date(size=12) }} </div>
+<div class="form-row">
+
+  {{ form.sleep_rating.label }} <br>
+  {{ form.sleep_rating(size=3) }}
+
+  {{ form.meditation.label }} <br>
+	{{ form.meditation(size=2) }} 
+
+  {{ form.day_rating.label }} <br>
+	{{ form.day_rating(size=2) }} 
+
+  {{ form.lights.label }} <br>
+	{{ form.lights(size=5) }} 
+
+  {{ form.cw.label }} <br>
+	{{ form.cw(size=2) }} 
+
+</div>
+
+<div class="form-row"> 
+	{{ form.description.label(bold) }} 
+	{{ form.description(size=80) }} </div>
+</div>
 {% endblock %}
+
+
