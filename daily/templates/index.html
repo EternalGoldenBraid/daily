@@ -13,7 +13,7 @@
 	{% endblock %}
 
  <table class="table">
-  <thead>
+  <thead class=.thead-dark>
     <tr>
       <th scope="col">Date</th>
       <th scope="col">Sleep</th>
@@ -48,31 +48,37 @@
 
 <div class="form-container">
 <h2> How was your day? </h2>
-<div class="form-row"> 
-  {{ form.date.label }} <br>
-  {{ form.date(size=12) }} </div>
-<div class="form-row">
 
-  {{ form.sleep_rating.label }} <br>
+<div class="form-row">
+  <form class= "form" "form-horizontal" action="" method="post" >
+    <p>
+  <!-- {{ form.date.label }} <br> -->
+  {{ form.date(size=12) }}
+
+<!-- {{ form.sleep_rating.label }} <br> -->
   {{ form.sleep_rating(size=3) }}
 
-  {{ form.meditation.label }} <br>
-	{{ form.meditation(size=2) }} 
+  <!-- {{ form.meditation.label }} <br> -->
+	{{ form.meditation(size=7) }} 
 
-  {{ form.day_rating.label }} <br>
-	{{ form.day_rating(size=2) }} 
+  <!-- {{ form.day_rating.label }} <br> -->
+	{{ form.day_rating(size=6) }} 
 
-  {{ form.lights.label }} <br>
+  <!-- {{ form.lights.label }} <br> -->
 	{{ form.lights(size=5) }} 
 
-  {{ form.cw.label }} <br>
-	{{ form.cw(size=2) }} 
+  <!-- {{ form.cw.label }} <br> -->
+	{{ form.cw(size=12) }} 
+    </p>
 
 </div>
 
 <div class="form-row"> 
-	{{ form.description.label(bold) }} 
+  <p>
+  <!-- {{ form.description.label(bold) }} -->
 	{{ form.description(size=80) }} </div>
+  </p>
+  <p> {{ form.submit() }} </p>
 </div>
 {% endblock %}
 
