@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, StringField, PasswordField, 
-    SubmitField, DateField, IntegerField)
+    SubmitField, IntegerField)
 from wtforms.validators import DataRequired, length
+from wtforms.fields.html5 import DateField
 
 
 class LoginForm(FlaskForm):
@@ -10,12 +11,24 @@ class LoginForm(FlaskForm):
     remember_me=BooleanField('Remember Me')
     submit=SubmitField('Sign In')
 
+
+# Form for inputting daily evens
 class EntryForm(FlaskForm):
-    date=DateField('Date', validators=[DataRequired(), length(max=12)], render_kw={"placeholder": "Date"})
-    sleep_rating=IntegerField('Sleep', validators=[DataRequired()], render_kw={"placeholder": "Sleep"}) 
-    meditation=IntegerField('Meditation', validators=[DataRequired(), length(max=12)], render_kw={"placeholder": "Meditation"})
-    description=StringField('Description', validators=[DataRequired(), length(max=12)], render_kw={"placeholder": "Description"})
-    day_rating=IntegerField('Rating', validators=[DataRequired(), length(max=12)], render_kw={"placeholder": "Rating"})
-    lights=IntegerField('Lights', validators=[DataRequired(), length(max=12)], render_kw={"placeholder": "Lights"})
-    cw=IntegerField('CW', validators=[DataRequired(), length(max=12)], render_kw={"placeholder": "Creative Work"})
+    date=DateField('Date', format='%Y-%m-%d', validators=[DataRequired()], render_kw={"placeholder": "Date"})
+    sleep_rating=StringField('Sleep', validators=[DataRequired()], render_kw={"placeholder": "Sleep"}) 
+    meditation=StringField('Meditation', validators=[DataRequired(), length(max=3, message="Meditation input too long")],
+                render_kw={"placeholder": "Meditation"})
+    description=StringField('Description', validators=[DataRequired()], render_kw={"placeholder": "Description"})
+    day_rating=StringField('Rating', validators=[DataRequired(), length(max=2, message='Your rating for the day contains too many digits')],
+                render_kw={"placeholder": "Rating"})
+    lights=StringField('Lights', validators=[DataRequired(), length(max=5, message='Your lights input contains too many digits')],
+                render_kw={"placeholder": "Lights"})
+    cw=StringField('CW', validators=[DataRequired(), length(max=5, message= 'CW contains too many digits')], render_kw={"placeholder": "Creative Work"})
     submit=SubmitField('Submit')
+
+
+
+
+#def validate_date(form, field):
+#        if field.data < form.startdate_field.data:
+#            raise ValidationError("End date must not be earlier than start date.")

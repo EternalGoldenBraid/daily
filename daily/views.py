@@ -12,27 +12,39 @@ from werkzeug.urls import url_parse
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    """ Show current data on daily """
+    """
+    Index page of the site, includes a table of daily history
+    """
+
     rating = Rating.query.filter_by(user_id=current_user.id)
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
-    form=EntryForm()
-    #for r in rating:
-    #    rating_dates.append(r.date.stftime('%Y-%m-%d'))
-    #event = [(),()]
-    #event = Event.query.filter_by(rating_date=)
-    return render_template("index.html", 
-            rating_event=rating_event, rating=rating, form=form) #SQLinjection?
+    form = EntryForm()
+    if form.validate_on_submit():         
+    # Check if request was a POST request 
+        flash("")
 
-# Route for logging the user in
+    # DEBUG
+    flash(form.errors)
+
+    #SQLinjection safe?
+    return render_template("index.html", 
+            rating_event=rating_event, rating=rating, form=form) 
+    
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """
+    Logs user in
+    """
+
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
-    if form.validate_on_submit(): # Check if request was a POST request 
-        
-        # Attempt to fetch users username from the database, take the first result
+    if form.validate_on_submit():         
+    # Check if request was a POST request 
+        # Attempt to fetch users username from the database, 
+        # take the first result
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
