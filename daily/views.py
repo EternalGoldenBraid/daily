@@ -20,12 +20,21 @@ def index():
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
     form = EntryForm()
+    # Check if request was a POST request and valid
     if form.validate_on_submit():         
-    # Check if request was a POST request 
-        flash("")
+
+        # DOESNT WORK, String field object has not attribute split
+        description = form.description # 
+        events = description.split()
+
+
+        # Confirm to user the information they wish to store
+        flash(events)
+
+        # Store into the database
 
     # DEBUG
-    flash(form.errors)
+    #flash(form.errors)
 
     #SQLinjection safe?
     return render_template("index.html", 
