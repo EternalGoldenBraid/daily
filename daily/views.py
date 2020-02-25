@@ -20,12 +20,17 @@ def index():
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
     form = EntryForm()
+
     # Check if request was a POST request and valid
     if form.validate_on_submit():         
 
-        # DOESNT WORK, String field object has not attribute split
-        description = form.description # 
-        events = description.split()
+        """
+        TODO: Decide between server-side and client-side
+        confirmation of event entries. 
+        Events would be key-value pairs entered in a common
+        or separate form in \index
+        """
+        events = form.description 
 
 
         # Confirm to user the information they wish to store
@@ -33,8 +38,7 @@ def index():
 
         # Store into the database
 
-    # DEBUG
-    #flash(form.errors)
+    #flash(form.errors) # DEBUG
 
     #SQLinjection safe?
     return render_template("index.html", 
@@ -55,14 +59,20 @@ def login():
         # Attempt to fetch users username from the database, 
         # take the first result
         user = User.query.filter_by(username=form.username.data).first()
+
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
+
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
+        
+        # Forward to the page the attempted to get at before authentication
         if not next_page or url_parse(next_page) != '':
             return redirect(url_for('index'))
+
         return redirect(next_page)
+
     return render_template('login.html', title='Log In', form=form)
 
 # url_parse() Parses a URL from a string into a URL tuple. If the URL is lacking a scheme it can be provided as second argument. Otherwise, it is ignored. Optionally fragments can be stripped from the URL by setting allow_fragments to False.
