@@ -22,7 +22,8 @@ def index():
     form = EntryForm()
 
     # Check if request was a POST request and valid
-    if form.validate_on_submit():         
+    #if form.validate_on_submit():         
+    if True:
 
         """
         TODO: Decide between server-side and client-side
@@ -30,15 +31,16 @@ def index():
         Events would be key-value pairs entered in a common
         or separate form in \index
         """
+
         events = form.description 
 
 
         # Confirm to user the information they wish to store
-        flash(events)
+        flash(events.id)
 
         # Store into the database
 
-    #flash(form.errors) # DEBUG
+    flash(form.errors) # DEBUG
 
     #SQLinjection safe?
     return render_template("index.html", 

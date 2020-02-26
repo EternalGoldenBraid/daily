@@ -60,11 +60,15 @@ class Event(db.Model):
     __tablename__ = 'event'
 
     id = db.Column(db.Integer, primary_key=True)
-    duration = db.Column(db.Numeric(4,2)) # Duration of the event, In future integrate with Toggl API, measured in minutes
-    rating_date = db.Column(db.DateTime, db.ForeignKey('rating.date'), index=True, nullable=False) # Date of the event
-    event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), index=True, nullable=False) # Description/tag of the event
+    # Duration of the event, In future integrate with Toggl API, measured in minutes
+    duration = db.Column(db.Numeric(4,2)) 
+    # Date of the event
+    rating_date = db.Column(db.DateTime, 
+            db.ForeignKey('rating.date'), index=True, nullable=False) 
+    # Description/tag of the event
     # Add start/stop time pauses?
-
+    event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
+            index=True, nullable=False)     
     
     def __repr__(self):
         return '<Date of event is : {}, The even tag is: {}, which had the duration of {}>'.format(self.rating_date, self.event_tag, self.duration)
