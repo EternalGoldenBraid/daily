@@ -51,35 +51,36 @@
 
 <div class="form-row">
   <form class= "form" "form-horizontal" action="" method="post" >
-    {{ form.hidden_tag() }}
+    {{ form_day.hidden_tag() }}
     <p>
-  <!-- {{ form.date.label }} <br> -->
-  {{ form.date(size=12) }}
+  <!-- {{ form_day.date.label }} <br> -->
+  {{ form_day.date(size=12) }}
 
-<!-- {{ form.sleep_rating.label }} <br> -->
-  {{ form.sleep_rating(size=3) }}
+<!-- {{ form_day.sleep_rating.label }} <br> -->
+  {{ form_day.sleep_rating(size=3) }}
 
-  <!-- {{ form.meditation.label }} <br> -->
-	{{ form.meditation(size=7) }} 
+  <!-- {{ form_day.meditation.label }} <br> -->
+	{{ form_day.meditation(size=7) }} 
 
-  <!-- {{ form.day_rating.label }} <br> -->
-	{{ form.day_rating(size=6) }} 
+  <!-- {{ form_day.day_rating.label }} <br> -->
+	{{ form_day.day_rating(size=6) }} 
 
-  <!-- {{ form.lights.label }} <br> -->
-	{{ form.lights(size=5) }} 
+  <!-- {{ form_day.lights.label }} <br> -->
+	{{ form_day.lights(size=5) }} 
 
-  <!-- {{ form.cw.label }} <br> -->
-	{{ form.cw(size=12) }} 
+  <!-- {{ form_day.cw.label }} <br> -->
+	{{ form_day.cw(size=12) }} 
     </p>
-
+  <p> {{ form_day.submit() }} </p>
 </div>
 
 <div class="form-row"> 
-	<p id="{{ form.description.id }}">
-  <!-- {{ form.description.label(bold) }} -->
-	{{ form.description(size=80) }} </div>
+  <!-- <p id="{{ form_events.description.id }}"> -->
+	<p id="This">
+  <!-- {{ form_events.description.label(bold) }} -->
+	{{ form_events.description(size=80) }} </div>
   </p>
-  <p> {{ form.submit() }} </p>
+  <p> {{ form_events.submit() }} </p>
 </div>
 {% endblock %}
 

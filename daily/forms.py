@@ -12,13 +12,18 @@ class LoginForm(FlaskForm):
     remember_me=BooleanField('Remember Me')
     submit=SubmitField('Sign In')
 
-class DescriptionField(FlaskForm):
+class DescriptionForm(FlaskForm):
     event=StringField('Event', 
                 validators=[length(max=200, 
                 message='Keep event under 200 characters')])
     duration_event=IntegerField('Duration', 
             validators=[NumberRange(min=0, max=24, 
                 message='Event duration exceeds 24 hours')])
+
+class EventsForm(FlaskForm):
+    description=FieldList(FormField(DescriptionForm), 
+                min_entries=1, max_entries=4)
+    submit=SubmitField('Submit Events')
 
 
 
@@ -34,8 +39,6 @@ class EntryForm(FlaskForm):
                 render_kw={"placeholder": "Meditation"})
     #description=StringField('Description', validators=[DataRequired()],
                 #render_kw={"placeholder": "Description"})
-    description=FieldList(FormField(DescriptionField), 
-                min_entries=1, max_entries=4)
     day_rating=StringField('Rating', validators=[DataRequired(), 
                 length(max=2, 
                 message='Rating for the day contains too many digits')],
@@ -47,7 +50,7 @@ class EntryForm(FlaskForm):
     cw=StringField('CW', validators=[DataRequired(),
                 length(max=5, message= 'CW contains too many digits')],
                 render_kw={"placeholder": "Creative Work"})
-    submit=SubmitField('Submit')
+    submit=SubmitField('Submit For the day')
 
 
 

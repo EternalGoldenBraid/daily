@@ -3,7 +3,7 @@ import datetime
 
 from flask import render_template, redirect, flash, url_for, request
 from daily import app, db # unnecessary
-from daily.forms import LoginForm, EntryForm
+from daily.forms import LoginForm, EntryForm, EventsForm
 from flask_login import current_user, login_user, logout_user, login_required
 from daily.models import User, Rating, Tag, Event
 from werkzeug.urls import url_parse
@@ -19,7 +19,8 @@ def index():
     rating = Rating.query.filter_by(user_id=current_user.id)
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
-    form = EntryForm()
+    day = EntryForm()
+    form_events = EventsForm()
 
     # Check if request was a POST request and valid
     #if form.validate_on_submit():         
@@ -32,19 +33,28 @@ def index():
         or separate form in \index
         """
 
-        events = form.description 
 
 
         # Confirm to user the information they wish to store
-        flash(events.id)
+        #flash(events.entries)
+        event = []
+        duration = []
+        
+        for entry in form_events.description.data:
+            event =  entry
+            #duration = entry.duration_event
+
+        flash('Events are {}, Durations are {}'.format(
+            event, duration))
 
         # Store into the database
 
-    flash(form.errors) # DEBUG
+    #flash(form.errors) # DEBUG
 
     #SQLinjection safe?
     return render_template("index.html", 
-            rating_event=rating_event, rating=rating, form=form) 
+            rating_event=rating_event, rating=rating, form_day=day,
+            form_events=form_events) 
     
 
 @app.route("/login", methods=["GET", "POST"])
