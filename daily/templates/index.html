@@ -74,6 +74,20 @@
   <p> {{ form_day.submit() }} </p>
 </div>
 
+
+<div class="form-row"> 
+	<p id="This">
+    {{ form_events.hidden_tag() }}
+    {% for entry in form_events.description %}
+        {{ entry() }}
+    {% endfor %}
+  </p>
+  <p> {{ form_events.submit() }} </p>
+</div>
+
+{% endblock %}
+
+
 <div class="form-row"> 
   <!-- <p id="{{ form_events.description.id }}"> -->
 	<p id="This">
@@ -82,6 +96,3 @@
   </p>
   <p> {{ form_events.submit() }} </p>
 </div>
-{% endblock %}
-
-
