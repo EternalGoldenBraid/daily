@@ -1,10 +1,13 @@
 import os
 import datetime
 
-from flask import render_template, redirect, flash, url_for, request
+from flask import (render_template, redirect, flash, 
+        url_for, request, jsonify)
 from daily import app, db # unnecessary
-from daily.forms import LoginForm, EntryForm, EventsForm
-from flask_login import current_user, login_user, logout_user, login_required
+from daily.forms import (LoginForm, EntryForm, 
+                        EventsForm, DescriptionForm)
+from flask_login import (current_user, login_user, 
+                    logout_user, login_required)
 from daily.models import User, Rating, Tag, Event
 from werkzeug.urls import url_parse
 
@@ -20,34 +23,18 @@ def index():
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
     day = EntryForm()
-    form_events = EventsForm()
+    #form_events = EventsForm()
+    form_events = DescriptionForm()
 
-    # Check if request was a POST request and valid
     #if form.validate_on_submit():         
-    if True:
-
-        """
-        TODO: Decide between server-side and client-side
-        confirmation of event entries. 
-        Events would be key-value pairs entered in a common
-        or separate form in \index
-        """
-
-
 
         # Confirm to user the information they wish to store
-        #flash(events.entries)
-        event = []
-        duration = []
-        
-        for entry in form_events.description.data:
-            event =  entry
+        #for entry in form_events.description.data:
+            #event =  entry
             #duration = entry.duration_event
 
-        flash('Events are {}, Durations are {}'.format(
-            event, duration))
-
         # Store into the database
+        # TODO
 
     #flash(form.errors) # DEBUG
 
@@ -56,6 +43,22 @@ def index():
             rating_event=rating_event, rating=rating, form_day=day,
             form_events=form_events) 
     
+    
+@app.route("/events_confirm", methods=["GET", "POST"])
+@login_required
+def events_confirm():
+    try:
+        #form_event = request.args.get('event_') 
+        #form_duration= request.args.get('duration') 
+        form_event = request.form['event']
+        form_duration= request.form['duration'] 
+        flash(form_event, form_duration)
+        return jsonify(result= (form_event, form_duration))
+        #return jsonify(result= ("Smth", "some dur"))
+    except:
+        print("Error")
+        return redirect(urlf_for('index'))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

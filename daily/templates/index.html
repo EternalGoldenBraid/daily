@@ -71,19 +71,37 @@
   <!-- {{ form_day.cw.label }} <br> -->
 	{{ form_day.cw(size=12) }} 
     </p>
-  <p> {{ form_day.submit() }} </p>
+		<!-- <p> {{ form_day.submit() }} </p> -->
 </div>
 
+
+<!-- Confirm events and durations in a separate block Try 1 flaskwtf -->
+	<script type=text/javascript>
+		$(function() {
+	  $('#events_durations').bind('click', function() {
+					$.post($SCRIPT_ROOT + '/events_confirm', {
+						event_: "fromthml",
+						duration: "manyhours"
+					}, function(data) {
+					  $("#result").text(data.result);
+					});
+					return false;
+				  });
+
+
+		});
+	</script>
 
 <div class="form-row"> 
-	<p id="This">
+	<p id="">
     {{ form_events.hidden_tag() }}
-    {% for entry in form_events.description %}
-        {{ entry() }}
-    {% endfor %}
+		{{ form_events.event(size=20) }}
+		{{ form_events.duration_event(size=20) }}
   </p>
-  <p> {{ form_events.submit() }} </p>
+  <p> {{ form_events.submit(id='events_durations') }} </p>
 </div>
+<p id = result>"confirm"</p>
+
 
 {% endblock %}
 
@@ -94,5 +112,21 @@
   <!-- {{ form_events.description.label(bold) }} -->
 	{{ form_events.description(size=80) }} </div>
   </p>
-  <p> {{ form_events.submit() }} </p>
+  <p> {{ form_events.submit(id='events_durations') }} </p>
 </div>
+<span id=result>Confirm_ here</span>
+
+
+
+<!-- Confirm events and durations in a separate block Try 1 flaskwtf -->
+	<script type=text/javascript>
+		$(function() {
+	  $('#events_durations').bind('click', function() {
+					$.getJSON($SCRIPT_ROOT + '/events_confirm', {
+					  event_: $('input[name="event_"]').val(),
+						duration: $('input[name="duration"]').val(),
+					}, function(data) {
+					  $("#result").text(data.result);
+					});
+					return false;
+				  });
