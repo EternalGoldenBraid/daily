@@ -22,11 +22,14 @@ def index():
     rating = Rating.query.filter_by(user_id=current_user.id)
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
-    day = EntryForm()
+    form_day = EntryForm()
     #form_events = EventsForm()
     form_events = DescriptionForm()
 
-    #if form.validate_on_submit():         
+    #if request.form['submit'] == 'Submit Events':
+        #pass
+        # A way to distinguisg submit button
+    #if form_day.validate_on_submit():         
 
         # Confirm to user the information they wish to store
         #for entry in form_events.description.data:
@@ -40,24 +43,21 @@ def index():
 
     #SQLinjection safe?
     return render_template("index.html", 
-            rating_event=rating_event, rating=rating, form_day=day,
+            rating_event=rating_event, rating=rating, form_day=form_day,
             form_events=form_events) 
     
     
 @app.route("/events_confirm", methods=["GET", "POST"])
 @login_required
 def events_confirm():
-    try:
-        #form_event = request.args.get('event_') 
-        #form_duration= request.args.get('duration') 
-        form_event = request.form['event']
-        form_duration= request.form['duration'] 
-        flash(form_event, form_duration)
-        return jsonify(result= (form_event, form_duration))
-        #return jsonify(result= ("Smth", "some dur"))
-    except:
-        print("Error")
-        return redirect(urlf_for('index'))
+#        form_event = request.form['event']
+#        form_duration= request.form['duration'] 
+#        flash(form_event, form_duration)
+    form_event = request.args.get('Event', 1) 
+    form_duration= request.args.get('Duration', 0) 
+    flash(form_event)
+    print(form_event)
+    return jsonify(result= (form_event, form_duration))
 
 
 @app.route("/login", methods=["GET", "POST"])
