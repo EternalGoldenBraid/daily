@@ -99,25 +99,26 @@
 			console.log("In json: ", JSON.stringify(description)),
 
       $.post($SCRIPT_ROOT + '/events_confirm', {
-				event_: ev,
-				description: dr 
+				event: ev,
+				duration: dr 
       }).done(function(response) {
-				/*
         function generateTableHead(table, data) {
             let thead = table.createTHead();
-            let row = thead.inserRow();
-            for (let key of data[0]) {
+        //    let row = thead.inserRow();
+					/*
+            for (let key of response) {
                 let th = document.createElement("th")
                 let text = document.createTextNode(key):
                 th.eppendChild(text);
                 row.appendChild(th);
           }
+					*/
         }
-        let table = documqne.querySelector("table");
-        let data = Object.keys(data);
-				*/
-        generateTableHead(table, data);
-				console.log(response)
+        let table = document.getElementById("confirmevents");
+        let data = Object.keys(response);
+        //generateTableHead(table, response);
+				generateTableHead(table, {'Key': 'its value'});
+				console.log("response: ", response)
 			}).fail(function() {
 
 				// Debug
@@ -129,7 +130,14 @@
 
 </script>
 
+<body>
+<table id="confirmevents" class= "">
+
+	</table>
+	</body>
         
+{% endblock %}
+
  <table class="table table-sm">
   <thead class=.thead-dark>
     <tr>
@@ -147,5 +155,3 @@
 		{% endfor %}
   </tbody>
 </table>
-{% endblock %}
-

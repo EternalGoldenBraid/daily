@@ -53,13 +53,15 @@ def index():
 def events_confirm():
 
     # Collect user entered Events: duration pairs untill they signal done
-    status = "Not done"
     events = []
 
-    data = request.form
-    events.append(data)
+    data = request.form.to_dict()
+    for key in data:
+        event = key
+        duration = data[key]
+        events.append({event: duration})
     print(events)
-    return jsonify()
+    return jsonify({event: duration})
 
 
 @app.route("/login", methods=["GET", "POST"])
