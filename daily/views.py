@@ -10,6 +10,7 @@ from flask_login import (current_user, login_user,
                     logout_user, login_required)
 from daily.models import User, Rating, Tag, Event
 from werkzeug.urls import url_parse
+from copy import deepcopy
 
 @app.route("/index", methods=["GET", "POST"])
 @app.route("/", methods=["GET", "POST"])
@@ -47,15 +48,18 @@ def index():
             form_events=form_events) 
     
     
-@app.route("/events_confirm", methods=["GET", "POST"])
+@app.route("/events_confirm", methods=["POST"])
 @login_required
 def events_confirm():
-#        form_event = request.form['event']
-#        form_duration= request.form['duration'] 
-#        flash(form_event, form_duration)
-    form_event = request.args.get('Event') 
-    form_duration= request.args.get('Duration', 0) 
-    return jsonify(result= (form_event, form_duration))
+
+    # Collect user entered Events: duration pairs untill they signal done
+    status = "Not done"
+    events = []
+
+    data = request.form
+    events.append(data)
+    print(events)
+    return jsonify()
 
 
 @app.route("/login", methods=["GET", "POST"])

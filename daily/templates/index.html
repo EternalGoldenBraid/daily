@@ -71,30 +71,14 @@
   <!-- {{ form_day.cw.label }} <br> -->
 	{{ form_day.cw(size=12) }} 
     </p>
-		<p> {{ form_day.submit() }} </p> 
+		<p> {{ form_day.submit() }} </p>
 </div>
 
-<!-- Confirm events and durations in a separate block Try 1 flaskwtf -->
-	<script type=text/javascript>
-		$(function() {
-	  $('a#events_durations').bind('click', function() {
-            alert("Wola"),
-					$.getJSON($SCRIPT_ROOT + '/events_confirm', {
-					  Event: $('input[name="event"]').val(),
-						Duration: $('input[name="duration_event"]').val(),
-					}, function(data) {
-					  $("#result").text(data.result);
-					});
-					return false;
-				  });
-
-	</script>
 
   <div class="form-row">
     {{ form_events.hidden_tag() }}
 		{{ form_events.event(size=20) }}
 		{{ form_events.duration_event(size=20) }}
-    <!-- <p> {{ form_events.submit(id=events_durations) }} </p> -->
   <p> <input id="eventsubmits" name="submit" type="submit" 
                 value="Submit Events"> </p>
   </div>
@@ -103,56 +87,65 @@
 
 <script type=text/javascript>
   $(function() {
-    $('#eventsubmits').bind('click', function() {
-      $.getJSON($SCRIPT_ROOT + '/events_confirm', {
-        Event: $('input[name="event"]').val(),
-        Duration: $('input[name="duration_event"]').val()
-      }, function(data) {
-        $("#result").text(data.result);
-      });
-      return false;
+    $('#eventsubmits').bind('click', function(event) {
+			event.preventDefault();
+			let ev = $('input[name="event"]').val();
+			let dr = $('input[name="duration_event"]').val();
+      let description={"event": ev, "duration": dr};
+
+			// For debugging
+			JSON.stringify(description);
+			console.log("In JSobject: ", description),
+			console.log("In json: ", JSON.stringify(description)),
+
+      $.post($SCRIPT_ROOT + '/events_confirm', {
+				event_: ev,
+				description: dr 
+      }).done(function(response) {
+				/*
+        function generateTableHead(table, data) {
+            let thead = table.createTHead();
+            let row = thead.inserRow();
+            for (let key of data[0]) {
+                let th = document.createElement("th")
+                let text = document.createTextNode(key):
+                th.eppendChild(text);
+                row.appendChild(th);
+          }
+        }
+        let table = documqne.querySelector("table");
+        let data = Object.keys(data);
+				*/
+        generateTableHead(table, data);
+				console.log(response)
+			}).fail(function() {
+
+				// Debug
+				alert("Something went wrong sendint events to server");
+				console.log("Something went wrong sendint events to server");
+			});
     });
   });
+
 </script>
 
+        
+ <table class="table table-sm">
+  <thead class=.thead-dark>
+    <tr>
+      <th scope="col">Event</th>
+      <th scope="col">Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+	  <!-- Render per date in ratings table, join event_date==rating_date -->
+		{% for entry in event%}
+			<tr>
+				<td scope="data"> {{ event }}</td>
+				<td scope="data"> {{ duration }}</td>
+    	</tr>             
+		{% endfor %}
+  </tbody>
+</table>
 {% endblock %}
-
-<script type=text/javascript>
-  $(function() {
-    $('a#calculate').bind('click', function() {
-            alert("Wola"),
-      $.getJSON($SCRIPT_ROOT + '/events_confirm', {
-        Event: $('input[name="a"]').val(),
-        Duration: $('input[name="b"]').val()
-      }, function(data) {
-        $("#result").text(data.result);
-      });
-      return false;
-    });
-  });
-</script>
-
-<h1>jQuery Example</h1>
-<p><input type=text size=5 name=a> +
-   <input type=text size=5 name=b> =
-   <span id=events_durations>?</span>
-
-
-
-
-
-
-
-
-<div class="form-row"> 
-  <!-- <p id="{{ form_events.description.id }}"> -->
-	<p id="This">
-  <!-- {{ form_events.description.label(bold) }} -->
-	{{ form_events.description(size=80) }} </div>
-  </p>
-  <p> {{ form_events.submit(id='events_durations') }} </p>
-</div>
-<span id=result>Confirm_ here</span>
-
-
 
