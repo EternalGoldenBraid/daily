@@ -53,10 +53,8 @@ def events_confirm():
 #        form_event = request.form['event']
 #        form_duration= request.form['duration'] 
 #        flash(form_event, form_duration)
-    form_event = request.args.get('Event', 1) 
+    form_event = request.args.get('Event') 
     form_duration= request.args.get('Duration', 0) 
-    flash(form_event)
-    print(form_event)
     return jsonify(result= (form_event, form_duration))
 
 

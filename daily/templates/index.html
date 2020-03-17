@@ -78,9 +78,10 @@
 	<script type=text/javascript>
 		$(function() {
 	  $('a#events_durations').bind('click', function() {
+            alert("Wola"),
 					$.getJSON($SCRIPT_ROOT + '/events_confirm', {
-					  Event: $('input[name="Event"]').val(),
-						Duration: $('input[name="Duration"]').val(),
+					  Event: $('input[name="event"]').val(),
+						Duration: $('input[name="duration_event"]').val(),
 					}, function(data) {
 					  $("#result").text(data.result);
 					});
@@ -89,19 +90,37 @@
 
 	</script>
 
-<div class="form-row"> 
+  <div class="form-row">
     {{ form_events.hidden_tag() }}
 		{{ form_events.event(size=20) }}
 		{{ form_events.duration_event(size=20) }}
-	<!-- <p> {{ form_events.submit(id=events_durations) }} </p> -->
-	<p><a href=# id=events_durations>calculate server side</a>
-</div>
+    <!-- <p> {{ form_events.submit(id=events_durations) }} </p> -->
+  <p> <input id="eventsubmits" name="submit" type="submit" 
+                value="Submit Events"> </p>
+  </div>
 <span id = result>"confirm"</span>
 
 
 <script type=text/javascript>
   $(function() {
+    $('#eventsubmits').bind('click', function() {
+      $.getJSON($SCRIPT_ROOT + '/events_confirm', {
+        Event: $('input[name="event"]').val(),
+        Duration: $('input[name="duration_event"]').val()
+      }, function(data) {
+        $("#result").text(data.result);
+      });
+      return false;
+    });
+  });
+</script>
+
+{% endblock %}
+
+<script type=text/javascript>
+  $(function() {
     $('a#calculate').bind('click', function() {
+            alert("Wola"),
       $.getJSON($SCRIPT_ROOT + '/events_confirm', {
         Event: $('input[name="a"]').val(),
         Duration: $('input[name="b"]').val()
@@ -116,11 +135,7 @@
 <h1>jQuery Example</h1>
 <p><input type=text size=5 name=a> +
    <input type=text size=5 name=b> =
-   <span id=result>?</span>
-<p><a href=# id=calculate>calculate server side</a>
-
-{% endblock %}
-
+   <span id=events_durations>?</span>
 
 
 
