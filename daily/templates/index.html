@@ -85,6 +85,7 @@
   </div>
 <span id = result>"confirm"</span>
 
+
 <!-- Append event:duration pairs while submitting data -->
 <script type=text/javascript>
   $(function() {
@@ -95,7 +96,6 @@
       let description={"event": ev, "duration": dr};
 			
 			// For debugging
-			JSON.stringify(description);
 			console.log("In JSobject: ", description);
 			console.log("In json: ", JSON.stringify(description));
 
@@ -103,25 +103,52 @@
 				event: ev,
 				duration: dr 
       }).done(function(response) {
-				$('#result').text(response.result);
-				alert(response.result);
-        function generateTableHead(table, data) {
+
+				// Testing
+				$('#result').text(response);
+				for (let [key, value] of Object.entries(response)) {
+					console.log(`${key}: ${value}`)
+				};
+
+				// Generate table based on response
+        function generateTableHead(table, keys) {
             let thead = table.createTHead();
-            //let row = thead.inserRow();
-					/*
-            for (let key of response) {
-                let th = document.createElement("th")
-           ')   let text = document.createTextNode(key):
-                th.eppendChild(text);
-                row.appendChild(th);
+            let row = thead.insertRow();
+						var labels = ['Event', 'Duration']
+					
+					// Debug
+					console.log("Thead return: ", thead)
+					console.log("row return: ", row)
+
+            for (let label of labels) {
+								let th = document.createElement("th");
+								let text = document.createTextNode(label);
+								th.appendChild(text);
+								row.appendChild(th);
           }
-					*/
         }
-        let table = document.getElementById("confirmevents");
-        let data = Object.keys(response);
-        //generateTableHead(table, response);
-				generateTableHead(table, {'Key': 'its value'});
-				console.log("response: ", response)
+
+				function generateTable(table, data) {
+
+					for(let entry of Object.entries(data)) {
+						let row = table.insertRow();
+						for(let item of entry) {
+							let cell =row.insertCell();
+							let text = document.createTextNode(item);
+							cell.appendChild(text);
+						}
+					}
+				}
+        let table = document.querySelector("#confirmevents");
+        let keys= Object.keys(response);
+				generateTableHead(table, keys);
+				generateTable(table, response);
+
+				// Debug
+				console.log("Table element: ", table);
+				console.log("Keys: ", keys);
+				console.error(error);
+
 			}).fail(function() {
 
 				// Debug
@@ -132,6 +159,8 @@
 
 </script>
 
+
+<!-- Table generated from response -->
 <body>
 <table id="confirmevents" class= "">
 
