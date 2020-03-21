@@ -1,14 +1,15 @@
 import os
 import datetime
 
-from flask import (render_template, redirect, flash, 
-        url_for, request, jsonify)
+from sqlalchemy.exc import SQLAlchemyError
 from daily import app, db # unnecessary
 from daily.forms import (LoginForm, EntryForm, 
                         EventsForm, DescriptionForm)
+from flask import (render_template, redirect, flash, 
+        url_for, request, jsonify, session)
 from flask_login import (current_user, login_user, 
                     logout_user, login_required)
-from daily.models import User, Rating, Tag, Event
+from daily.models import User, Rating, Tag, Event, Buffer
 from werkzeug.urls import url_parse
 from copy import deepcopy
 
@@ -24,7 +25,6 @@ def index():
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
     form_day = EntryForm()
-    #form_events = EventsForm()
     form_events = DescriptionForm()
 
     #if request.form['submit'] == 'Submit Events':
@@ -53,15 +53,32 @@ def index():
 def events_confirm():
 
     # Collect user entered Events: duration pairs untill they signal done
-    events = []
+    try:
+        data = request.form.to_dict()
+        print(f"Request data: {data}, Id: {current_user.id}")
+        event, duration = data['event'], data['duration']
 
-    data = request.form.to_dict()
-    for key in data:
-        event = key
-        duration = data[key]
-        events.append({event: duration})
-    print(events)
-    return jsonify({event: duration})
+        b = Buffer(id = current_user.id, event_tag= event,
+                duration = duration)
+        
+        db.session.add(b)
+        db.session.commit()
+
+        return jsonify({event: duration})
+    except SQLAlchemyError as e:
+        print("Error: ",e)
+        return jsonify()
+
+
+@app.route("/empty", methods=["POST", "GET"])
+@login_required
+def empty():
+
+    try:
+        #db.session.clear
+        return(url_for("index"))
+    except Exception as e:
+        print(e)
 
 
 @app.route("/login", methods=["GET", "POST"])

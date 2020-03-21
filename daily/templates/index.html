@@ -84,7 +84,7 @@
   </div>
 <span id = result>"confirm"</span>
 
-
+<!-- Append event:duration pairs while submitting data -->
 <script type=text/javascript>
   $(function() {
     $('#eventsubmits').bind('click', function(event) {
@@ -92,11 +92,11 @@
 			let ev = $('input[name="event"]').val();
 			let dr = $('input[name="duration_event"]').val();
       let description={"event": ev, "duration": dr};
-
+			
 			// For debugging
 			JSON.stringify(description);
-			console.log("In JSobject: ", description),
-			console.log("In json: ", JSON.stringify(description)),
+			console.log("In JSobject: ", description);
+			console.log("In json: ", JSON.stringify(description));
 
       $.post($SCRIPT_ROOT + '/events_confirm', {
 				event: ev,

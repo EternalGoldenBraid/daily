@@ -94,13 +94,13 @@ class Buffer(db.Model):
     __tablename__= 'buffer'
 
     id = db.Column(db.Integer, primary_key=True)
-    event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
+    event_tag = db.Column(db.String, 
             index=True, nullable=False)     
     duration = db.Column(db.Numeric(4,2)) 
 
 
     def __repr__(self):
-        return f'<Buffer includes {self.event_tag}: {self.duration}>'
+        return f'<Buffer id {self.id} {self.event_tag}: {self.duration}>'
 
 
 
