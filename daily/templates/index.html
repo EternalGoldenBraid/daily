@@ -116,10 +116,6 @@
             let row = thead.insertRow();
 						var labels = ['Event', 'Duration']
 					
-					// Debug
-					console.log("Thead return: ", thead)
-					console.log("row return: ", row)
-
             for (let label of labels) {
 								let th = document.createElement("th");
 								let text = document.createTextNode(label);
@@ -137,12 +133,28 @@
 							let text = document.createTextNode(item);
 							cell.appendChild(text);
 						}
+
+				function appendRow(table, data) {
+
+					let row_append = table.insertRow(-1)
+					for (let entry of Object.entries(data)) {
+						let row_append = table.insertRow(-1)
+						let text =  document.createTextNode
+					}
+						}
 					}
 				}
         let table = document.querySelector("#confirmevents");
-        let keys= Object.keys(response);
-				generateTableHead(table, keys);
-				generateTable(table, response);
+				if (table.textContent === true) {
+					console.log(table)
+        	let keys= Object.keys(response);
+					generateTableHead(table, keys);
+					generateTable(table, response);
+				} 
+				else {
+					let row_append = table.insertRow(-1)
+					let text =  document.createTextNode
+				}
 
 				// Debug
 				console.log("Table element: ", table);
