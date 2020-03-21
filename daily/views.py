@@ -58,11 +58,14 @@ def events_confirm():
         print(f"Request data: {data}, Id: {current_user.id}")
         event, duration = data['event'], data['duration']
 
-        b = Buffer(id = current_user.id, event_tag= event,
+        b = Buffer(user_id = current_user.id, event_tag= event,
                 duration = duration)
         
+        #event = db.query()
         db.session.add(b)
         db.session.commit()
+
+        
 
         return jsonify({event: duration})
     except SQLAlchemyError as e:

@@ -94,6 +94,7 @@ class Buffer(db.Model):
     __tablename__= 'buffer'
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, index=True, nullable=False)
     event_tag = db.Column(db.String, 
             index=True, nullable=False)     
     duration = db.Column(db.Numeric(4,2)) 
