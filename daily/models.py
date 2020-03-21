@@ -88,6 +88,22 @@ class Tag(db.Model):
     def __repr__(self):
         return '<Tag name is {}>'.format(self.tag_name)
 
+
+# A buffer to hold event: duration pairs for a user during an entry
+class Buffer(db.Model):
+    __tablename__= 'buffer'
+
+    id = db.Column(db.Integer, primary_key=True)
+    event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
+            index=True, nullable=False)     
+    duration = db.Column(db.Numeric(4,2)) 
+
+
+    def __repr__(self):
+        return f'<Buffer includes {self.event_tag}: {self.duration}>'
+
+
+
 # user_loader is a callback(call after) function for reloading the user from session
 @login.user_loader
 def load_user(id):
