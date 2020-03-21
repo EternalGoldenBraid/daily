@@ -55,19 +55,23 @@ def events_confirm():
     # Collect user entered Events: duration pairs untill they signal done
     try:
         data = request.form.to_dict()
-        print(f"Request data: {data}, Id: {current_user.id}")
+        user_id = current_user.id
         event, duration = data['event'], data['duration']
 
-        b = Buffer(user_id = current_user.id, event_tag= event,
-                duration = duration)
         
-        #event = db.query()
+        # Add to database
+        b = Buffer(user_id = user_id, event_tag= event,
+                duration = duration)
         db.session.add(b)
         db.session.commit()
+    
+        # Render to use current inputs awaiting confirmation
+        buffers = Buffer.query.filter_by(user_id=user_id).all()
+        events = {}
+        for buffer in buffers:
+            events[buffer.event_tag] = buffer.duration
+        return jsonify(events)
 
-        
-
-        return jsonify({event: duration})
     except SQLAlchemyError as e:
         print("Error: ",e)
         return jsonify()

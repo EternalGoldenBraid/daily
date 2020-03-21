@@ -53,23 +53,23 @@
   <form class= "form" "form-horizontal" action="" method="post" >
     {{ form_day.hidden_tag() }}
     <p>
-  <!-- {{ form_day.date.label }} <br> -->
-  {{ form_day.date(size=12) }}
+	{{ form_day.date.label }} 
+  {{ form_day.date(class="form-control", type="date", size=12) }}
 
-<!-- {{ form_day.sleep_rating.label }} <br> -->
+	{{ form_day.sleep_rating.label }} 
   {{ form_day.sleep_rating(size=3) }}
 
-  <!-- {{ form_day.meditation.label }} <br> -->
-	{{ form_day.meditation(size=7) }} 
+	{{ form_day.meditation.label }} 
+	{{ form_day.meditation(class="form-control", type="time", size=7) }} 
 
-  <!-- {{ form_day.day_rating.label }} <br> -->
+	{{ form_day.day_rating.label }} <br> 
 	{{ form_day.day_rating(size=6) }} 
 
-  <!-- {{ form_day.lights.label }} <br> -->
-	{{ form_day.lights(size=5) }} 
+	{{ form_day.lights.label }} 
+	{{ form_day.lights(class="form-control", type="time", size=5) }} 
 
-  <!-- {{ form_day.cw.label }} <br> -->
-	{{ form_day.cw(size=12) }} 
+	{{ form_day.cw.label }}
+	{{ form_day.cw(class="form-control", type="time", size=12) }} 
     </p>
 		<p> {{ form_day.submit() }} </p>
 </div>
@@ -78,7 +78,8 @@
   <div class="form-row">
     {{ form_events.hidden_tag() }}
 		{{ form_events.event(size=20) }}
-		{{ form_events.duration_event(size=20) }}
+		{{ form_events.duration_event(class="form-control",
+				type="time", size=20) }}
   <p> <input id="eventsubmits" name="submit" type="submit" 
                 value="Submit Events"> </p>
   </div>
@@ -102,13 +103,15 @@
 				event: ev,
 				duration: dr 
       }).done(function(response) {
+				$('#result').text(response.result);
+				alert(response.result);
         function generateTableHead(table, data) {
             let thead = table.createTHead();
-        //    let row = thead.inserRow();
+            //let row = thead.inserRow();
 					/*
             for (let key of response) {
                 let th = document.createElement("th")
-                let text = document.createTextNode(key):
+           ')   let text = document.createTextNode(key):
                 th.eppendChild(text);
                 row.appendChild(th);
           }
@@ -122,8 +125,7 @@
 			}).fail(function() {
 
 				// Debug
-				alert("Something went wrong sendint events to server");
-				console.log("Something went wrong sendint events to server");
+				console.log("Error: scripts 127 index.html");
 			});
     });
   });

@@ -35,9 +35,9 @@ class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, unique=True, nullable=False) # SHOULD DATE BE UNIQUE?  Ok for single user
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
-    meditation = db.Column(db.Integer, nullable=False) # Duration of daily meditation.
-    cw = db.Column(db.Numeric(4,2), nullable=False) # Duration of daily creative work. IMPRO: Change to floating point values
-    screen = db.Column(db.Time, nullable=False) # When did user stop/reduce bright light exposure.
+    meditation = db.Column(db.Integer, nullable=False) 
+    cw = db.Column(db.Integer, nullable=False) 
+    screen = db.Column(db.Integer, nullable=False) 
     rating_day = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True, nullable=False)
 
@@ -61,7 +61,7 @@ class Event(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     # Duration of the event, In future integrate with Toggl API, measured in minutes
-    duration = db.Column(db.Numeric(4,2)) 
+    duration = db.Column(db.Integer) 
     # Date of the event
     rating_date = db.Column(db.DateTime, 
             db.ForeignKey('rating.date'), index=True, nullable=False) 
@@ -97,11 +97,11 @@ class Buffer(db.Model):
     user_id = db.Column(db.Integer, index=True, nullable=False)
     event_tag = db.Column(db.String, 
             index=True, nullable=False)     
-    duration = db.Column(db.Numeric(4,2)) 
+    duration = db.Column(db.Integer) 
 
 
-    def __repr__(self):
-        return f'<Buffer id {self.id} {self.event_tag}: {self.duration}>'
+    #def __repr__(self):
+        #return {self.event_tag: self.duration}
 
 
 
