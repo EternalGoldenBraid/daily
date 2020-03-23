@@ -52,28 +52,36 @@ def index():
 @login_required
 def events_confirm():
 
+
     # Collect user entered Events: duration pairs untill they signal done
     try:
         data = request.form.to_dict()
         user_id = current_user.id
-        event, duration = data['event'], data['duration']
-
-        
-        # Add to database
-        b = Buffer(user_id = user_id, event_tag= event,
-                duration = duration)
-        db.session.add(b)
-        db.session.commit()
-    
-        # Render to use current inputs awaiting confirmation
+        event, duration = data['event'].rstrip(), data['duration']
         buffers = Buffer.query.filter_by(user_id=user_id).all()
         events = {}
+
+        # Stage current events awaiting confirmation
         for buffer in buffers:
             events[buffer.event_tag] = buffer.duration
+
+        # Validate that entry does not already exist 
+        if Buffer.query.filter_by(user_id = user_id, 
+                event_tag=event).all():
+            return jsonify(events), "Duup"
+        
+        # Add to database
+        buffer_add = Buffer(user_id = user_id, event_tag= event,
+                    duration = duration)
+        db.session.add(buffer_add)
+        db.session.commit()
+    
+        # Render to user current events awaiting confirmation
+        events[event] = duration
         return jsonify(events)
 
     except SQLAlchemyError as e:
-        print("Error: ",e)
+        print(e)
         return jsonify()
 
 

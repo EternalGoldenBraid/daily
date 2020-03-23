@@ -80,104 +80,24 @@
 		{{ form_events.event(size=20) }}
 		{{ form_events.duration_event(class="form-control",
 				type="time", size=20) }}
-  <p> <input id="eventsubmits" name="submit" type="submit" 
+
+  <p> <input id="eventsubmits" name="Submit" type="submit" 
                 value="Submit Events"> </p>
+  <p> <input id="eventclear" name="Clear" type="submit" 
+                value="Clear"> </p>
   </div>
-<span id = result>"confirm"</span>
 
-
-<!-- Append event:duration pairs while submitting data -->
-<script type=text/javascript>
-  $(function() {
-    $('#eventsubmits').bind('click', function(event) {
-			event.preventDefault();
-			let ev = $('input[name="event"]').val();
-			let dr = $('input[name="duration_event"]').val();
-      let description={"event": ev, "duration": dr};
-			
-			// For debugging
-			console.log("In JSobject: ", description);
-			console.log("In json: ", JSON.stringify(description));
-
-      $.post($SCRIPT_ROOT + '/events_confirm', {
-				event: ev,
-				duration: dr 
-      }).done(function(response) {
-
-				// Testing
-				$('#result').text(response);
-				for (let [key, value] of Object.entries(response)) {
-					console.log(`${key}: ${value}`)
-				};
-
-				// Generate table based on response
-        function generateTableHead(table, keys) {
-            let thead = table.createTHead();
-            let row = thead.insertRow();
-						var labels = ['Event', 'Duration']
-					
-            for (let label of labels) {
-								let th = document.createElement("th");
-								let text = document.createTextNode(label);
-								th.appendChild(text);
-								row.appendChild(th);
-          }
-        }
-
-				function generateTable(table, data) {
-
-					for(let entry of Object.entries(data)) {
-						let row = table.insertRow();
-						for(let item of entry) {
-							let cell =row.insertCell();
-							let text = document.createTextNode(item);
-							cell.appendChild(text);
-						}
-
-				function appendRow(table, data) {
-
-					let row_append = table.insertRow(-1)
-					for (let entry of Object.entries(data)) {
-						let row_append = table.insertRow(-1)
-						let text =  document.createTextNode
-					}
-						}
-					}
-				}
-        let table = document.querySelector("#confirmevents");
-				if (table.textContent === true) {
-					console.log(table)
-        	let keys= Object.keys(response);
-					generateTableHead(table, keys);
-					generateTable(table, response);
-				} 
-				else {
-					let row_append = table.insertRow(-1)
-					let text =  document.createTextNode
-				}
-
-				// Debug
-				console.log("Table element: ", table);
-				console.log("Keys: ", keys);
-				console.error(error);
-
-			}).fail(function() {
-
-				// Debug
-				console.log("Error: scripts 127 index.html");
-			});
-    });
-  });
-
-</script>
-
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/confirmevents.js') }}"></script>
 
 <!-- Table generated from response -->
 <body>
-<table id="confirmevents" class= "">
+	<div class=table-responsive">
+<table id="confirmevents" class= "table table-sm">
 
 	</table>
 	</body>
+	</div>
         
 {% endblock %}
 
