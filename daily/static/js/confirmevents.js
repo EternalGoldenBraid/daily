@@ -11,6 +11,9 @@
         }).done(function(response) {
 
         // Testing
+        if (globals.response_obj) {
+            global.response_obj = response;
+        }
         $('#result').text(response);
         console.log(`response before loop: ${Object.keys(response)}, event: ${ev}`)
         for (let [key, value] of Object.entries(response)) {
@@ -20,6 +23,7 @@
         if (ev in Object.keys(response)) {
             throw "Entry already exists"
         }
+            /*
 	// Generate table based on response
         function generateTableHead(table, keys) {
             let thead = table.createTHead();
@@ -73,6 +77,7 @@
         else {
             appendRow(table);
         }
+        */
 
         }).fail(function() {
             // Debug

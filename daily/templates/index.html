@@ -87,6 +87,14 @@
                 value="Clear"> </p>
   </div>
 
+	<script type=text/javascript >
+		var globals = {};
+		console.log("globals: ", globals);
+	</script>
+
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/table_confirmation.js')  }}"></script>
+
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/confirmevents.js') }}"></script>
 
