@@ -3,24 +3,28 @@
         event.preventDefault();
 	let ev = $('input[name="event"]').val();
 	let dr = $('input[name="duration_event"]').val();
-        let description={"event": ev, "duration": dr};
+        let description={"event": globals.ev, "duration": dr};
+
+        globals.ev = ev;
+        globals.dr = dr;
+        console.log("Globals after init ev, dr: ", globals)
 
         $.post($SCRIPT_ROOT + '/events_confirm', {
-	    event: ev,
-	    duration: dr 
+	    event: globals.ev,
+	    duration: globals.dr 
         }).done(function(response) {
 
         // Testing
-        if (globals.response_obj) {
-            global.response_obj = response;
-        }
+            globals.response_obj = response;
+        console.log("confirm; response_obj status: ", globals.response_obj);
+
         $('#result').text(response);
-        console.log(`response before loop: ${Object.keys(response)}, event: ${ev}`)
+        console.log(`response before loop: ${Object.keys(response)}, event: ${globals.ev}`)
         for (let [key, value] of Object.entries(response)) {
         console.log("response: ", `${key}: ${value}`)
         };
 
-        if (ev in Object.keys(response)) {
+        if (globals.ev in Object.keys(response)) {
             throw "Entry already exists"
         }
             /*

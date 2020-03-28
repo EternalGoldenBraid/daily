@@ -89,14 +89,16 @@
 
 	<script type=text/javascript >
 		var globals = {};
-		console.log("globals: ", globals);
+		console.log("globals before the scripts: ", globals);
 	</script>
 
-	<script type=text/javascript src="{{
-		url_for('static', filename='js/table_confirmation.js')  }}"></script>
-
+  <!-- Asynchronous script -->
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/confirmevents.js') }}"></script>
+
+	<script defer type=text/javascript src="{{
+		url_for('static', filename='js/table_confirmation.js')  }}"></script>
+
 
 <!-- Table generated from response -->
 <body>
