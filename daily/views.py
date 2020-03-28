@@ -26,26 +26,23 @@ def index():
                 Rating.date==Event.rating_date).all()
     form_day = EntryForm()
     form_events = DescriptionForm()
+    buffers = Buffer.query.filter_by(user_id=current_user.id).all()
+    events = {}
 
-    #if request.form['submit'] == 'Submit Events':
-        #pass
-        # A way to distinguisg submit button
-    #if form_day.validate_on_submit():         
+    # Stage current events awaiting confirmation
+    for buffer in buffers:
+        events[buffer.event_tag] = buffer.duration
 
-        # Confirm to user the information they wish to store
-        #for entry in form_events.description.data:
-            #event =  entry
-            #duration = entry.duration_event
 
-        # Store into the database
-        # TODO
+    # Store into the database
+    # TODO
 
     #flash(form.errors) # DEBUG
 
     #SQLinjection safe?
-    return render_template("index.html", 
+    return  render_template("index.html", 
             rating_event=rating_event, rating=rating, form_day=form_day,
-            form_events=form_events) 
+            form_events=form_events, events=events)
     
     
 @app.route("/events_confirm", methods=["POST"])
@@ -68,7 +65,7 @@ def events_confirm():
         # Validate that entry does not already exist 
         if Buffer.query.filter_by(user_id = user_id, 
                 event_tag=event).all():
-            return jsonify(events), "Duup"
+            return jsonify(events), 500
         
         # Add to database
         buffer_add = Buffer(user_id = user_id, event_tag= event,
@@ -89,11 +86,10 @@ def events_confirm():
 @login_required
 def empty():
 
-    try:
-        #db.session.clear
-        return(url_for("index"))
-    except Exception as e:
-        print(e)
+    buffer_delete = Buffer.query.filter_by(user_id=current_user.id).all()
+    #db.session.delete(buffer_delete)
+
+    return jsonify("ok"), 200
 
 
 @app.route("/login", methods=["GET", "POST"])

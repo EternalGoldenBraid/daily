@@ -99,12 +99,20 @@
 	<script defer type=text/javascript src="{{
 		url_for('static', filename='js/table_confirmation.js')  }}"></script>
 
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/empty_confirmations.js') }}"></script>
+
 
 <!-- Table generated from response -->
 <body>
 	<div class=table-responsive">
 <table id="confirmevents" class= "table table-sm">
-
+        {% for entry in events %}
+            <tr>
+              <td scope=""> {{ entry }}</td>
+              <td scope=""> {{ events[entry] }}</td>
+            </tr>
+        {% endfor %}
 	</table>
 	</body>
 	</div>

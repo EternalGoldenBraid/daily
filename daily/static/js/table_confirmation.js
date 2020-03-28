@@ -1,5 +1,25 @@
 $(function()  {  
 
+        let table = document.querySelector("#confirmevents");
+
+        function generateTableHead(table) {
+            let thead = table.createTHead();
+            let row = thead.insertRow();
+            var labels = ['Event', 'Duration'];
+        				
+            for (let label of labels) {
+                let th = document.createElement("th");
+        	let text = document.createTextNode(label);
+        	th.appendChild(text);
+        	row.appendChild(th);
+          }
+        }
+        generateTableHead(table);
+
+        $('#eventsubmits').bind('click', function(event) {
+
+        /*
+         
         // Generate table based on response
         function generateTableHead(table, keys) {
             let thead = table.createTHead();
@@ -25,6 +45,7 @@ $(function()  {
                  }
             }
         }
+        */
         
         // Add a row to the confirmation table
         function appendRow(table) {
@@ -40,23 +61,17 @@ $(function()  {
             }
         }
         
-        let table = document.querySelector("#confirmevents");
-        
-        // If table exists, append new row. Else create table for confirms
+        // If table exists, append new row.
         console.log(table)
         console.log("rows.length", table.rows.length)
-
         console.log("table; response_obj status: ", globals.response_obj);
-        if ((table.rows.length === 0) && 
+
+        if ((table.rows.length > 0) && 
                 (globals.response_obj !== undefined)) {
-            let keys = Object.keys(globals.response_obj);
-            generateTableHead(table, keys);
-            generateTable(table, globals.response_obj);
-        } 
-        else {
             appendRow(table);
-        }
+        } 
         console.log("globals after table: ", globals)
 
+    });
 });
 
