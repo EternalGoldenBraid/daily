@@ -50,7 +50,8 @@
 <h2> How was your day? </h2>
 
 <div class="form-row">
-  <form class= "form" "form-horizontal" action="" method="post" >
+  <form id="mainform" class= "form" "form-horizontal" 
+				action="" method="post" >
     {{ form_day.hidden_tag() }}
     <p>
 	{{ form_day.date.label }} 
@@ -78,7 +79,7 @@
   <div class="form-row">
     {{ form_events.hidden_tag() }}
 		{{ form_events.event(size=20) }}
-		{{ form_events.duration_event(class="form-control",
+		{{ form_events.duration_event(class="form-control", 
 				type="time", size=20) }}
 
   <p> <input id="eventsubmits" name="Submit" type="submit" 
@@ -87,18 +88,19 @@
                 value="Clear"> </p>
   </div>
 
+	<!-- globals namespace -->
 	<script type=text/javascript >
 		var globals = {};
 		console.log("globals before the scripts: ", globals);
 	</script>
 
-  <!-- Asynchronous script -->
+  <!-- Events confirm -->
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/confirmevents.js') }}"></script>
 
+	<!-- Table control -->
 	<script defer type=text/javascript src="{{
 		url_for('static', filename='js/table_confirmation.js')  }}"></script>
-
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/empty_confirmations.js') }}"></script>
 

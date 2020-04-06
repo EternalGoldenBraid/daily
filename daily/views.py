@@ -86,8 +86,13 @@ def events_confirm():
 @login_required
 def empty():
 
-    buffer_delete = Buffer.query.filter_by(user_id=current_user.id).all()
-    #db.session.delete(buffer_delete)
+    if  Buffer.query.filter_by(
+            user_id=current_user.id).delete():
+        db.session.commit()
+
+    #testi = db.session.query(Buffer).filter(
+                    #Buffer.user_id==current_user.id).all()
+    #db.session.delete(testi)
 
     return jsonify("ok"), 200
 
