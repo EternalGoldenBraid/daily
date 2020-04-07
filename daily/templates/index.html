@@ -49,38 +49,108 @@
 <div class="form-container">
 <h2> How was your day? </h2>
 
-<div class="form-row">
-  <form class= "form" "form-horizontal" action="" method="post" >
-    {{ form.hidden_tag() }}
+<div class="align-items-center">
+  <form id="mainform" class= "form form-horizontal" 
+				action="" method="post" >
+    {{ form_day.hidden_tag() }}
     <p>
-  <!-- {{ form.date.label }} <br> -->
-  {{ form.date(size=12) }}
+		<div class="col-auto">
+	{{ form_day.date.label }} 
+  {{ form_day.date(class="form-control", type="date", size=12) }}
 
-<!-- {{ form.sleep_rating.label }} <br> -->
-  {{ form.sleep_rating(size=3) }}
+	{{ form_day.sleep_rating.label }} 
+  {{ form_day.sleep_rating(size=3) }}
 
-  <!-- {{ form.meditation.label }} <br> -->
-	{{ form.meditation(size=7) }} 
+	{{ form_day.meditation.label }} 
+	{{ form_day.meditation(class="form-control", type="time", size=7) }} 
+		</div>
+</div>
 
-  <!-- {{ form.day_rating.label }} <br> -->
-	{{ form.day_rating(size=6) }} 
+<div class= "align-items-center">
+		<div class="col-auto">
+	{{ form_day.day_rating.label }}
+	{{ form_day.day_rating(size=6) }} 
 
-  <!-- {{ form.lights.label }} <br> -->
-	{{ form.lights(size=5) }} 
+	{{ form_day.lights.label }} 
+	{{ form_day.lights(class="form-control", type="time", size=5) }} 
 
-  <!-- {{ form.cw.label }} <br> -->
-	{{ form.cw(size=12) }} 
+	{{ form_day.cw.label }}
+	{{ form_day.cw(class="form-control", type="time", size=12) }} 
+		</div>
+</div>
     </p>
-
+		<p> {{ form_day.submit() }} </p>
 </div>
 
-<div class="form-row"> 
-  <p>
-  <!-- {{ form.description.label(bold) }} -->
-	{{ form.description(size=80) }} </div>
-  </p>
-  <p> {{ form.submit() }} </p>
-</div>
+
+  <div class="row align-items-center">
+    {{ form_events.hidden_tag() }}
+
+		<div class="col-auto">
+		{{ form_events.event.label }}
+		{{ form_events.event(size=20) }}
+		</div>
+
+		<div class="col-auto">
+		{{ form_events.duration_event.label }}
+		{{ form_events.duration_event(class="form-control", 
+				type="time", size=20) }}
+		</div>
+
+  <p> <input id="eventsubmits" name="Submit" type="submit" 
+                value="Add Event"> </p>
+  <p> <input id="eventclear" name="Clear" type="submit" 
+                value="Clear"> </p>
+  </div>
+
+	<!-- globals namespace -->
+	<script type=text/javascript >
+		var globals = {};
+	</script>
+
+  <!-- Events confirm -->
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/confirmevents.js') }}"></script>
+
+	<!-- Table control -->
+	<script defer type=text/javascript src="{{
+		url_for('static', filename='js/table_confirmation.js')  }}"></script>
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/empty_confirmations.js') }}"></script>
+
+
+<!-- Table generated from response -->
+<body>
+	<div class=table-responsive">
+<table id="confirmevents" class= "table table-sm">
+	{% if events|length != 0 %} <!-- TEST -->
+        {% for entry in events %}
+            <tr>
+              <td scope=""> {{ entry }}</td>
+              <td scope=""> {{ events[entry] }}</td>
+            </tr>
+        {% endfor %}
+	</table>
+	{% endif %}
+	</body>
+	</div>
+        
 {% endblock %}
 
-
+ <table class="table table-sm">
+  <thead class=.thead-dark>
+    <tr>
+      <th scope="col">Event</th>
+      <th scope="col">Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+	  <!-- Render per date in ratings table, join event_date==rating_date -->
+		{% for entry in event%}
+			<tr>
+				<td scope="data"> {{ event }}</td>
+				<td scope="data"> {{ duration }}</td>
+    	</tr>             
+		{% endfor %}
+  </tbody>
+</table>
