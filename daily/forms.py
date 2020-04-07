@@ -13,7 +13,7 @@ class LoginForm(FlaskForm):
     submit=SubmitField('Sign In')
 
 class DescriptionForm(FlaskForm):
-    event=StringField('event', 
+    event=StringField('Event', 
                 validators=[length(max=200, 
                 message='Keep event under 200 characters')])
     duration_event=IntegerField('Duration', 

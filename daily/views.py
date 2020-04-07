@@ -13,6 +13,7 @@ from daily.models import User, Rating, Tag, Event, Buffer
 from werkzeug.urls import url_parse
 from copy import deepcopy
 
+
 @app.route("/index", methods=["GET", "POST"])
 @app.route("/", methods=["GET", "POST"])
 @login_required
@@ -45,6 +46,24 @@ def index():
             form_events=form_events, events=events)
     
     
+
+@app.route("/events_add", methods=["POST"])
+@login_required
+def events_add():
+    """
+    Add events to database
+    """
+
+    form = EntryForm()
+    if form.validate_on_submit():
+        rating = Rating(date=form.date, rating_sleep=form.sleep_rating,
+                meditation=form.meditation, cw=form.cw, screen=form.lights,
+                rating_day=form.day_rating)
+        
+        buffer_add = Buffer(user_id = user_id, event_tag= event,
+                    duration = duration)
+
+
 @app.route("/events_confirm", methods=["POST"])
 @login_required
 def events_confirm():
@@ -89,12 +108,7 @@ def empty():
     if  Buffer.query.filter_by(
             user_id=current_user.id).delete():
         db.session.commit()
-
-    #testi = db.session.query(Buffer).filter(
-                    #Buffer.user_id==current_user.id).all()
-    #db.session.delete(testi)
-
-    return jsonify("ok"), 200
+    return "Table emptied", 200
 
 
 @app.route("/login", methods=["GET", "POST"])

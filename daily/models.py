@@ -57,7 +57,7 @@ class Rating(db.Model):
 #       How to code duration, rounding by minute?
 
 class Event(db.Model):
-    __tablename__ = 'event'
+    __tablename__ = 'Event'
 
     id = db.Column(db.Integer, primary_key=True)
     # Duration of the event, In future integrate with Toggl API, measured in minutes

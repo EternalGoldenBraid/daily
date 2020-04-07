@@ -13,6 +13,7 @@
 	    duration: globals.dr 
         }).done(function(response) {
             // Add table row
+            globals.response_obj = response
             globals.addRow(globals.table_confirm)
         }).fail(function(error) {
             // Debug

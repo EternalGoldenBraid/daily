@@ -7,7 +7,6 @@ $(function() {
         }).done(function(response) {
             let table = document.querySelector("#confirmevents")
             $("#confirmevents").hide();
-            console.log("Emptied response: ", response)
         }).fail(function() {
             // Debug
             console.log("Failed to empty")

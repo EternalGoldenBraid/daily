@@ -49,11 +49,12 @@
 <div class="form-container">
 <h2> How was your day? </h2>
 
-<div class="form-row">
-  <form id="mainform" class= "form" "form-horizontal" 
+<div class="align-items-center">
+  <form id="mainform" class= "form form-horizontal" 
 				action="" method="post" >
     {{ form_day.hidden_tag() }}
     <p>
+		<div class="col-auto">
 	{{ form_day.date.label }} 
   {{ form_day.date(class="form-control", type="date", size=12) }}
 
@@ -62,8 +63,12 @@
 
 	{{ form_day.meditation.label }} 
 	{{ form_day.meditation(class="form-control", type="time", size=7) }} 
+		</div>
+</div>
 
-	{{ form_day.day_rating.label }} <br> 
+<div class= "align-items-center">
+		<div class="col-auto">
+	{{ form_day.day_rating.label }}
 	{{ form_day.day_rating(size=6) }} 
 
 	{{ form_day.lights.label }} 
@@ -71,19 +76,29 @@
 
 	{{ form_day.cw.label }}
 	{{ form_day.cw(class="form-control", type="time", size=12) }} 
+		</div>
+</div>
     </p>
 		<p> {{ form_day.submit() }} </p>
 </div>
 
 
-  <div class="form-row">
+  <div class="row align-items-center">
     {{ form_events.hidden_tag() }}
+
+		<div class="col-auto">
+		{{ form_events.event.label }}
 		{{ form_events.event(size=20) }}
+		</div>
+
+		<div class="col-auto">
+		{{ form_events.duration_event.label }}
 		{{ form_events.duration_event(class="form-control", 
 				type="time", size=20) }}
+		</div>
 
   <p> <input id="eventsubmits" name="Submit" type="submit" 
-                value="Submit Events"> </p>
+                value="Add Event"> </p>
   <p> <input id="eventclear" name="Clear" type="submit" 
                 value="Clear"> </p>
   </div>
@@ -108,6 +123,7 @@
 <body>
 	<div class=table-responsive">
 <table id="confirmevents" class= "table table-sm">
+	{% if events|length != 0 %} <!-- TEST -->
         {% for entry in events %}
             <tr>
               <td scope=""> {{ entry }}</td>
@@ -115,6 +131,7 @@
             </tr>
         {% endfor %}
 	</table>
+	{% endif %}
 	</body>
 	</div>
         
