@@ -43,31 +43,48 @@ class Rating(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                 index=True, nullable=False)
 
+
     # Establish Event objects on Rating called Rating.events.
     # Establish .rating attribute on Event, 
     # which refer to the parent Rating object.
     events = db.relationship('Event', backref='rating', lazy='dynamic')
 
     
-    
 # Define events table, by design will have 
 # multiple date entries due to multiple unique tags.
 # Potential Improvements:
 class Event(db.Model):
-    __tablename__ = 'Event'
+    __tablename__ = 'event'
 
     id = db.Column(db.Integer, primary_key=True)
-    # Duration of the event, In future integrate with Toggl API, measured in minutes
     duration = db.Column(db.Integer) 
     # Date of the event
     rating_date = db.Column(db.DateTime, 
             db.ForeignKey('rating.date'), index=True, nullable=False) 
-    # Description/tag of the event
-    event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
-            index=True, nullable=False)     
+    # Story/tag of the event
+    story = db.Column(db.String, nullable=False, index=True)
+    #event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
+            #index=True, nullable=False)     
+    tags = db.relationship('Tag', backref='event')
+
+    # Many-to-many for rating-events
+    rating_events = db.relationship('Rating', secondary=rating_as
+                    db.backref('events', lazy = 'dynamic'))
     
-    def __repr__(self):
-        return '<Date of event is : {}, The even tag is: {}, which had the duration of {}>'.format(self.rating_date, self.event_tag, self.duration)
+
+# Many-to-many association table for Rating-Event
+rating_as = db.Table('rating_events',
+        db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
+        db.Column('event.id', db.Integer, db.ForeignKey('event.id'))
+        )
+
+
+# Many-to-many association table for Event-Tag
+event_as = db.Table('event_tags',
+        db.Column('event.id', db.Integer, db.ForeignKey('tag.id')),
+        db.Column('tag.id', db.Integer, db.ForeignKey('event.id'))
+        )
+
 
 # Define relationships with tags and days
 class Tag(db.Model):
@@ -78,11 +95,11 @@ class Tag(db.Model):
 
     # Establish Tag object on Event called Event.tags.
     # Establish .event attribute on Tag, which refers to the parent Event object.
-    tags = db.relationship('Event', backref='tag', lazy='dynamic')
+    tags = db.relationship('Event', secondary=event_as,
+            db.backref('tags', lazy='dynamic'))
 
+    
 
-    def __repr__(self):
-        return '<Tag name is {}>'.format(self.tag_name)
 
 
 # A buffer to hold event: duration pairs for a user during an entry

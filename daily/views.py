@@ -47,14 +47,28 @@ def index():
         print(events.items())
         
         # Read tags from user input
-        if len(event.items) != 0:
+        tags = Tag.query.all()
+        # Make sure buffer is non-empty
+        if len(events.items()) != 0:
             for item in events.items():
                 description, duration = item[0], item[1]
                 parts = description.split(':')
-                print(parts)
+                story = parts.pop(-1)
+                print(f"Tags: {parts}, Story: {story}")
 
                 # Check if tag exists, TODO: A better validation?
                 if len(parts) > 1:
+                    # Add tags to db if they're new
+                    for tag in parts:
+                        if tag not in tags:
+                            new_tag = Tag(tag_name=tag)
+                            db.session.add(new_tag)
+
+                    # Add Event table row including: date, tag(s), story
+                    event_new = Event(duration=duration,
+                                rating_date=form_day.date.data,
+                                story=story, event_tag)
+
 
 
 
