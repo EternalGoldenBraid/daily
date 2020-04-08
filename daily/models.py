@@ -33,29 +33,26 @@ class Rating(db.Model):
     __tablename__ = 'rating'
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, unique=True, nullable=False) # SHOULD DATE BE UNIQUE?  Ok for single user
+    # DATE SHOULD DATE BE UNIQUE?  Ok for single user
+    date = db.Column(db.DateTime, unique=True, nullable=False) 
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False) 
     cw = db.Column(db.Integer, nullable=False) 
     screen = db.Column(db.Integer, nullable=False) 
     rating_day = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                index=True, nullable=False)
 
     # Establish Event objects on Rating called Rating.events.
-    # Establish .rating attribute on Event, which refer to the parent Rating object.
+    # Establish .rating attribute on Event, 
+    # which refer to the parent Rating object.
     events = db.relationship('Event', backref='rating', lazy='dynamic')
 
-    def __repr__(self):
-        return '<User: {} Date: {}, Rating_date : {}, M : {}, CW: {}, Screens: {}>'.format(
-    self.user.username, self.date, self.rating_day, self.meditation,
-            self.cw, self.screen)
     
-# Define events table, by design will have multiple date entries due to multiple unique tags.
-# Can probably be improved
+    
+# Define events table, by design will have 
+# multiple date entries due to multiple unique tags.
 # Potential Improvements:
-#   When new rating, check if a corresponding event already exists. If yes, use that, else create event.
-#       How to code duration, rounding by minute?
-
 class Event(db.Model):
     __tablename__ = 'Event'
 
@@ -66,7 +63,6 @@ class Event(db.Model):
     rating_date = db.Column(db.DateTime, 
             db.ForeignKey('rating.date'), index=True, nullable=False) 
     # Description/tag of the event
-    # Add start/stop time pauses?
     event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
             index=True, nullable=False)     
     

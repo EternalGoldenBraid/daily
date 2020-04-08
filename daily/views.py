@@ -1,7 +1,8 @@
 import os
-import datetime
+from datetime import datetime
 
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
+                            InvalidRequestError)
 from daily import app, db # unnecessary
 from daily.forms import (LoginForm, EntryForm, 
                         EventsForm, DescriptionForm)
@@ -22,7 +23,8 @@ def index():
     Index page of the site, includes a table of daily history
     """
 
-    rating = Rating.query.filter_by(user_id=current_user.id)
+    # Fetch existing rows from rating table for rendering to user
+    ratings = Rating.query.filter_by(user_id=current_user.id)
     rating_event= db.session.query(Rating, Event).filter(
                 Rating.date==Event.rating_date).all()
     form_day = EntryForm()
@@ -34,15 +36,38 @@ def index():
     for buffer in buffers:
         events[buffer.event_tag] = buffer.duration
 
+    # Receive and add to database users new row for rating table
+    if request.method == 'POST' and form_day.validate():
+        rating = Rating(user_id=current_user.id, date=form_day.date.data, 
+                rating_sleep=form_day.sleep_rating.data,
+                meditation=form_day.meditation.data, cw=form_day.cw.data, 
+                screen=form_day.lights.data, 
+                rating_day=form_day.day_rating.data)
 
-    # Store into the database
-    # TODO
+        print(events.items())
+        
+        # Read tags from user input
+        if len(event.items) != 0:
+            for item in events.items():
+                description, duration = item[0], item[1]
+                parts = description.split(':')
+                print(parts)
 
-    #flash(form.errors) # DEBUG
+                # Check if tag exists, TODO: A better validation?
+                if len(parts) > 1:
+
+
+
+        try:
+            db.session.add(rating)
+            db.session.commit()
+        except (SQLAlchemyError, InvalidRequestError):
+            db.session.rollback()
+            flash("New entry overlaps with old one")
 
     #SQLinjection safe?
     return  render_template("index.html", 
-            rating_event=rating_event, rating=rating, form_day=form_day,
+            rating_event=rating_event, rating=ratings, form_day=form_day,
             form_events=form_events, events=events)
     
     
@@ -59,6 +84,8 @@ def events_add():
         rating = Rating(date=form.date, rating_sleep=form.sleep_rating,
                 meditation=form.meditation, cw=form.cw, screen=form.lights,
                 rating_day=form.day_rating)
+
+        print(rating)
         
         buffer_add = Buffer(user_id = user_id, event_tag= event,
                     duration = duration)

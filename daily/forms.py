@@ -61,7 +61,7 @@ class EntryForm(FlaskForm):
     sleep_rating=StringField('Sleep', validators=[DataRequired()],
                 render_kw={"placeholder": "Sleep"}, default = 1) 
     meditation=StringField('Meditation', validators=[DataRequired(),
-                length(max=3, message="Meditation input too long")],
+                length(max=5, message="Meditation input too long")],
                 render_kw={"placeholder": "Meditation"}, default = 2)
     #description=StringField('Description', validators=[DataRequired()],
                 #render_kw={"placeholder": "Description"})
