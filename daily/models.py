@@ -49,6 +49,13 @@ class Rating(db.Model):
     # which refer to the parent Rating object.
     events = db.relationship('Event', backref='rating', lazy='dynamic')
 
+
+# Many-to-many association table for Rating-Event
+rating_as = db.Table('rating_events',
+        db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
+        db.Column('event.id', db.Integer, db.ForeignKey('event.id'))
+        )
+
     
 # Define events table, by design will have 
 # multiple date entries due to multiple unique tags.
@@ -68,15 +75,10 @@ class Event(db.Model):
     tags = db.relationship('Tag', backref='event')
 
     # Many-to-many for rating-events
-    rating_events = db.relationship('Rating', secondary=rating_as
-                    db.backref('events', lazy = 'dynamic'))
+    rating_events = db.relationship('Rating', secondary=rating_as,
+                    backref='events', lazy='dynamic')
     
 
-# Many-to-many association table for Rating-Event
-rating_as = db.Table('rating_events',
-        db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
-        db.Column('event.id', db.Integer, db.ForeignKey('event.id'))
-        )
 
 
 # Many-to-many association table for Event-Tag
@@ -96,7 +98,7 @@ class Tag(db.Model):
     # Establish Tag object on Event called Event.tags.
     # Establish .event attribute on Tag, which refers to the parent Event object.
     tags = db.relationship('Event', secondary=event_as,
-            db.backref('tags', lazy='dynamic'))
+            backref='tags', lazy='dynamic')
 
     
 

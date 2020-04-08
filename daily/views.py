@@ -65,9 +65,9 @@ def index():
                             db.session.add(new_tag)
 
                     # Add Event table row including: date, tag(s), story
-                    event_new = Event(duration=duration,
-                                rating_date=form_day.date.data,
-                                story=story, event_tag)
+                    #event_new = Event(duration=duration,
+                                #rating_date=form_day.date.data,
+                                #story=story, event_tag)
 
 
 
