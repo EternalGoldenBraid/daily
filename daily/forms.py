@@ -58,16 +58,18 @@ class EntryForm(FlaskForm):
     date=DateField('Date', format='%Y-%m-%d', 
                 validators=[DataRequired()], 
                 render_kw={"placeholder": "Date"})
+
     sleep_rating=StringField('Sleep', validators=[DataRequired()],
                 render_kw={"placeholder": "Sleep"}, default = 1) 
+
     meditation=StringField('Meditation', validators=[DataRequired(),
-                length(max=5, message="Meditation input too long")],
+                length(max=5, 
+                    message="Meditation contains too many digits")],
                 render_kw={"placeholder": "Meditation"}, default = 2)
-    #description=StringField('Description', validators=[DataRequired()],
-                #render_kw={"placeholder": "Description"})
+
     day_rating=StringField('Rating', validators=[DataRequired(), 
-                length(max=2, 
-                message='Rating for the day contains too many digits')],
+        length(max=2, message='Rating for the day contains too many digits')
+        ],
                 render_kw={"placeholder": "Rating"}, default = 3)
     lights=StringField('Lights', validators=[DataRequired(), 
                 length(max=5,

@@ -44,12 +44,6 @@ class Rating(db.Model):
                 index=True, nullable=False)
 
 
-    # Establish Event objects on Rating called Rating.events.
-    # Establish .rating attribute on Event, 
-    # which refer to the parent Rating object.
-    events = db.relationship('Event', backref='rating', lazy='dynamic')
-
-
 # Many-to-many association table for Rating-Event
 rating_as = db.Table('rating_events',
         db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
@@ -65,19 +59,17 @@ class Event(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer) 
-    # Date of the event
     rating_date = db.Column(db.DateTime, 
             db.ForeignKey('rating.date'), index=True, nullable=False) 
-    # Story/tag of the event
     story = db.Column(db.String, nullable=False, index=True)
-    #event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
-            #index=True, nullable=False)     
-    tags = db.relationship('Tag', backref='event')
 
-    # Many-to-many for rating-events
+    # Many-to-many for rating-events, defines an Rating.events attribute
     rating_events = db.relationship('Rating', secondary=rating_as,
                     backref='events', lazy='dynamic')
     
+    # Dropped after adding many to many associations table
+    #event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
+            #index=True, nullable=False)     
 
 
 
@@ -93,15 +85,12 @@ class Tag(db.Model):
     __tablename__ = 'tag'
 
     id = db.Column(db.Integer, primary_key=True)
-    tag_name = db.Column(db.String, index=True, unique=True, nullable=False)
+    tag_name = db.Column(db.String, index=True, unique=True,    
+                 nullable=False)
 
-    # Establish Tag object on Event called Event.tags.
-    # Establish .event attribute on Tag, which refers to the parent Event object.
+    # Many-to-many for events-tags, defines a Event.tags attribute
     tags = db.relationship('Event', secondary=event_as,
             backref='tags', lazy='dynamic')
-
-    
-
 
 
 # A buffer to hold event: duration pairs for a user during an entry
@@ -115,15 +104,13 @@ class Buffer(db.Model):
     duration = db.Column(db.Integer) 
 
 
-    #def __repr__(self):
-        #return {self.event_tag: self.duration}
 
-
-
-# user_loader is a callback(call after) function for reloading the user from session
+# user_loader is a callback(call after) function for reloading 
+# the user from session
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
 
 # SQLite3 foreign key constraints to be enforced on engine connect
 @event.listens_for(Engine, "connect")
