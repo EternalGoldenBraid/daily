@@ -54,3 +54,102 @@ input[type=text]
 	margin 8px 0;
 	align: center;
 }
+
+table {
+    /*border: 1px solid #ccc; */
+    width: 100%;
+    margin:0;
+    padding:0;
+    /*border-collapse: collapse;
+    border-spacing: 10px;*/
+  }
+
+  table tr {
+    /*border: 1px solid #ddd;*/
+    padding: 5px;
+    background: #fff;
+    opacity: 85%
+
+  }
+
+  /*table th, table td {
+    padding: 10px;
+    text-align: center;
+
+  }*/
+
+  table th {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-top: 0;
+  }
+  
+
+
+  @media screen and (max-width: 800px) {
+
+   #card table {
+      border: 0;
+    }
+
+   #card table thead {
+      display: none;
+    }
+
+   #card table tr {
+      margin-bottom: 20px;
+      display: block;
+      border-bottom: 2px solid #ddd;
+	 box-shadow: 2px 2px 1px #dadada;
+
+    }
+
+   #card table td {
+      display: block;
+      text-align: right;
+      font-size: 13px;
+    }
+
+   #card table td:last-child {
+      border-bottom: 0;
+    }
+
+   #card table td::before {
+      content: attr(data-label);
+      float: left;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    	#card	tbody{
+			line-height:!important;
+		}
+
+   #description td::before {
+	   
+      content: attr(id);
+      float: left;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    	#description tbody{
+			line-height:auto!important;
+		}
+	}
+
+  
+
+   /* Style buttons */
+.btn {
+  background-color: DodgerBlue; /* Blue background */
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  padding: 6px 8px; /* Some padding */
+  font-size: 16px; /* Set a font size */
+  cursor: pointer; /* Mouse pointer on hover */
+}
+
+/* Darker background on mouse-over */
+.btn:hover {
+  background-color: RoyalBlue;
+}
+

@@ -59,8 +59,7 @@ class Event(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer) 
-    rating_date = db.Column(db.DateTime, 
-            db.ForeignKey('rating.date'), index=True, nullable=False) 
+    rating_date = db.Column(db.DateTime, index=True, nullable=False) 
     story = db.Column(db.String, nullable=False, index=True)
 
     # Many-to-many for rating-events, defines an Rating.events attribute

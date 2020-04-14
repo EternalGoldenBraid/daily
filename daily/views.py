@@ -25,8 +25,8 @@ def index():
 
     # Fetch existing rows from rating table for rendering to user
     ratings = Rating.query.filter_by(user_id=current_user.id)
-    rating_event= db.session.query(Rating, Event).filter(
-                Rating.date==Event.rating_date).all()
+    #rating_event= db.session.query(Rating, Event).filter(
+                #Rating.date==Event.rating_date).all()
     form_day = EntryForm()
     form_events = DescriptionForm()
     buffers = Buffer.query.filter_by(user_id=current_user.id).all()
@@ -44,10 +44,18 @@ def index():
                 screen=form_day.lights.data, 
                 rating_day=form_day.day_rating.data)
 
+        # Push a new rating row to database
+        try:
+            db.session.add(rating)
+            db.session.commit()
+        except (SQLAlchemyError, InvalidRequestError) as e1:
+            db.session.rollback()
+            print(e1)
+            flash("New entry overlaps with old one")
+
         # Read tags from user input
         tags = Tag.query.all()
         tags_strings = [tag_str.tag_name for tag_str in tags]
-        print(tags_strings)
         # Make sure buffer is non-empty
         if len(events_buffer.items()) > 0:
             for item in events_buffer.items():
@@ -67,6 +75,7 @@ def index():
 
                     # Add tags to db if they're new
                     for tag in parts:
+                        tag = (tag.rstrip()).upper()
                         if tag not in tags_strings:
                             new_tag = Tag(tag_name=tag)
                             db.session.add(new_tag)
@@ -77,44 +86,26 @@ def index():
                             # Associate event with the existing tag
                             existing_tag = Tag.query.filter_by(
                                             tag_name=tag).first()
-                            print("Found an existing tag!: ",existing_tag.tag_name) # TEST
-                            # DEBUG
-                            print("Events date: ", event_new.rating_date)
-                            print("Existings dates:")
-                            for day in Rating.query.all():
-                                print(day.date)
-
                             event_new.tags.append(existing_tag)
-
-
-
-
+                            db.session.add(event_new)
 
                 # Associate rating with an event
-                rating.events.append(event_new)
-
-        print(f"Rating of day: {rating.date}")
-        print(f"Events")
-        for e in rating.events:
-            print(e.story, end=" With tags:")
-            for t in e.tags:
-                print(f"{t.tag_name}", end="/")
-            print()
+                try:
+                    rating.events.append(event_new)
+                    db.session.commit()
+                except SQLAlchemyError as e:
+                    print(e)
+                    return "Ops", 400
 
 
+    # Fetch existing events for rendering the all ratings table
+    #events_all = Rating.query.filter_by(
+            #rating.user_id==current_user.id).all()
 
-        try:
-            #db.session.add(rating)
-            db.session.commit()
-
-        except (SQLAlchemyError, InvalidRequestError) as e1:
-            db.session.rollback()
-            print(e1)
-            flash("New entry overlaps with old one")
 
     #SQLinjection safe?
     return  render_template("index.html", 
-            rating_event=rating_event, rating=ratings, form_day=form_day,
+            ratings=ratings, form_day=form_day,
             form_events=form_events, events=events_buffer)
     
 
@@ -128,7 +119,6 @@ def events_confirm():
         data = request.form.to_dict()
         user_id = current_user.id
         event, duration = data['event'].rstrip(), data['duration']
-        event = event.upper()
         buffers = Buffer.query.filter_by(user_id=user_id).all()
         events = {}
 
@@ -160,9 +150,29 @@ def events_confirm():
 @login_required
 def empty():
 
-    if  Buffer.query.filter_by(
+    if Buffer.query.filter_by(
             user_id=current_user.id).delete():
         db.session.commit()
+    return "Table emptied", 200
+
+
+
+@app.route("/delete_row/<id>", methods=["POST", "GET"])
+@login_required
+def delete_row(id):
+
+    if id:
+        pass
+        print(f"Send id :{id}")
+    return "Table emptied", 200
+
+
+@app.route("/editRow", methods=["POST", "GET"])
+@login_required
+def edit_row():
+
+    if True:
+        pass
     return "Table emptied", 200
 
 

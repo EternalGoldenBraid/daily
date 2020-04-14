@@ -12,8 +12,10 @@
 		
 	{% endblock %}
 
- <table class="table">
-  <thead class=.thead-dark>
+
+<div id='card'>
+ <table id='events_all' class="table w-auto">
+  <thead class=thead-light>
     <tr>
       <th scope="col">Date</th>
       <th scope="col">Sleep</th>
@@ -22,31 +24,47 @@
       <th scope="col">Screens</th>
       <th scope="col">Rating</th>
       <th scope="col">Creative Work</th>
+			<th></th>
+			<th></th>
     </tr>
   </thead>
   <tbody>
 	  <!-- Render per date in ratings table, join event_date==rating_date -->
-					{% for i in rating %}
+					{% for rating in ratings %}
 			<tr>
-				<td scope="data"> {{	i.date.strftime('%Y-%m-%d') }}</td>
-				<td scope="data"> {{	i.rating_sleep }}</td>
-				<td scope="data"> {{	i.meditation }}</td>
-				<td scope="data">
-					{% for r in rating_event %}
-						{% if i.date==r.Event.rating_date %}
-							{{ r.Event.event_tag }}:{{ r.Event.duration }},
+				<td data-label='Date'> {{	rating.date.strftime('%Y-%m-%d') }}</td>
+				<td data-label='Sleep'> {{	rating.rating_sleep }}</td>
+				<td data-label='Meditation'> {{	rating.meditation }}</td>
+				<td id='description' data-label='Description'>
+					{% for event in rating.events %}
+						{% for tag in event.tags %}
+							{{ tag.tag_name.capitalize()  }}:	
+						{% endfor %}
+					{{ event.story }} 
+						{% if event.duration|length != 0 %}
+							: {{ event.duration }}
 						{% endif %}
 					{% endfor %}
 				</td>
-				<td scope="data"> {{ i.screen }}</td>
-				<td scope="data"> {{ i.rating_day }}</td>
-				<td scope="data"> {{ i.cw }}</td>
+				<td data-label='Screens'> {{ rating.screen }}</td>
+				<td data-label'Rating'> {{ rating.rating_day }}</td>
+				<td data-label='Creative Work'> {{ rating.cw }}</td>
+				<td>
+				<form action="{{url_for('delete_row', id=rating.id) }}" 
+							method="post">
+            <button type="hidden" name="_method" class="btn fa fa-trash" 
+										value="DELETE" id='deleteRowButton'>
+            <button type="submit" value="Delete" class="btn fa fa-pencil"
+						 			 id='editRowButton'>
+          </form>
+				</td>
     	</tr>             
 		{% endfor %}
   </tbody>
 </table>
+</div>
 
-<div class="form-container">
+<div id="newEntries" class="form-container">
 <h2> How was your day? </h2>
 
 <div class="align-items-center">
@@ -66,7 +84,7 @@
 		</div>
 </div>
 
-<div class= "align-items-center">
+<div id="newEntries" class= "align-items-center">
 		<div class="col-auto">
 	{{ form_day.day_rating.label }}
 	{{ form_day.day_rating(size=6) }} 
@@ -118,8 +136,13 @@
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/empty_confirmations.js') }}"></script>
 
+  <!-- Edit and remove -->
+	<!--
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/edit_remove.js') }}"></script>
+	-->
 
-<!-- Table generated from response -->
+	<!-- Table generated for tag:story confirmation-->
 <body>
 	<div class=table-responsive">
 <table id="confirmevents" class= "table table-sm">
