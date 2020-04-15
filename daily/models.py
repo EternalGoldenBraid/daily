@@ -64,7 +64,8 @@ class Event(db.Model):
 
     # Many-to-many for rating-events, defines an Rating.events attribute
     rating_events = db.relationship('Rating', secondary=rating_as,
-                    backref='events', lazy='dynamic')
+                    backref='events', lazy='dynamic', 
+                    cascade="save-update, merge, delete")
     
     # Dropped after adding many to many associations table
     #event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
@@ -88,7 +89,8 @@ class Tag(db.Model):
                  nullable=False)
 
     # Many-to-many for events-tags, defines a Event.tags attribute
-    tags = db.relationship('Event', secondary=event_as,
+    tags = db.relationship('Event', secondary=event_as, 
+            cascade="save-update, merge, delete",
             backref='tags', lazy='dynamic')
 
 

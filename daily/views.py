@@ -10,7 +10,8 @@ from flask import (render_template, redirect, flash,
         url_for, request, jsonify, session)
 from flask_login import (current_user, login_user, 
                     logout_user, login_required)
-from daily.models import User, Rating, Tag, Event, Buffer
+from daily.models import (User, Rating, Tag, Event, Buffer, 
+                            rating_as, event_as)
 from werkzeug.urls import url_parse
 from copy import deepcopy
 
@@ -32,11 +33,12 @@ def index():
     buffers = Buffer.query.filter_by(user_id=current_user.id).all()
     events_buffer = {}
 
-    # Stage current events awaiting confirmation
+    # Stage current events awaiting confirmation into adictionary
+    # Access key being the str field of the event and value it's duration
     for buffer in buffers:
         events_buffer[buffer.event_tag] = buffer.duration
 
-    # Receive and add to database users new row for rating table
+    # Add to database users new row for rating table
     if request.method == 'POST' and form_day.validate():
         rating = Rating(user_id=current_user.id, date=form_day.date.data, 
                 rating_sleep=form_day.sleep_rating.data,
@@ -50,12 +52,13 @@ def index():
             db.session.commit()
         except (SQLAlchemyError, InvalidRequestError) as e1:
             db.session.rollback()
-            print(e1)
             flash("New entry overlaps with old one")
+            return redirect(url_for('index')), 409
 
         # Read tags from user input
         tags = Tag.query.all()
         tags_strings = [tag_str.tag_name for tag_str in tags]
+
         # Make sure buffer is non-empty
         if len(events_buffer.items()) > 0:
             for item in events_buffer.items():
@@ -79,6 +82,10 @@ def index():
                         if tag not in tags_strings:
                             new_tag = Tag(tag_name=tag)
                             db.session.add(new_tag)
+                            db.session.commit()
+
+                            # Update the tag_strings
+                            tags_strings.append(tag)
 
                             # Associate event with the new tag
                             event_new.tags.append(new_tag)
@@ -95,7 +102,7 @@ def index():
                     db.session.commit()
                 except SQLAlchemyError as e:
                     print(e)
-                    return "Ops", 400
+                    return redirect(url_for('index')), 400
 
 
     # Fetch existing events for rendering the all ratings table
@@ -161,11 +168,31 @@ def empty():
 @login_required
 def delete_row(id):
 
-    if id:
-        pass
-        print(f"Send id :{id}")
-    return "Table emptied", 200
+    # Check if request is to delete
+    if 'DELETE' in request.form.values():
+        # Remove rating event association
+        try:
+            rating = Rating.query.filter_by(id=id)
+            events = rating.first().events
 
+            print(type(events[0]))
+            print(type(rating))
+            print(type(rating.first()))
+
+            for event in events:
+                Event.query.filter_by(id=event.id).delete()
+                db.session.commit()
+                pass
+            #rating.delete()
+            #db.session.commit()
+        except SQLAlchemyError as e:
+            print(e)
+            request.status = 400
+            flash("Something went wrong removing your entry")
+            return redirect(url_for('index')), 400
+    elif 'EDIT' in request.form.values():
+        pass
+    return redirect(url_for('index'))
 
 @app.route("/editRow", methods=["POST", "GET"])
 @login_required
