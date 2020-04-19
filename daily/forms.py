@@ -63,7 +63,7 @@ class EntryForm(FlaskForm):
                 render_kw={"placeholder": "Sleep"}, default = 1) 
 
     meditation=StringField('Meditation', validators=[DataRequired(),
-                length(max=5, 
+                length(max=15, 
                     message="Meditation contains too many digits")],
                 render_kw={"placeholder": "Meditation"}, default = 2)
 
@@ -72,12 +72,12 @@ class EntryForm(FlaskForm):
         ],
                 render_kw={"placeholder": "Rating"}, default = 3)
     lights=StringField('Lights', validators=[DataRequired(), 
-                length(max=5,
+                length(max=15,
                 message='Your lights input contains too many digits')],
                 render_kw={"placeholder": "Lights"}, default = 4)
     cw=StringField('CW', validators=[DataRequired(),
-                length(max=5, message= 'CW contains too many digits')],
-                render_kw={"placeholder": "Creative Work"}, default = 5)
+                length(max=15, message= 'CW contains too many digits')],
+                render_kw={"placeholder": "Creative Work"}, default = "11-07-22")
     submit=SubmitField('Submit For the day')
 
 

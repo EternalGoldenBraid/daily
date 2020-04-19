@@ -180,8 +180,9 @@ def delete_row(id):
             print(type(rating.first()))
 
             for event in events:
-                Event.query.filter_by(id=event.id).delete()
-                db.session.commit()
+                #Event.query.filter_by(id=event.id).delete()
+                Event.query.delete()
+                #db.session.commit()
                 pass
             #rating.delete()
             #db.session.commit()
