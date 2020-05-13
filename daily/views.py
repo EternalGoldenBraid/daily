@@ -46,6 +46,11 @@ def index():
                 screen=form_day.lights.data, 
                 rating_day=form_day.day_rating.data)
 
+        # TEST
+        #print(request.form.values())
+
+
+
         # Push a new rating row to database
         try:
             db.session.add(rating)
@@ -172,20 +177,15 @@ def delete_row(id):
     if 'DELETE' in request.form.values():
         # Remove rating event association
         try:
-            rating = Rating.query.filter_by(id=id)
-            events = rating.first().events
-
-            print(type(events[0]))
-            print(type(rating))
-            print(type(rating.first()))
+            rating = Rating.query.filter_by(id=id).first()
+            events = rating.events
 
             for event in events:
-                #Event.query.filter_by(id=event.id).delete()
-                Event.query.delete()
-                #db.session.commit()
-                pass
-            #rating.delete()
-            #db.session.commit()
+                db.session.delete(event)
+
+            db.session.commit()
+            db.session.delete(rating)
+            db.session.commit()
         except SQLAlchemyError as e:
             print(e)
             request.status = 400

@@ -77,10 +77,11 @@
   {{ form_day.date(class="form-control", type="date", size=12) }}
 
 	{{ form_day.sleep_rating.label }} 
-  {{ form_day.sleep_rating(size=3) }}
+  {{ form_day.sleep_rating(type=number, size=3) }}
 
-	{{ form_day.meditation.label }} 
-	{{ form_day.meditation(class="form-control", type="time", size=7) }} 
+	{{ form_day.meditation_hours.label }}
+	{{ form_day.meditation_hours(class="form-control", type="number", size=5) }}
+	{{ form_day.meditation_minutes(class="form-control", type="number", size=5, value=30) }}
 		</div>
 </div>
 
@@ -92,8 +93,9 @@
 	{{ form_day.lights.label }} 
 	{{ form_day.lights(class="form-control", type="time", size=5) }} 
 
-	{{ form_day.cw.label }}
-	{{ form_day.cw(class="form-control", type="time", size=12) }} 
+	{{ form_day.cw_hours.label }}
+	{{ form_day.cw_hours(class="form-control", type="number", size=5) }} 
+	{{ form_day.cw_minutes(class="form-control", type="number", size=5) }} 
 		</div>
 </div>
     </p>
@@ -110,9 +112,11 @@
 		</div>
 
 		<div class="col-auto">
-		{{ form_events.duration_event.label }}
-		{{ form_events.duration_event(class="form-control", 
-				type="time", size=20) }}
+		{{ form_events.duration_event_hours.label }}
+		{{ form_events.duration_event_hours(class="form-control", 
+				type="number", size=5) }}
+		{{ form_events.duration_event_minutes(class="form-control", 
+				type="nubmer", size=5) }}
 		</div>
 
   <p> <input id="eventsubmits" name="Submit" type="submit" 
