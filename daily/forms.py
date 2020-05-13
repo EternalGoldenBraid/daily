@@ -16,11 +16,11 @@ class DescriptionForm(FlaskForm):
     event=StringField('Event', 
                 validators=[length(max=200, 
                 message='Keep event under 200 characters')])
-    duration_event_hours=IntegerField('Duration', 
+    duration_event_hours=IntegerField( 
             render_kw={'placeholder': 'Hours'},
             validators=[NumberRange(min=0, max=24, 
                 message='Event duration exceeds 24 hours')])
-    duration_event_minutes=IntegerField('Duration', 
+    duration_event_minutes=IntegerField( 
             render_kw={'placeholder': 'Minutes'},
             validators=[NumberRange(min=0, max=59, 
                 message='Event duration minutes exceed 59 minutes')])

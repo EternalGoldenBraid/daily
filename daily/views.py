@@ -47,10 +47,14 @@ def index():
         #cw = request.form['cw_hours']*60+request.form['cw_minutes']
         #meditation = request.form['meditation_hours']*60 + \
         #             request.form['meditation_minutes']
-        cw = form_day.cw_hours.data*60+form_day.cw_minutes
-        meditation = (form_day.meditation_hours.data*60 +  
-                     form_day.meditation_minutes)
+        #cw = int(form_day.cw_hours.data)*60+int(form_day.cw_minutes)
+        #meditation = (int(form_day.meditation_hours.data)*60 +  
+        #             int(form_day.meditation_minutes))
+        cw = 3
+        meditation=3
 
+        for i in request.form.keys():
+            print(i)
 
         rating = Rating(user_id=current_user.id, date=form_day.date.data, 
                 rating_sleep=form_day.sleep_rating.data,
@@ -138,31 +142,11 @@ def events_confirm():
 
     # Collect user entered Events: duration pairs untill they signal done
     try:
-        data = request.form.to_dict()
         user_id = current_user.id
-        #event = data['event'].rstrip() 
         event = request.form.get('event').rstrip()
-
-        duration_hours, duration_minutes =  (
-            request.form.get('duration_hours'),
-            request.form.get('duration_minutes')
-                )
-
-        # Format duration to minutes
-        if duration_hours is not None and duration_minutes is not None:
-            duration = duration_hours*60 + duration_minutes
-        elif duration_hours is None and duration_minutes is not None:
-            duration = duration_minutes
-        elif duration_hours is not None and duration_minutes is None:
-            duration = duration_hours*60
-        else:
-            duration = "" 
-
-        # DEBUG: line 146 not registering hours and minutes
-        # dur_h and dur_m == none all the time
-        print(duration_hours)
-        print(duration_minutes)
-
+        duration = request.form.get('duration')
+        #event = data['event'].rstrip() 
+        #data = request.form.to_dict()
 
         buffers = Buffer.query.filter_by(user_id=user_id).all()
         events = {}
