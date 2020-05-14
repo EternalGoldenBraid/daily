@@ -33,6 +33,7 @@ Run the application with `flask run` and test using the provided URL.
 - [x] Deploy to cloud
 
 - [x] Implement a web UI 
+
       - [ ] With data visualization **In progress**
       
 - [ ] Add multi-user support
