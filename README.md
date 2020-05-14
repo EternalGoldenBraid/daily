@@ -40,8 +40,5 @@ Run the application with `flask run` and test using the provided URL.
 
 - [ ] Add an about page
 
-
-
-Add multi-user suport, and creation of their db models []
-
+- [ ] Configure Database backups
 
