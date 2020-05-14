@@ -34,7 +34,7 @@ Run the application with `flask run` and test using the provided URL.
 
 - [x] Implement a web UI 
 
-      - [ ] With data visualization **In progress**
+- [ ] Add data visualization
       
 - [ ] Add multi-user support
 
