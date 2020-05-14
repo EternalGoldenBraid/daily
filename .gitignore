@@ -13,3 +13,6 @@ MANIFEST
 .venv
 env/
 venv/
+
+# Database
+database.db
