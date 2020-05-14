@@ -33,60 +33,65 @@ class Rating(db.Model):
     __tablename__ = 'rating'
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, unique=True, nullable=False) # SHOULD DATE BE UNIQUE?  Ok for single user
+    # DATE SHOULD DATE BE UNIQUE?  Ok for single user
+    date = db.Column(db.DateTime, unique=True, nullable=False) 
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False) 
     cw = db.Column(db.Integer, nullable=False) 
     screen = db.Column(db.Integer, nullable=False) 
     rating_day = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                index=True, nullable=False)
 
-    # Establish Event objects on Rating called Rating.events.
-    # Establish .rating attribute on Event, which refer to the parent Rating object.
-    events = db.relationship('Event', backref='rating', lazy='dynamic')
 
-    def __repr__(self):
-        return '<User: {} Date: {}, Rating_date : {}, M : {}, CW: {}, Screens: {}>'.format(
-    self.user.username, self.date, self.rating_day, self.meditation,
-            self.cw, self.screen)
+# Many-to-many association table for Rating-Event
+rating_as = db.Table('rating_events',
+        db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
+        db.Column('event.id', db.Integer, db.ForeignKey('event.id'))
+        )
+
     
-# Define events table, by design will have multiple date entries due to multiple unique tags.
-# Can probably be improved
+# Define events table, by design will have 
+# multiple date entries due to multiple unique tags.
 # Potential Improvements:
-#   When new rating, check if a corresponding event already exists. If yes, use that, else create event.
-#       How to code duration, rounding by minute?
-
 class Event(db.Model):
-    __tablename__ = 'Event'
+    __tablename__ = 'event'
 
     id = db.Column(db.Integer, primary_key=True)
-    # Duration of the event, In future integrate with Toggl API, measured in minutes
     duration = db.Column(db.Integer) 
-    # Date of the event
-    rating_date = db.Column(db.DateTime, 
-            db.ForeignKey('rating.date'), index=True, nullable=False) 
-    # Description/tag of the event
-    # Add start/stop time pauses?
-    event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
-            index=True, nullable=False)     
+    rating_date = db.Column(db.DateTime, index=True, nullable=False) 
+    story = db.Column(db.String, nullable=False, index=True)
+
+    # Many-to-many for rating-events, defines an Rating.events attribute
+    rating_events = db.relationship('Rating', secondary=rating_as,
+                    backref='events', lazy='dynamic')
+                    #cascade="save-update, merge, delete")
     
-    def __repr__(self):
-        return '<Date of event is : {}, The even tag is: {}, which had the duration of {}>'.format(self.rating_date, self.event_tag, self.duration)
+    # Dropped after adding many to many associations table
+    #event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
+            #index=True, nullable=False)     
+
+
+
+# Many-to-many association table for Event-Tag
+event_as = db.Table('event_tags',
+        db.Column('event.id', db.Integer, db.ForeignKey('tag.id')),
+        db.Column('tag.id', db.Integer, db.ForeignKey('event.id'))
+        )
+
 
 # Define relationships with tags and days
 class Tag(db.Model):
     __tablename__ = 'tag'
 
     id = db.Column(db.Integer, primary_key=True)
-    tag_name = db.Column(db.String, index=True, unique=True, nullable=False)
+    tag_name = db.Column(db.String, index=True, unique=True,    
+                 nullable=False)
 
-    # Establish Tag object on Event called Event.tags.
-    # Establish .event attribute on Tag, which refers to the parent Event object.
-    tags = db.relationship('Event', backref='tag', lazy='dynamic')
-
-
-    def __repr__(self):
-        return '<Tag name is {}>'.format(self.tag_name)
+    # Many-to-many for events-tags, defines a Event.tags attribute
+    tags = db.relationship('Event', secondary=event_as, 
+            backref='tags', lazy='dynamic')
+            #cascade="save-update, merge, delete",
 
 
 # A buffer to hold event: duration pairs for a user during an entry
@@ -100,15 +105,13 @@ class Buffer(db.Model):
     duration = db.Column(db.Integer) 
 
 
-    #def __repr__(self):
-        #return {self.event_tag: self.duration}
 
-
-
-# user_loader is a callback(call after) function for reloading the user from session
+# user_loader is a callback(call after) function for reloading 
+# the user from session
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
 
 # SQLite3 foreign key constraints to be enforced on engine connect
 @event.listens_for(Engine, "connect")

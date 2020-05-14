@@ -31,15 +31,17 @@ $(function()  {
                 console.log("items: ", items)
                 let row_append = table.insertRow(-1);
                 for (let item of items) {
-                let text = document.createTextNode(item);
-                let cell = row_append.insertCell();
-                cell.appendChild(text)
-            
+                    let text = document.createTextNode(item);
+                    let cell = row_append.insertCell();
+                    cell.appendChild(text);
                 }
             }
             
             // If table exists, append new row.
-            console.log("table; response_obj status: ", globals.response_obj);
+
+            // TEST
+            console.log("table; response_obj status: ", 
+                globals.response_obj);
 
             if ((table.rows.length > 0) && 
                     (globals.response_obj !== undefined)) {
