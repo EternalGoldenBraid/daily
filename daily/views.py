@@ -1,19 +1,20 @@
 import os
+from copy import deepcopy
 from datetime import datetime
-
 from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
                             InvalidRequestError)
+from daily.models import (User, Rating, Tag, Event, Buffer, 
+                            rating_as, event_as)
 from daily import app, db # unnecessary
 from daily.forms import (LoginForm, EntryForm, 
                         EventsForm, DescriptionForm)
+from daily.helpers import hours_minutes
+from daily.errors import bad_request_error
 from flask import (render_template, redirect, flash, 
-        url_for, request, jsonify, session)
+        url_for, request, jsonify, session, abort)
 from flask_login import (current_user, login_user, 
                     logout_user, login_required)
-from daily.models import (User, Rating, Tag, Event, Buffer, 
-                            rating_as, event_as)
 from werkzeug.urls import url_parse
-from copy import deepcopy
 
 
 @app.route("/index", methods=["GET", "POST"])
@@ -43,15 +44,16 @@ def index():
 
         # TEST
         print(request.form.values())
-        # Convert units formatted in Hours:Minutes to Minutes
-        #cw = request.form['cw_hours']*60+request.form['cw_minutes']
-        #meditation = request.form['meditation_hours']*60 + \
-        #             request.form['meditation_minutes']
-        #cw = int(form_day.cw_hours.data)*60+int(form_day.cw_minutes)
-        #meditation = (int(form_day.meditation_hours.data)*60 +  
-        #             int(form_day.meditation_minutes))
-        cw = 3
-        meditation=3
+
+        # Format the requests hours:minutes representation to minutes
+        try:
+            cw = hours_minutes('cw')
+            meditation = hours_minutes('meditation')
+        except ValueError as e:
+            print(e)
+            return bad_request_error(
+                    'Make sure your Creative work hours and Meditation' 
+                    + 'inputs are integers')
 
         for i in request.form.keys():
             print(i)
@@ -143,10 +145,19 @@ def events_confirm():
     # Collect user entered Events: duration pairs untill they signal done
     try:
         user_id = current_user.id
+
+        # Collect and validate the event entry from event field
         event = request.form.get('event').rstrip()
-        duration = request.form.get('duration')
-        #event = data['event'].rstrip() 
-        #data = request.form.to_dict()
+        if event == '':
+            return 'Please add a note to the event field', 400
+
+        # Format the requests hours:minutes representation to minutes
+        try:
+            duration = hours_minutes('duration')
+        except ValueError as e:
+            print(e)
+            return jsonify(
+                    'Make sure your duration inputs are integers'), 400
 
         buffers = Buffer.query.filter_by(user_id=user_id).all()
         events = {}
@@ -158,7 +169,7 @@ def events_confirm():
         # Validate that entry does not already exist 
         if Buffer.query.filter_by(user_id = user_id, 
                 event_tag=event).all():
-            return jsonify("Event already exists"), 409
+            return jsonify("Event already exists"), 400
         
         # Add to database
         buffer_add = Buffer(user_id = user_id, event_tag= event,
@@ -167,11 +178,17 @@ def events_confirm():
         db.session.commit()
     
         # Render to user current events awaiting confirmation
-        events[event] = duration
+        # Pass empty string is no duration to render an empty row with
+        #   tableconfirmation.js
+        if duration != 0:
+            events[event] = duration
+        else:
+            events[event] = ''
         return jsonify(events)
 
     except SQLAlchemyError as e:
         print(e)
+        print("Unexpected error in events_confirm")
         return jsonify()
 
 

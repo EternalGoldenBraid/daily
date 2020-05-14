@@ -30,7 +30,7 @@
   </thead>
   <tbody>
 	  <!-- Render per date in ratings table, join event_date==rating_date -->
-					{% for rating in ratings %}
+		{% for rating in ratings %}
 			<tr>
 				<td data-label='Date'> {{	rating.date.strftime('%Y-%m-%d') }}</td>
 				<td data-label='Sleep'> {{	rating.rating_sleep }}</td>
@@ -38,10 +38,10 @@
 				<td id='description' data-label='Description'>
 					{% for event in rating.events %}
 						{% for tag in event.tags %}
-							{{ tag.tag_name.capitalize()  }}:	
+							{{ tag.tag_name.capitalize() }}:	
 						{% endfor %}
 					{{ event.story }} 
-						{% if event.duration|length != 0 %}
+					{% if event.duration|string()|length != 0 %}
 							: {{ event.duration }}
 						{% endif %}
 					{% endfor %}
@@ -77,7 +77,7 @@
   {{ form_day.date(class="form-control", type="date", size=12) }}
 
 	{{ form_day.sleep_rating.label }} 
-  {{ form_day.sleep_rating(type=number, size=3) }}
+  {{ form_day.sleep_rating(class="form-control", type="number", size=3) }}
 
 	{{ form_day.meditation_hours.label }}
 	{{ form_day.meditation_hours(class="form-control", type="number", size=5) }}
@@ -116,7 +116,7 @@
 		{{ form_events.duration_event_hours(class="form-control", 
 				type="number", size=5) }}
 		{{ form_events.duration_event_minutes(class="form-control", 
-				type="nubmer", size=5) }}
+				type="number", size=5) }}
 		</div>
 
   <p> <input id="eventsubmits" name="Submit" type="submit" 
@@ -164,6 +164,7 @@
         
 {% endblock %}
 
+<!--
  <table class="table table-sm">
   <thead class=.thead-dark>
     <tr>
@@ -173,7 +174,7 @@
   </thead>
   <tbody>
 	  <!-- Render per date in ratings table, join event_date==rating_date -->
-		{% for entry in event%}
+		{% for entry in event %}
 			<tr>
 				<td scope="data"> {{ event }}</td>
 				<td scope="data"> {{ duration }}</td>
@@ -181,3 +182,4 @@
 		{% endfor %}
   </tbody>
 </table>
+-->

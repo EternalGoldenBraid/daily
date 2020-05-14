@@ -1,9 +1,10 @@
+from flask import redirect, render_template, request, session
+from functools import wraps
+from daily.errors import bad_request_error
 import os
 import requests
 import urllib.parse
 
-from flask import redirect, render_template, request, session
-from functools import wraps
 
 
 
@@ -21,3 +22,24 @@ def login_required(f):
     return decorated_function
 
 
+def hours_minutes(field_name):
+    """
+    Format from Hours:Minutes to Minutes
+    """
+    try:
+        hours   = request.form[f'{field_name}_hours']
+        minutes = request.form[f'{field_name}_minutes']
+    except KeyError:
+        raise
+    
+    # Error  checking and validation for duration input as integers
+    if hours == '': hours = 0
+    if minutes == '': minutes = 0
+    try:
+        hours = int(hours)
+        minutes = int(minutes)
+        duration = hours*60 + minutes
+        return duration
+    except ValueError as e:
+        raise
+    
