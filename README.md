@@ -8,7 +8,7 @@ The project also coincides with my intereset in data and extracting patterns tha
 
 ## Project Status
 
-This project is currently in development. The initial database models are finished, entries that amount to 2-3 months will be inserted shortly alongside a web interface. Useful and insightul trend plots will follow.
+A minimal web interface is up and running [here](http://dailyapp.eu.pythonanywhere.com/) using pythonanywhere. The application currently only supports adding data for a single user (me).
 
 ## Installation and Setup Instructions
 
@@ -26,13 +26,20 @@ Run the application with `flask run` and test using the provided URL.
 
 ## Task List
 
-Read and setup from SQLAlchemy, Flask and it's plugins' Documentation [x]
+- [x] Read and setup from SQLAlchemy, Flask and it's plugins' Documentation
 
-Create database models [x]
+- [x] Create database models
 
-Implement a web UI with data visualisation []  **In progress**
+- [x] Deploy to cloud
 
-Deploy to cloud []
+- [x] Implement a web UI 
+      - [ ] With data visualization **In progress**
+      
+- [ ] Add multi-user support
+
+- [ ] Add an about page
+
+
 
 Add multi-user suport, and creation of their db models []
 
