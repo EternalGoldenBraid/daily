@@ -268,7 +268,46 @@ def login():
 
     return render_template('login.html', title='Log In', form=form)
 
-# url_parse() Parses a URL from a string into a URL tuple. If the URL is lacking a scheme it can be provided as second argument. Otherwise, it is ignored. Optionally fragments can be stripped from the URL by setting allow_fragments to False.
+# url_parse() Parses a URL from a string into a URL tuple. 
+#If the URL is lacking a scheme it can be provided as second argument. 
+#Otherwise, it is ignored. Optionally fragments can be stripped from 
+#the URL by setting allow_fragments to False.
+#The inverse of this function is url_unparse().
+
+@app.route("/register", methods=["GET", "POST"])
+def login():
+    """
+    Registers user 
+    """
+
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegisterForm()
+    if form.validate_on_submit():         
+    # Check if request was a POST request 
+        # Attempt to fetch users username from the database, 
+        # take the first result
+        user = User.query.filter_by(username=form.username.data).first()
+
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        
+        # Forward to the page the attempted to get at before authentication
+        if not next_page or url_parse(next_page) != '':
+            return redirect(url_for('index'))
+
+        return redirect(next_page)
+
+    return render_template('login.html', title='Log In', form=form)
+
+# url_parse() Parses a URL from a string into a URL tuple. 
+#If the URL is lacking a scheme it can be provided as second argument. 
+#Otherwise, it is ignored. Optionally fragments can be stripped from 
+#the URL by setting allow_fragments to False.
 #The inverse of this function is url_unparse().
 
 
