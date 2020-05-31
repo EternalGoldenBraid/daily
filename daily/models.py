@@ -60,7 +60,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer) 
     rating_date = db.Column(db.DateTime, index=True, nullable=False) 
-    story = db.Column(db.String(500), nullable=False, index=True)
+    story = db.Column(db.String(1000), nullable=False, index=True)
 
     # Many-to-many for rating-events, defines an Rating.events attribute
     rating_events = db.relationship('Rating', secondary=rating_as,
@@ -95,7 +95,7 @@ class Buffer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
-    event_tag = db.Column(db.String(16), 
+    event_tag = db.Column(db.String(1000), 
             index=True, nullable=False)     
     duration = db.Column(db.Integer) 
 
