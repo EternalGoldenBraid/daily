@@ -60,18 +60,13 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer) 
     rating_date = db.Column(db.DateTime, index=True, nullable=False) 
-    story = db.Column(db.String, nullable=False, index=True)
+    story = db.Column(db.String(500), nullable=False, index=True)
 
     # Many-to-many for rating-events, defines an Rating.events attribute
     rating_events = db.relationship('Rating', secondary=rating_as,
                     backref='events', lazy='dynamic')
                     #cascade="save-update, merge, delete")
     
-    # Dropped after adding many to many associations table
-    #event_tag = db.Column(db.String, db.ForeignKey('tag.tag_name'), 
-            #index=True, nullable=False)     
-
-
 
 # Many-to-many association table for Event-Tag
 event_as = db.Table('event_tags',
@@ -85,7 +80,7 @@ class Tag(db.Model):
     __tablename__ = 'tag'
 
     id = db.Column(db.Integer, primary_key=True)
-    tag_name = db.Column(db.String, index=True, unique=True,    
+    tag_name = db.Column(db.String(16), index=True, unique=True,    
                  nullable=False)
 
     # Many-to-many for events-tags, defines a Event.tags attribute
@@ -100,7 +95,7 @@ class Buffer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
-    event_tag = db.Column(db.String, 
+    event_tag = db.Column(db.String(16), 
             index=True, nullable=False)     
     duration = db.Column(db.Integer) 
 
