@@ -208,7 +208,7 @@ def empty():
 def delete_row(id):
 
     # Check if request is to delete
-    if 'DELETE' in request.form.values():
+    if 'DELETE_rating' in request.form.values():
         # Remove rating event association
         try:
             rating = Rating.query.filter_by(id=id).first()
@@ -225,7 +225,20 @@ def delete_row(id):
             request.status = 400
             flash("Something went wrong removing your entry")
             return redirect(url_for('index')), 400
-    elif 'EDIT' in request.form.values():
+    elif 'EDIT_rating' in request.form.values():
+        pass
+    elif 'DELETE_buffer' in request.form.values():
+        # Remove rating event association
+        try:
+            buffer = Buffer.query.filter_by(id=id).first()
+            db.session.delete(buffer)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            print(e)
+            request.status = 400
+            flash("Something went wrong removing your entry")
+            return redirect(url_for('index')), 400
+    elif 'EDIT_buffer' in request.form.values():
         pass
     return redirect(url_for('index'))
 

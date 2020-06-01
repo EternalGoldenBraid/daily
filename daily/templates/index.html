@@ -54,8 +54,8 @@
 				<form action="{{url_for('delete_row', id=rating.id) }}" 
 							method="post">
             <button type="hidden" name="_method" class="btn fa fa-trash" 
-										value="DELETE" id='deleteRowButton'>
-            <button type="submit" value="EDIT" class="btn fa fa-pencil"
+										value="DELETE_rating" id='deleteRowButton'>
+            <button type="submit" value="EDIT_rating" class="btn fa fa-pencil"
 						 			 id='editRowButton'>
           </form>
 				</td>
@@ -156,6 +156,14 @@
             <tr>
               <td scope=""> {{ entry }}</td>
               <td scope=""> {{ events[entry] }}</td>
+							<td scope="">
+										<form action="{{url_for('delete_row', id=entry.id) }}" 
+													method="post">
+	        					    <button type="hidden" name="_method" class="btn fa fa-trash" 
+																value="DELETE_buffer" id='deleteRowButton'>
+	        					    <button type="submit" value="EDIT_buffer" class="btn fa fa-pencil"
+												 			 id='editRowButton'>
+	        					</form>
             </tr>
         {% endfor %}
 	</table>
