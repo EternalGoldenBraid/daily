@@ -120,7 +120,7 @@
 				type="number", size=5) }}
 		</div>
 
-  <p> <input id="eventsubmits" name="Submit" type="submit" 
+  <p> <input id="eventsubmit" name="Submit" type="submit" 
                 value="Add Event"> </p>
   <p> <input id="eventclear" name="Clear" type="submit" 
                 value="Clear"> </p>
@@ -141,28 +141,28 @@
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/empty_confirmations.js') }}"></script>
 
-  <!-- Edit and remove -->
-	<!--
+  <!-- Edit and remove buffer -->
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/edit_remove.js') }}"></script>
-	-->
 
 	<!-- Table generated for tag:story confirmation-->
 <body>
 	<div class=table-responsive">
 <table id="confirmevents" class= "table table-sm">
-	{% if events|length != 0 %} <!-- TEST -->
+	{% if events|length != 0 %}
         {% for entry in events %}
             <tr>
               <td scope=""> {{ entry }}</td>
-              <td scope=""> {{ events[entry] }}</td>
+              <td scope=""> {{ events[entry][0] }}</td>
 							<td scope="">
-										<form action="{{url_for('delete_row', id=entry.id) }}" 
-													method="post">
-	        					    <button type="hidden" name="_method" class="btn fa fa-trash" 
-																value="DELETE_buffer" id='deleteRowButton'>
-	        					    <button type="submit" value="EDIT_buffer" class="btn fa fa-pencil"
-												 			 id='editRowButton'>
+                    <form id="buffer_buttons">
+	        					    <button type="submit" class="btn fa fa-trash" 
+                                name="DELETE_buffer" 
+                                data-idx={{ events[entry][1]|tojson }}
+                                id='DeleteBufferButton'>
+                          <button type="" 
+                                class="btn fa fa-pencil" 
+                                id='EditBufferButton'>
 	        					</form>
             </tr>
         {% endfor %}

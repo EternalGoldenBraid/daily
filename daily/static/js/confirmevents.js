@@ -1,5 +1,5 @@
   $(function() {
-    $('#eventsubmits').on('click', function(event) {
+    $('#eventsubmit').on('click', function(event) {
         event.preventDefault();
 	let ev = $('input[name="event"]').val();
 	let dr_h = $('input[name="duration_event_hours"]').val();
@@ -20,6 +20,7 @@
             console.log("globals.response: ", globals.response_obj)
         }).fail(function(error) {
             alert(error.responseText)
+            console.log("confirmevents failed to add event")
         });
     });
   });

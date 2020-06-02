@@ -34,16 +34,13 @@ def index():
     buffers = Buffer.query.filter_by(user_id=current_user.id).all()
     events_buffer = {}
 
-    # Stage current events awaiting confirmation into adictionary
-    # Access key being the str field of the event and value it's duration
+    # Stage current events awaiting confirmation in dictionary form
+    # Key being the str field of the event and value it's duration
     for buffer in buffers:
-        events_buffer[buffer.event_tag] = buffer.duration
+        events_buffer[buffer.event_tag] = [buffer.duration, buffer.id]
 
     # Add to database users new row for rating table
     if request.method == 'POST' and form_day.validate():
-
-        # TEST
-        print(request.form.values())
 
         # Format the requests hours:minutes representation to minutes
         try:
@@ -55,17 +52,11 @@ def index():
                     'Make sure your Creative work hours and Meditation' 
                     + 'inputs are integers')
 
-        for i in request.form.keys():
-            print(i)
-
         rating = Rating(user_id=current_user.id, date=form_day.date.data, 
                 rating_sleep=form_day.sleep_rating.data,
                 meditation=meditation, cw=cw, 
                 screen=form_day.lights.data, 
                 rating_day=form_day.day_rating.data)
-
-
-
 
         # Push a new rating row to database
         try:
@@ -73,6 +64,7 @@ def index():
             db.session.commit()
         except (SQLAlchemyError, InvalidRequestError) as e1:
             db.session.rollback()
+            return internal_error("New entry overlaps with old one")
             flash("New entry overlaps with old one")
             return redirect(url_for('index')), 409
 
@@ -83,7 +75,7 @@ def index():
         # Make sure buffer is non-empty
         if len(events_buffer.items()) > 0:
             for item in events_buffer.items():
-                description, duration = item[0], item[1]
+                description, duration = item[0], item[1][0]
                 parts = description.split(':')
                 story = parts.pop(-1)
 
@@ -140,7 +132,6 @@ def index():
 @app.route("/events_confirm", methods=["POST"])
 @login_required
 def events_confirm():
-
 
     # Collect user entered Events: duration pairs untill they signal done
     try:
@@ -202,10 +193,47 @@ def empty():
     return "Table emptied", 200
 
 
+@app.route("/delete_row_buffer", methods=["POST", "GET"])
+@login_required
+def delete_row_buffer():
+    """
+    Delete entries from Buffer table:
+     Buffer deletions done asynchronously with json
+     """
+
+    # Check if request is to delete
+    event = request.form.get('value')
+    dir(event)
+    return redirect(url_for('index'))
+
+    if event == 'BUFFER_delete':
+        # Remove event from buffer
+        try:
+            return redirect(url_for('index'))
+            id = none
+            buffer = Buffer.query.filter_by(id=id).first()
+            db.session.delete(buffer)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            print(e)
+            request.status = 400
+            flash("Something went wrong removing your entry")
+            return redirect(url_for('index')), 400
+    elif event == 'BUFFER_edit':
+        pass
+    return redirect(url_for('index'))
+
 
 @app.route("/delete_row/<id>", methods=["POST", "GET"])
 @login_required
 def delete_row(id):
+    """
+    Delete entries from Rating table and Buffer table:
+     Rating deletions happen synchronously,
+     Buffer deletions done asynchronously with json
+     """
+
+    print('tuomi')
 
     # Check if request is to delete
     if 'DELETE_rating' in request.form.values():
@@ -227,22 +255,27 @@ def delete_row(id):
             return redirect(url_for('index')), 400
     elif 'EDIT_rating' in request.form.values():
         pass
-    elif 'DELETE_buffer' in request.form.values():
-        # Remove rating event association
-        try:
-            buffer = Buffer.query.filter_by(id=id).first()
-            db.session.delete(buffer)
-            db.session.commit()
-        except SQLAlchemyError as e:
-            print(e)
-            request.status = 400
-            flash("Something went wrong removing your entry")
-            return redirect(url_for('index')), 400
-    elif 'EDIT_buffer' in request.form.values():
-        pass
+    elif request.get_json().is_json:
+        event = request.get_json().get('value').rstrip()
+        if event == 'BUFFER_delete':
+            # Remove event from buffer
+            try:
+                buffer = Buffer.query.filter_by(id=id).first()
+                db.session.delete(buffer)
+                db.session.commit()
+            except SQLAlchemyError as e:
+                print(e)
+                request.status = 400
+                flash("Something went wrong removing your entry")
+                return redirect(url_for('index')), 400
+        elif event == 'BUFFER_edit':
+            pass
     return redirect(url_for('index'))
 
 @app.route("/editRow", methods=["POST", "GET"])
+def edit_row():
+    return redirect(url_for('index')) 
+
 @login_required
 def edit_row():
 
@@ -341,4 +374,4 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))

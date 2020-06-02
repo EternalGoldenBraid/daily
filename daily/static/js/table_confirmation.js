@@ -5,8 +5,8 @@ $(function()  {
 
         let table = document.querySelector("#confirmevents");
         globals.table_confirm = table
-        console.log("Globals table :", globals)
 
+    // Render confirmation table headers
         function generateTableHead(table) {
             let thead = table.createTHead();
             let row = thead.insertRow();
@@ -18,17 +18,23 @@ $(function()  {
         	th.appendChild(text);
         	row.appendChild(th);
           }
+
+            // Room for button row
+                let th = document.createElement("th");
+        	let text = document.createTextNode("");
+        	th.appendChild(text);
+        	row.appendChild(th);
         }
         generateTableHead(table);
 
         globals.addRow = function addRow(table) {
 
-            console.log("Addrow ran")
+            console.log("Addrow ran") // TEST
             // Append row to table
             function appendRow(table) {
                 
                 let items = [globals.ev, globals.dr]
-                console.log("items: ", items)
+                console.log("items: ", items) // TEST
                 let row_append = table.insertRow(-1);
                 for (let item of items) {
                     let text = document.createTextNode(item);
@@ -38,10 +44,6 @@ $(function()  {
             }
             
             // If table exists, append new row.
-
-            // TEST
-            console.log("table; response_obj status: ", 
-                globals.response_obj);
 
             if ((table.rows.length > 0) && 
                     (globals.response_obj !== undefined)) {
