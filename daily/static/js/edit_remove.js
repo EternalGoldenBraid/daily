@@ -1,4 +1,5 @@
 
+/*
 $(function() {
     $('#deleteRowButton').on('click', function(event) {
         event.preventDefault();
@@ -49,6 +50,29 @@ $(function() {
             // Reload the table the row from table
         }).fail(function() {
 
+        });
+    });
+  });
+
+*/
+
+
+$(function() {
+    $('.delbtn').on('click', function(event) {
+        event.preventDefault();
+
+        // Finds the closest row <tr>
+        var $row = $(this).closest("tr");       
+        var button = document.getElementById('DeleteBufferButton');
+
+        $.post($SCRIPT_ROOT + '/delete_row_buffer', {
+            value: 'delete',
+            id : button.dataset.idx 
+        }).done(function(response) {
+            // Delete the tr
+            $row.remove();
+        }).fail(function(error) {
+            console.log('Failed to remove single entry')
         });
     });
   });

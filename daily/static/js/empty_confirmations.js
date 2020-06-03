@@ -5,10 +5,13 @@ $(function() {
         $.post($SCRIPT_ROOT + '/empty', {
 
         }).done(function(response) {
-            let table = document.querySelector("#confirmevents")
-            $("#confirmevents").hide();
+            //Jqueyr altenative
+            //tbl = $("#confirmevents");
+            
+            // find table 'confirmevents'
+            let tbl = document.getElementsByTagName('table')[1];
+            tbl.remove();
         }).fail(function() {
-            // Debug
             console.log("Failed to empty")
         });
     });

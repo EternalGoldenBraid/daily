@@ -1,7 +1,7 @@
   $(function() {
-    $('#eventsubmits').on('click', function(event) {
+    $('#eventsubmit').on('click', function(event) {
         event.preventDefault();
-	let ev = $('input[name="event"]').val();
+	let ev = $('#event_field').val();
 	let dr_h = $('input[name="duration_event_hours"]').val();
 	let dr_m = $('input[name="duration_event_minutes"]').val();
 
@@ -13,13 +13,23 @@
 	    duration_minutes: dr_m,
         }).done(function(response) {
             // Add table row
-            globals.response_obj = response
-            globals.dr = response[ev]
-            globals.addRow(globals.table_confirm)
+            //globals.response_obj = response
+            //globals.dr = response[ev]
+            //globals.addRow(globals.table_confirm)
+
+            /* 
+             * Reloading the page since the buttons for removing and editing
+             * entries in the confirmevents table are rendered with jinja
+             * on page load. In future either change the page load for 
+             * js only or server side only.
+             * All the pre comment code above renders a table asynch.
+             */
+            location.reload();
             // test
             console.log("globals.response: ", globals.response_obj)
         }).fail(function(error) {
-            alert(error.responseText)
+            console.log(error.responseText)
+            console.log("confirmevents failed to add event")
         });
     });
   });
