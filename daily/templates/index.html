@@ -73,57 +73,70 @@
 				action="" method="post" >
     {{ form_day.hidden_tag() }}
     <p>
-		<div class="col-auto">
+		<div class="form-row">
+			<div class="form-group col-auto">
 	{{ form_day.date.label }} 
   {{ form_day.date(class="form-control", type="date", size=12) }}
+			</div>
 
+			<div class="form-group col-auto">
 	{{ form_day.sleep_rating.label }} 
   {{ form_day.sleep_rating(class="form-control", type="number", size=3) }}
+			</div>
 
+			<div class="form-group col-auto">
+				<div class="form-row">
 	{{ form_day.meditation_hours.label }}
-	{{ form_day.meditation_hours(class="form-control", type="number", size=5) }}
-	{{ form_day.meditation_minutes(class="form-control", type="number", size=5, value=30) }}
-		</div>
-</div>
+				</div>
 
-<div id="newEntries" class= "align-items-center">
-		<div class="col-auto">
+				<div class="form-row">
+	{{ form_day.meditation_hours(class="form-control", 
+																	type="number", size=5) }}
+	{{ form_day.meditation_minutes(class="form-control", type="number", 
+																	size=5, value=30) }}
+				</div>
+			</div>
+
+			<div class="form-group col-auto">
 	{{ form_day.day_rating.label }}
-	{{ form_day.day_rating(size=6) }} 
+	{{ form_day.day_rating(class="form-control", size=6) }} 
+			</div>
 
+
+			<div class="form-group col-auto">
 	{{ form_day.lights.label }} 
 	{{ form_day.lights(class="form-control", type="time", size=5) }} 
+			</div>
 
+			<div class="form-group col-auto">
 	{{ form_day.cw_hours.label }}
 	{{ form_day.cw_hours(class="form-control", type="number", size=5) }} 
 	{{ form_day.cw_minutes(class="form-control", type="number", size=5) }} 
+			</div>
 		</div>
-</div>
     </p>
-		<p> {{ form_day.submit() }} </p>
+		<p class="text-center" > {{ form_day.submit() }} </p>
+	</div>
 </div>
 
 
-  <div class="row align-items-center">
-    {{ form_events.hidden_tag() }}
+  <div class="form-group">
+  		<div class="col-auto">
+  	  {{ form_events.hidden_tag() }}
 
-		<div class="col-auto">
-		{{ form_events.event.label }}
-		{{ form_events.event(size=20) }}
+			{{ form_events.event.label }}
+			{{ form_events.event(class="form-control 
+														form-control-lg") }}
+			</div>
+
+			{{ form_events.duration_event_hours.label }}
+			{{ form_events.duration_event_hours(type="number", size=5) }}
+			{{ form_events.duration_event_minutes(type="number", size=5) }}
+
+  			<input id="eventsubmit" name="Submit" type="submit" 
+								value="Add Event"> 
+  			<input id="eventclear" name="Clear" type="submit" value="Clear">
 		</div>
-
-		<div class="col-auto">
-		{{ form_events.duration_event_hours.label }}
-		{{ form_events.duration_event_hours(class="form-control", 
-				type="number", size=5) }}
-		{{ form_events.duration_event_minutes(class="form-control", 
-				type="number", size=5) }}
-		</div>
-
-  <p> <input id="eventsubmit" name="Submit" type="submit" 
-                value="Add Event"> </p>
-  <p> <input id="eventclear" name="Clear" type="submit" 
-                value="Clear"> </p>
   </div>
 
 	<!-- globals namespace -->
