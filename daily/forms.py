@@ -23,6 +23,9 @@ class DescriptionForm(FlaskForm):
     event=TextAreaField('Event', 
                 validators=[length(max=200, 
                 message='Keep event under 200 characters')])
+    #event=StringField('Event', 
+    #            validators=[length(max=200, 
+    #            message='Keep event under 200 characters')])
     duration_event_hours=IntegerField('Duration', 
             render_kw={'placeholder': 'Hours'},
             validators=[NumberRange(min=0, max=24, 

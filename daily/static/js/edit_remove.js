@@ -58,8 +58,7 @@ $(function() {
 
 
 $(function() {
-    //$('#DeleteBufferButton').on('click', function(event) {
-    $('#confirmevents').on('click', function(event) {
+    $('#DeleteBufferButton').on('click', function(event) {
         event.preventDefault();
 
         console.log("sending")

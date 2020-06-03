@@ -125,8 +125,9 @@
   	  {{ form_events.hidden_tag() }}
 
 			{{ form_events.event.label }}
-			{{ form_events.event(class="form-control 
-														form-control-lg") }}
+			{{ form_events.event(class="form-control form-control-lg",
+														id="event_field") }}
+
 			</div>
 
 			{{ form_events.duration_event_hours.label }}
@@ -135,9 +136,9 @@
 
   			<input id="eventsubmit" name="Submit" type="submit" 
 								value="Add Event"> 
-  			<input id="eventclear" name="Clear" type="submit" value="Clear">
 		</div>
   </div>
+  			<input id="eventclear" name="Clear" type="submit" value="Clear">
 
 	<!-- globals namespace -->
 	<script type=text/javascript >

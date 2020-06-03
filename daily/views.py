@@ -203,9 +203,6 @@ def delete_row_buffer():
 
     # Check if request is to delete
     event = request.form.get('value')
-    dir(event)
-    return redirect(url_for('index'))
-
     if event == 'BUFFER_delete':
         # Remove event from buffer
         try:
@@ -233,7 +230,6 @@ def delete_row(id):
      Buffer deletions done asynchronously with json
      """
 
-    print('tuomi')
 
     # Check if request is to delete
     if 'DELETE_rating' in request.form.values():
@@ -255,21 +251,6 @@ def delete_row(id):
             return redirect(url_for('index')), 400
     elif 'EDIT_rating' in request.form.values():
         pass
-    elif request.get_json().is_json:
-        event = request.get_json().get('value').rstrip()
-        if event == 'BUFFER_delete':
-            # Remove event from buffer
-            try:
-                buffer = Buffer.query.filter_by(id=id).first()
-                db.session.delete(buffer)
-                db.session.commit()
-            except SQLAlchemyError as e:
-                print(e)
-                request.status = 400
-                flash("Something went wrong removing your entry")
-                return redirect(url_for('index')), 400
-        elif event == 'BUFFER_edit':
-            pass
     return redirect(url_for('index'))
 
 @app.route("/editRow", methods=["POST", "GET"])
