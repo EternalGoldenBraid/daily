@@ -203,11 +203,10 @@ def delete_row_buffer():
 
     # Check if request is to delete
     event = request.form.get('value')
-    if event == 'BUFFER_delete':
+    if event == 'delete':
         # Remove event from buffer
         try:
-            return redirect(url_for('index'))
-            id = none
+            id = request.form.get('id')
             buffer = Buffer.query.filter_by(id=id).first()
             db.session.delete(buffer)
             db.session.commit()
@@ -216,7 +215,7 @@ def delete_row_buffer():
             request.status = 400
             flash("Something went wrong removing your entry")
             return redirect(url_for('index')), 400
-    elif event == 'BUFFER_edit':
+    elif event == 'edit':
         pass
     return redirect(url_for('index'))
 
@@ -225,11 +224,8 @@ def delete_row_buffer():
 @login_required
 def delete_row(id):
     """
-    Delete entries from Rating table and Buffer table:
-     Rating deletions happen synchronously,
-     Buffer deletions done asynchronously with json
+    Delete entries from Rating table
      """
-
 
     # Check if request is to delete
     if 'DELETE_rating' in request.form.values():
