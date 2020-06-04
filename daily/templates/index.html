@@ -58,7 +58,7 @@
 							{{ tag.tag_name.capitalize() }}:	
 						{% endfor %}
 					{{ event.story }} 
-					{% if event.duration|string()|length != 0 %}
+					{% if event.duration != 0 %}
 							: {{ event.duration }}
 						{% endif %}
 						<br>
