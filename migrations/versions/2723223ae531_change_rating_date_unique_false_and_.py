@@ -1,7 +1,7 @@
 """Change rating date unique=False, and change couple str lengths
 
 Revision ID: 2723223ae531
-Revises: b8179643f212
+Revises: 5b64ace08c6e
 Create Date: 2020-06-04 09:38:31.123645
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '2723223ae531'
-down_revision = 'b8179643f212'
+down_revision = '5b64ace08c6e'
 branch_labels = None
 depends_on = None
 
@@ -30,7 +30,7 @@ def upgrade():
                existing_type=sa.VARCHAR(length=16),
                type_=sa.String(length=200),
                existing_nullable=False)
-    op.drop_constraint('uq_rating_date', 'rating')
+    op.drop_constraint('uq_rating_date', 'rating', type='unique')
     # ### end Alembic commands ###
 
 
