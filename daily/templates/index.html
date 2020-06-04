@@ -59,8 +59,14 @@
 						{% endfor %}
 					{{ event.story }} 
 					{% if event.duration != 0 %}
-							: {{ event.duration // 60 }}h:{{ event.duration%60 }}m
+						{% if event.duration % 60 == 0 %}
+							: {{ event.duration // 60 }}h
+						{% elif event.duration // 60 == 0 %}
+							: {{ event.duration%60 }}m
+						{% else %}
+							: {{ event.duration%60 }}h: {{ event.duration // 60 }}m
 						{% endif %}
+					{% endif %}
 						<br>
 					{% endfor %}
 				</td>
