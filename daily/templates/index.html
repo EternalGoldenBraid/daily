@@ -64,7 +64,7 @@
 						{% elif event.duration // 60 == 0 %}
 							: {{ event.duration%60 }}m
 						{% else %}
-							: {{ event.duration%60 }}h: {{ event.duration // 60 }}m
+							: {{ event.duration // 60 }}h: {{ event.duration % 60 }}m
 						{% endif %}
 					{% endif %}
 						<br>
