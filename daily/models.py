@@ -34,7 +34,7 @@ class Rating(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     # DATE SHOULD DATE BE UNIQUE?  Ok for single user
-    date = db.Column(db.DateTime, unique=True, nullable=False) 
+    date = db.Column(db.DateTime, unique=False, nullable=False) 
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False) 
     cw = db.Column(db.Integer, nullable=False) 
@@ -80,7 +80,7 @@ class Tag(db.Model):
     __tablename__ = 'tag'
 
     id = db.Column(db.Integer, primary_key=True)
-    tag_name = db.Column(db.String(16), index=True, unique=True,    
+    tag_name = db.Column(db.String(200), index=True, unique=True,    
                  nullable=False)
 
     # Many-to-many for events-tags, defines a Event.tags attribute

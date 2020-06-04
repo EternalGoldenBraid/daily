@@ -38,7 +38,7 @@ def upgrade():
     op.create_index(op.f('ix_event_story'), 'event', ['story'], unique=False)
     op.create_table('tag',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('tag_name', sa.String(length=16), nullable=False),
+    sa.Column('tag_name', sa.String(length=200), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_tag_tag_name'), 'tag', ['tag_name'], unique=True)
