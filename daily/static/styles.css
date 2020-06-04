@@ -47,7 +47,6 @@ input[type=text]
 }
 
 table {
-    /*border: 1px solid #ccc; */
     width: 100%;
     margin:0;
     padding:0;
@@ -91,23 +90,22 @@ table {
 	margin-bottom: 20px;
 	display: inline flow;
 	border-bottom: 2px solid #ddd;
-	box-shadow: 2px 2px 1px #dadada;
-
+	border-bottom: 7px dotted gray;
+	/*	
+  	box-shadow: 2px 2px 1px #dadada;
+	*/
     }
 
    #card table td .upper {
       display: run-in;
       text-align: left;
       font-size: 16px;
-      /* cellspacing */
-      border-collapse: collapse;
-      border-bottom: 0px solid #ddd;
     }
 
    #card table td .lower {
       display: block;
       text-align: center;
-      font-size: 13px;
+      font-size: 19px;
     }
 
     
@@ -116,7 +114,6 @@ table {
       border-bottom: 0;
     }
 
-    /*
    #card table td::before {
       content: attr(data-label);
       float: left;
@@ -125,7 +122,6 @@ table {
       letter-spacing: 1px;
     }
 
-    */
    #card .space::before {
       content: attr(data-label)  '  ';
       float: left;
@@ -165,9 +161,9 @@ table {
 
    /* Style buttons */
 .btn {
-  background-color: DodgerBlue; /* Blue background */
+  background-color: gray; /* Blue background */
   border: none; /* Remove borders */
-  color: white; /* White text */
+  color: pink; /* White text */
   padding: 6px 8px; /* Some padding */
   font-size: 16px; /* Set a font size */
   cursor: pointer; /* Mouse pointer on hover */

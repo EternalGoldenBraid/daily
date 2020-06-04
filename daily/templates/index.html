@@ -71,12 +71,14 @@
   </tbody>
 </table>
 </div>
+<div>
     {% if prev_url %}
-    <a href="{{ prev_url }}">Newer posts</a>
+		<a class="btn fa fa-hand-o-left" href="{{ prev_url }}"></a>
     {% endif %}
     {% if next_url %}
-    <a href="{{ next_url }}">Older posts</a>
+		<a class="btn fa fa-hand-o-right" href="{{ next_url }}"></a>
     {% endif %}
+</div>
 
 <div id="newEntries" class="form-container">
 <h2> How was your day? </h2>
