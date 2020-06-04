@@ -9,7 +9,7 @@ from daily import app, db # unnecessary
 from daily.forms import (LoginForm, EntryForm, 
                         EventsForm, DescriptionForm)
 from daily.helpers import hours_minutes
-from daily.errors import bad_request_error
+from daily.errors import bad_request_error, internal_error
 from flask import (render_template, redirect, flash, 
         url_for, request, jsonify, session, abort)
 from flask_login import (current_user, login_user, 
@@ -26,9 +26,16 @@ def index():
     """
 
     # Fetch existing rows from rating table for rendering to user
-    ratings = Rating.query.filter_by(user_id=current_user.id)
-    #rating_event= db.session.query(Rating, Event).filter(
-                #Rating.date==Event.rating_date).all()
+    page = request.args.get('page', 1, type=int)
+    ratings = Rating.query.filter_by(user_id=current_user.id).order_by(
+            Rating.date.desc()).paginate(
+            page, app.config['DAYS_PER_PAGE'], False)
+
+    next_url = url_for('index', page=ratings.next_num) \
+        if ratings.has_next else None
+    prev_url = url_for('index', page=ratings.prev_num) \
+        if ratings.has_prev else None
+
     form_day = EntryForm()
     form_events = DescriptionForm()
     buffers = Buffer.query.filter_by(user_id=current_user.id).all()
@@ -65,7 +72,6 @@ def index():
         except (SQLAlchemyError, InvalidRequestError) as e1:
             db.session.rollback()
             return internal_error("New entry overlaps with old one")
-            flash("New entry overlaps with old one")
             return redirect(url_for('index')), 409
 
         # Read tags from user input
@@ -118,22 +124,19 @@ def index():
                     return redirect(url_for('index')), 400
 
 
-    # Fetch existing events for rendering the all ratings table
-    #events_all = Rating.query.filter_by(
-            #rating.user_id==current_user.id).all()
 
 
     #SQLinjection safe?
     return  render_template("index.html", 
-            ratings=ratings, form_day=form_day,
-            form_events=form_events, events=events_buffer)
+            ratings=ratings.items, form_day=form_day,
+            form_events=form_events, events=events_buffer,
+            next_url=next_url, prev_url=prev_url)
     
 
 @app.route("/events_confirm", methods=["POST"])
 @login_required
 def events_confirm():
 
-    # Collect user entered Events: duration pairs untill they signal done
     try:
         user_id = current_user.id
 

@@ -20,10 +20,10 @@
       <th scope="col">Date</th>
       <th scope="col">Sleep</th>
       <th scope="col">Meditation</th>
-      <th scope="col">Description</th>
       <th scope="col">Screens</th>
       <th scope="col">Rating</th>
       <th scope="col">Creative Work</th>
+      <th scope="col">Description</th>
 			<th></th>
 			<th></th>
     </tr>
@@ -31,10 +31,13 @@
   <tbody>
 	  <!-- Render per date in ratings table, join event_date==rating_date -->
 		{% for rating in ratings %}
-			<tr>
+			<tr >
 				<td data-label='Date'> {{	rating.date.strftime('%Y-%m-%d') }}</td>
 				<td data-label='Sleep'> {{	rating.rating_sleep }}</td>
 				<td data-label='Meditation'> {{	rating.meditation }}</td>
+				<td data-label='Screens'> {{ rating.screen }}</td>
+				<td data-label'Rating'> {{ rating.rating_day }}</td>
+				<td data-label='Creative Work'> {{ rating.cw }}</td>
 				<td id='description' data-label='Description'>
 					{% for event in rating.events %}
 						{% for tag in event.tags %}
@@ -47,10 +50,8 @@
 						<br>
 					{% endfor %}
 				</td>
-				<td data-label='Screens'> {{ rating.screen }}</td>
-				<td data-label'Rating'> {{ rating.rating_day }}</td>
-				<td data-label='Creative Work'> {{ rating.cw }}</td>
-				<td>
+				</tr>
+				<td rowspan=2>
 				<form action="{{url_for('delete_row', id=rating.id) }}" 
 							method="post">
             <button type="hidden" name="_method" class="btn fa fa-trash" 
@@ -64,6 +65,12 @@
   </tbody>
 </table>
 </div>
+    {% if prev_url %}
+    <a href="{{ prev_url }}">Newer posts</a>
+    {% endif %}
+    {% if next_url %}
+    <a href="{{ next_url }}">Older posts</a>
+    {% endif %}
 
 <div id="newEntries" class="form-container">
 <h2> How was your day? </h2>
