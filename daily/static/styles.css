@@ -88,33 +88,63 @@ table {
     }
 
    #card table tr {
-      margin-bottom: 20px;
-      display: block;
-      border-bottom: 2px solid #ddd;
-	 box-shadow: 2px 2px 1px #dadada;
+	margin-bottom: 20px;
+	display: inline flow;
+	border-bottom: 2px solid #ddd;
+	box-shadow: 2px 2px 1px #dadada;
 
     }
 
-   #card table td {
+   #card table td .upper {
+      display: run-in;
+      text-align: left;
+      font-size: 16px;
+      /* cellspacing */
+      border-collapse: collapse;
+      border-bottom: 0px solid #ddd;
+    }
+
+   #card table td .lower {
       display: block;
       text-align: center;
       font-size: 13px;
     }
 
+    
+    /
    #card table td:last-child {
       border-bottom: 0;
     }
 
+    /*
    #card table td::before {
       content: attr(data-label);
       float: left;
       text-transform: uppercase;
       font-weight: bold;
+      letter-spacing: 1px;
     }
-    	#card	tbody{
-			line-height:!important;
-		}
 
+    */
+   #card .space::before {
+      content: attr(data-label)  '  ';
+      float: left;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 1px;
+      white-space: pre;
+    }
+
+
+
+    /*
+     * what are these last 3?
+    #card tbody{
+	line-height:!important;
+	}
+	*/
+
+    /*
    #description td::before {
 	   
       content: attr(id);
@@ -122,10 +152,14 @@ table {
       text-transform: uppercase;
       font-weight: bold;
     }
-    	#description tbody{
-			line-height:auto!important;
-		}
-	}
+
+    #description {
+	line-height:auto!important;
+    }
+	*/ 
+
+
+}
 
   
 

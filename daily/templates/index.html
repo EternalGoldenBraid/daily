@@ -15,14 +15,14 @@
 
 <div id='card'>
  <table id='events_all' class="table w-auto">
-  <thead class=thead-light>
+  <thead class='upper'>
     <tr>
-      <th scope="col">Date</th>
-      <th scope="col">Sleep</th>
-      <th scope="col">Meditation</th>
-      <th scope="col">Screens</th>
-      <th scope="col">Rating</th>
-      <th scope="col">Creative Work</th>
+      <th scope="col"> Date: 				</th>
+      <th scope="col"> Sleep 				</th>
+      <th scope="col"> Meditation 	</th>
+      <th scope="col"> Screens 			</th>
+			<th scope="col"> Rating 			</th> 
+      <th scope="col"> Creative Work</th>
 			<!-- <th scope="col">Description</th> -->
 			<th></th>
 			<th></th>
@@ -31,13 +31,27 @@
   <tbody>
 	  <!-- Render per date in ratings table, join event_date==rating_date -->
 		{% for rating in ratings %}
+		<div class='upper'>
 			<tr >
-				<td data-label='Date'> {{	rating.date.strftime('%Y-%m-%d') }}</td>
-				<td data-label='Sleep'> {{	rating.rating_sleep }}</td>
-				<td data-label='Meditation'> {{	rating.meditation }}</td>
-				<td data-label='Screens'> {{ rating.screen }}</td>
-				<td data-label'Rating'> {{ rating.rating_day }}</td>
-				<td data-label='Creative Work'> {{ rating.cw }}</td>
+				<td class= 'space' data-label='Date'   			 > {{	rating.date.strftime('%Y-%m-%d') }}</td>
+				<td class= 'space' data-label='Sleep' 				 > {{	rating.rating_sleep }}</td>
+				<td class= 'space' data-label='Meditation' 	 > {{	rating.meditation }}</td>
+				<td class= 'space' data-label='Screens'    	 > {{ rating.screen }}</td>
+				<td class= 'space' data-label='Rating'    		 > {{ rating.rating_day }}</td>
+				<td class= 'space' data-label='Creative Work '> {{ rating.cw }}</td>
+
+				<td class = events_buttons >
+				<form action="{{url_for('delete_row', id=rating.id) }}" 
+							method="post">
+            <button type="hidden" name="_method" class="btn fa fa-trash" 
+										value="DELETE_rating" id='deleteRowButton'>
+            <button type="submit" value="EDIT_rating" class="btn fa fa-pencil"
+						 			 id='editRowButton'>
+				</td>
+			</tr>
+		</div>
+		<div class='lower'>
+			<tr>
 				<td id='description' data-label='Description'>
 					{% for event in rating.events %}
 						{% for tag in event.tags %}
@@ -50,17 +64,9 @@
 						<br>
 					{% endfor %}
 				</td>
-				</tr>
-				<td rowspan=2>
-				<form action="{{url_for('delete_row', id=rating.id) }}" 
-							method="post">
-            <button type="hidden" name="_method" class="btn fa fa-trash" 
-										value="DELETE_rating" id='deleteRowButton'>
-            <button type="submit" value="EDIT_rating" class="btn fa fa-pencil"
-						 			 id='editRowButton'>
+			</tr>
+		</div>
           </form>
-				</td>
-    	</tr>             
 		{% endfor %}
   </tbody>
 </table>
