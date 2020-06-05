@@ -30,7 +30,7 @@ def upgrade():
                existing_type=sa.VARCHAR(length=16),
                type_=sa.String(length=200),
                existing_nullable=False)
-    op.drop_constraint('uq_rating_date', 'rating', type='unique')
+    op.drop_constraint('uq_rating_date', 'rating', type_='unique')
     # ### end Alembic commands ###
 
 

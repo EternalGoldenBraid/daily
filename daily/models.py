@@ -1,6 +1,6 @@
 from daily import db, login, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import event
+from sqlalchemy import event, schema
 from sqlalchemy.engine import Engine
 from sqlite3 import Connection as SQLite3connection
 
@@ -33,7 +33,6 @@ class Rating(db.Model):
     __tablename__ = 'rating'
 
     id = db.Column(db.Integer, primary_key=True)
-    # DATE SHOULD DATE BE UNIQUE?  Ok for single user
     date = db.Column(db.DateTime, unique=False, nullable=False) 
     rating_sleep = db.Column(db.Integer, index=True, nullable=False)
     meditation = db.Column(db.Integer, nullable=False) 
@@ -43,6 +42,9 @@ class Rating(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                 index=True, nullable=False)
 
+    __table_args__ = (
+       db.UniqueConstraint('date', 'user_id', name='date_userid'),
+    )
 
 # Many-to-many association table for Rating-Event
 rating_as = db.Table('rating_events',
