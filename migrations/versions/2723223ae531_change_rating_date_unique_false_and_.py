@@ -30,7 +30,7 @@ def upgrade():
                existing_type=sa.VARCHAR(length=16),
                type_=sa.String(length=200),
                existing_nullable=False)
-    op.drop_constraint('uq_rating_date', 'rating', type_='unique')
+    op.drop_constraint('date', 'rating', type_='unique')
     # ### end Alembic commands ###
 
 
@@ -48,5 +48,5 @@ def downgrade():
                existing_type=sa.String(length=1000),
                type_=sa.VARCHAR(length=16),
                existing_nullable=False)
-    op.create_unique_constraint("uq_rating_date", "rating", ["date"])
+    op.create_unique_constraint("date", "rating", ["date"])
     # ### end Alembic commands ###
