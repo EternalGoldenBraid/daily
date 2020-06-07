@@ -59,10 +59,18 @@ def index():
                     'Make sure your Creative work hours and Meditation' 
                     + 'inputs are integers')
 
+        try:
+            scr = form_day.lights.data.replace(':','')
+            scr = int(scr)
+        except TypeError:
+            print("Error line 71" )
+            return bad_request_error(
+                "Please enter numbers on screens field")
+
         rating = Rating(user_id=current_user.id, date=form_day.date.data, 
                 rating_sleep=form_day.sleep_rating.data,
                 meditation=meditation, cw=cw, 
-                screen=form_day.lights.data, 
+                screen=scr, 
                 rating_day=form_day.day_rating.data)
 
         # Push a new rating row to database
