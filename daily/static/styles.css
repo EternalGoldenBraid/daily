@@ -26,9 +26,6 @@ main
 {
     /* scroll horizontally as needed */
     overflow-x: auto;
-
-    /* center contents */
-    text-align: center;
 }
 
 main img
@@ -61,12 +58,6 @@ table {
     opacity: 85%
 
   }
-
-  /*table th, table td {
-    padding: 10px;
-    text-align: center;
-
-  }*/
 
   table th {
     text-transform: uppercase;
