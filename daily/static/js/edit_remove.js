@@ -58,7 +58,7 @@ $(function() {
 
 
 $(function() {
-    $('.delbtn').on('click', function(event) {
+    $('.delrating').on('click', function(event) {
         event.preventDefault();
 
         // Finds the closest row <tr>

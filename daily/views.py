@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
                             InvalidRequestError)
 from daily.models import (User, Rating, Tag, Event, Buffer, 
-                            rating_as, event_as)
+                            rating_as, event_as, BufferEdit)
 from daily import app, db # unnecessary
 from daily.forms import (LoginForm, EntryForm, 
                         EventsForm, DescriptionForm)
@@ -230,21 +230,20 @@ def delete_row_buffer():
         pass
     return redirect(url_for('index'))
 
-
-@app.route("/delete_row/<id>", methods=["POST", "GET"])
+@app.route("/delete_edit_row/<id>", methods=["POST", "GET"])
 @login_required
-def delete_row(id):
+def delete_edit_row(id):
     """
     Delete entries from Rating table
      """
+
+    rating = Rating.query.filter_by(id=id).first()
+    events = rating.events
 
     # Check if request is to delete
     if 'DELETE_rating' in request.form.values():
         # Remove rating event association
         try:
-            rating = Rating.query.filter_by(id=id).first()
-            events = rating.events
-
             for event in events:
                 db.session.delete(event)
 
@@ -257,12 +256,27 @@ def delete_row(id):
             flash("Something went wrong removing your entry")
             return redirect(url_for('index')), 400
     elif 'EDIT_rating' in request.form.values():
-        pass
+        # Render edit page for making changes
+        try:
+            for event in events:
+                buffer_edit = BufferEdit(user_id=current_user.id,
+                        event_tag=event, duration=event.duration)
+                db.session.add(buffer_edit)
+                db.session.commit()
+                return render_template("edit.html", 
+                        ratings=rating, form_day=form_day,
+                        form_events=form_events, events=events)
+        except SQLAlchemyError:
+            return internal_error("Failed to process your edit request")
+
     return redirect(url_for('index'))
 
-@app.route("/editRow", methods=["POST", "GET"])
+@app.route("/editrow", methods=["POST", "GET"])
 def edit_row():
-    return redirect(url_for('index')) 
+    return render_template("edit.html", 
+            ratings=ratings.items, form_day=form_day,
+            form_events=form_events, events=events_buffer,
+            next_url=next_url, prev_url=prev_url)
 
 @login_required
 def edit_row():
@@ -317,44 +331,38 @@ def register():
     # Awaiting rating table modification for multi user support
     return url_for('register')
 
-#    if form.password != form.password_confimation:
-#        flash("Passwords don't match")
-#        return redirect(url_for('register'))
-#
-#    if current_user.is_authenticated:
-#        return redirect(url_for('index'))
-#    form = RegisterForm()
-#    if form.validate_on_submit():         
-#    # Check if request was a POST request 
-#
-#        # Check if user already exists
-#        username = form.username.data
-#        user = User.query.filter_by(username=username).first()
-#
-#        if user is not None:
-#            flash('Username already exists')
-#            return redirect(url_for('register'))
-#
-#        # Create user
-#        u = User(username=username, email=#TODO)
-#        u.set_password(form.password.data)
-#
-#        login_user(user, remember=form.remember_me.data)
-#        next_page = request.args.get('next')
-#        
-#        # Forward to the page the attempted to get at before authentication
-#        if not next_page or url_parse(next_page) != '':
-#            return redirect(url_for('index'))
-#
-#        return redirect(next_page)
-#
-#    return render_template('login.html', title='Log In', form=form)
-
-# url_parse() Parses a URL from a string into a URL tuple. 
-#If the URL is lacking a scheme it can be provided as second argument. 
-#Otherwise, it is ignored. Optionally fragments can be stripped from 
-#the URL by setting allow_fragments to False.
-#The inverse of this function is url_unparse().
+    #    if form.password != form.password_confimation:
+    #        flash("Passwords don't match")
+    #        return redirect(url_for('register'))
+    #
+    #    if current_user.is_authenticated:
+    #        return redirect(url_for('index'))
+    #    form = RegisterForm()
+    #    if form.validate_on_submit():         
+    #    # Check if request was a POST request 
+    #
+    #        # Check if user already exists
+    #        username = form.username.data
+    #        user = User.query.filter_by(username=username).first()
+    #
+    #        if user is not None:
+    #            flash('Username already exists')
+    #            return redirect(url_for('register'))
+    #
+    #        # Create user
+    #        u = User(username=username, email=#TODO)
+    #        u.set_password(form.password.data)
+    #
+    #        login_user(user, remember=form.remember_me.data)
+    #        next_page = request.args.get('next')
+    #        
+    #        # Forward to the page the attempted to get at before authentication
+    #        if not next_page or url_parse(next_page) != '':
+    #            return redirect(url_for('index'))
+    #
+    #        return redirect(next_page)
+    #
+    #    return render_template('login.html', title='Log In', form=form)
 
 
 # Route for loggine the user out

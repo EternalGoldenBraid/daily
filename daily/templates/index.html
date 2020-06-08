@@ -40,12 +40,12 @@
 				<td class= 'space' data-label='Creative Work '> {{ rating.cw }}</td>
 
 				<td class = events_buttons >
-				<form action="{{url_for('delete_row', id=rating.id) }}" 
+				<form action="{{url_for('delete_edit_row', id=rating.id) }}" 
 							method="post">
             <button type="hidden" name="_method" class="btn fa fa-trash" 
 										value="DELETE_rating" id='deleteRowButton'>
-            <button type="submit" value="EDIT_rating" class="btn fa fa-pencil"
-						 			 id='editRowButton'>
+            <button type="hidden" name="_method" class="btn fa fa-pencil"
+                    value="EDIT_rating" id='editRowButton'>
 				</td>
 			</tr>
 		</div>
@@ -256,13 +256,14 @@
 							<td scope="">
                     <form id="buffer_buttons">
 	        					    <button type="submit" 
-																class="delbtn btn fa fa-trash" 
+																class="delrating btn fa fa-trash" 
                                 name="delete" 
                                 data-idx={{ events[entry][1]|tojson }}
                                 id='DeleteBufferButton'>
                           <button type="submit" 
-                                class="btn fa fa-pencil" 
+                                class="editrating btn fa fa-pencil" 
 																name="edit"
+                                data-idx={{ events[entry][1]|tojson }}
                                 id='EditBufferButton'>
 	        					</form>
             </tr>
