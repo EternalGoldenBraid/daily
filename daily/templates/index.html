@@ -147,7 +147,7 @@
 
 			{{ form_events.event.label }}
 			{{ form_events.event(class="form-control form-control-lg",
-														id="event_field") }}
+														id="event_field", rows='5') }}
 
 			</div>
 
@@ -166,6 +166,7 @@
 		var globals = {};
 	</script>
 
+
   <!-- Events confirm -->
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/confirmevents.js') }}"></script>
@@ -179,6 +180,68 @@
   <!-- Edit and remove buffer -->
 	<script type=text/javascript src="{{
 		url_for('static', filename='js/edit_remove.js') }}"></script>
+
+	<!-- Keep form data for the session duration -->
+	<script type=text/javascript>
+    // Run on page load
+    window.onload = function() {
+
+				// TESTING
+				console.log('date up: ', date);
+
+        // If sessionStorage is storing default values (ex. date), 
+				// exit the function and do not restore data
+        if (sessionStorage.getItem('date') == "date") {
+            return;
+        }
+
+        // If values are not blank, restore them to the fields
+
+
+        var date= sessionStorage.getItem('date');
+        if (date!== null) $('[name=date]').val(date);
+
+        var sleep_rating= sessionStorage.getItem('sleep_rating');
+        if (sleep_rating!== null) $('[name=sleep_rating]').val(sleep_rating);
+
+        var meditation_hours= sessionStorage.getItem('meditation_hours');
+        if (meditation_hours!== null) $('[name=meditation_hours]').val(
+																							meditation_hours);
+
+        var meditation_minutes=sessionStorage.getItem('meditation_minutes');
+        if (meditation_minutes!== null) $('[name=meditation_minutes]').val(
+																							meditation_minutes);
+
+        var day_rating= sessionStorage.getItem('day_rating');
+        if (day_rating!== null) $('[name=day_rating]').val(day_rating);
+
+
+        var lights= sessionStorage.getItem('lights');
+        if (lights!== null) $('[name=lights]').val(lights);
+
+
+        var cw_hours= sessionStorage.getItem('cw_hours');
+        if (cw_hours!== null) $('[name=cw_hours]').val(cw_hours);
+
+        var cw_minutes= sessionStorage.getItem('cw_minutes');
+        if (cw_minutes!== null) $('[name=cw_minutes]').val(cw_minutes);
+
+				// TESTING
+				console.log('date down: ', date);
+    }
+
+    // Before refreshing the page, save the form data to sessionStorage
+    window.onbeforeunload = function() {
+        sessionStorage.setItem("date", $('[name=date]').val());
+        sessionStorage.setItem("sleep_rating", $('[name=sleep_rating]').val());
+        sessionStorage.setItem("meditation_hours", $('[name=meditation_hours]').val());
+        sessionStorage.setItem("meditation_minutes", $('[name=meditation_minutes]').val());
+        sessionStorage.setItem("day_rating", $('[name=day_rating]').val());
+        sessionStorage.setItem("lights", $('[name=lights]').val());
+        sessionStorage.setItem("cw_hours", $('[name=cw_hours]').val());
+        sessionStorage.setItem("cw_minutes", $('[name=cw_minutes]').val());
+    }
+</script>
 
 	<!-- Table generated for tag:story confirmation-->
 <body>
@@ -209,23 +272,3 @@
 	</div>
         
 {% endblock %}
-
-<!--
- <table class="table table-sm">
-  <thead class=.thead-dark>
-    <tr>
-      <th scope="col">Event</th>
-      <th scope="col">Duration</th>
-    </tr>
-  </thead>
-  <tbody>
-	  <!-- Render per date in ratings table, join event_date==rating_date -->
-		{% for entry in event %}
-			<tr>
-				<td scope="data"> {{ event }}</td>
-				<td scope="data"> {{ duration }}</td>
-    	</tr>             
-		{% endfor %}
-  </tbody>
-</table>
--->
