@@ -16,3 +16,5 @@ venv/
 
 # Database
 database.db
+config.py
+dailyapp.sql
