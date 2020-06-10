@@ -1,40 +1,15 @@
-
-/*
-$(function() {
-    $('#deleteRowButton').on('click', function(event) {
-        event.preventDefault();
-
-    // Finds the closest row <tr>
-    var $row = $(this).closest("tr"),        
-
-    // Finds all children <td> elements
-    $tds = $row.find("td");             
-    console.log("td's", $tds)
-
-    // Visits every single <td> element
-    $.each($tds, function() {               
-
-    // Prints out the text within the <td>
-    console.log($(this).text());        
-    });
-        $.post($SCRIPT_ROOT + '/deleteRow', {
-
-        }).done(function(response) {
-            // Delete the tr
-        }).fail(function() {
-
-        });
-    });
-  });
-
+// Functions for asynch requets to delete or 
+// remove a event from buffer
 
 $(function() {
-    $('#editRowButton').on('click', function(event) {
+    $('#EditBufferButton').on('click', function(event) {
         event.preventDefault();
 
         // Finds the closest row <tr>
         var $row = $(this).closest("tr"),        
+        var button = document.getElementById('EditBufferButton');
 
+            /* TESTING
         // Finds all children <td> elements
         $tds = $row.find("td");             
         console.log("td's", $tds)
@@ -44,21 +19,24 @@ $(function() {
         // Prints out the text within the <td>
         console.log($(this).text());        
         });
+        */
         $.post($SCRIPT_ROOT + '/editRow', {
-
+            value: 'edit',
+            id : button.dataset.idx 
         }).done(function(response) {
             // Reload the table the row from table
+            // TESTING
+            console.log('editbutton post OK')
         }).fail(function() {
-
+            // TESTING
+            console.log('editbutton post FAIL')
         });
     });
   });
 
-*/
-
 
 $(function() {
-    $('.delrating').on('click', function(event) {
+    $('#DeleteBufferButton').on('click', function(event) {
         event.preventDefault();
 
         // Finds the closest row <tr>

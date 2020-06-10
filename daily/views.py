@@ -234,7 +234,10 @@ def delete_row_buffer():
 @login_required
 def delete_edit_row(id):
     """
-    Delete entries from Rating table
+    Delete or edit entries from Rating table.
+    In case of edit, events are copied into a edit buffer table which's
+    contents, after edit, are compared to the corresponding events in
+    events table. Changes are made into events table if necessary.
      """
 
     rating = Rating.query.filter_by(id=id).first()
@@ -258,6 +261,8 @@ def delete_edit_row(id):
     elif 'EDIT_rating' in request.form.values():
         # Render edit page for making changes
         try:
+            # Copy current events into buffer_edit table
+            # for processing edits
             for event in events:
                 buffer_edit = BufferEdit(user_id=current_user.id,
                         event_tag=event, duration=event.duration)
@@ -266,17 +271,12 @@ def delete_edit_row(id):
                 return render_template("edit.html", 
                         ratings=rating, form_day=form_day,
                         form_events=form_events, events=events)
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
+            print(e)
             return internal_error("Failed to process your edit request")
 
     return redirect(url_for('index'))
 
-@app.route("/editrow", methods=["POST", "GET"])
-def edit_row():
-    return render_template("edit.html", 
-            ratings=ratings.items, form_day=form_day,
-            form_events=form_events, events=events_buffer,
-            next_url=next_url, prev_url=prev_url)
 
 @login_required
 def edit_row():

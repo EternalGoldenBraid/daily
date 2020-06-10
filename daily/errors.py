@@ -9,6 +9,7 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     flash(error)
+    print(error)
     db.session.rollback()
     return redirect(url_for('index')), 500
 
