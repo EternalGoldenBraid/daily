@@ -97,7 +97,7 @@ class Buffer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
-    event_tag = db.Column(db.String(2000), 
+    event_tag = db.Column(db.String(2000), unique=True,
             index=True, nullable=False)     
     duration = db.Column(db.Integer) 
 
@@ -108,7 +108,7 @@ class BufferEdit(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
-    event_tag = db.Column(db.String(2000), 
+    event_tag = db.Column(db.String(2000), unique=True,
             index=True, nullable=False)     
     duration = db.Column(db.Integer) 
 

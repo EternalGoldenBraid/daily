@@ -4,10 +4,12 @@
 $(function() {
     $('#EditBufferButton').on('click', function(event) {
         event.preventDefault();
+        var button = null;
+        var $row = null;
 
         // Finds the closest row <tr>
-        var $row = $(this).closest("tr"),        
-        var button = document.getElementById('EditBufferButton');
+        $row = $(this).closest("tr"),        
+        button = document.getElementById('EditBufferButton');
 
             /* TESTING
         // Finds all children <td> elements
@@ -38,10 +40,11 @@ $(function() {
 $(function() {
     $('#DeleteBufferButton').on('click', function(event) {
         event.preventDefault();
-
+        var button = null;
+        var $row = null;
         // Finds the closest row <tr>
-        var $row = $(this).closest("tr");       
-        var button = document.getElementById('DeleteBufferButton');
+        $row = $(this).closest("tr");       
+        button = document.getElementById('DeleteBufferButton');
 
         $.post($SCRIPT_ROOT + '/delete_row_buffer', {
             value: 'delete',
