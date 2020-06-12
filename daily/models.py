@@ -107,10 +107,10 @@ class BufferEdit(db.Model):
     __tablename__= 'buffer_edits'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, index=True, nullable=False)
-    event_tag = db.Column(db.String(2000), unique=True,
+    user_id= db.Column(db.Integer, index=True, nullable=False)
+    event_tag= db.Column(db.String(2000), unique=True,
             index=True, nullable=False)     
-    duration = db.Column(db.Integer) 
+    duration= db.Column(db.Integer) 
 
 
 

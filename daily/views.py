@@ -18,7 +18,6 @@ from werkzeug.urls import url_parse
 
 
 @app.route("/index", methods=["GET", "POST"])
-@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     """
@@ -79,7 +78,7 @@ def index():
             db.session.commit()
         except (SQLAlchemyError, InvalidRequestError) as e1:
             db.session.rollback()
-            return internal_error("New entry overlaps with old one")
+            flash("New entry overlaps with old one")
             return redirect(url_for('index')), 409
 
         # Read tags from user input
@@ -132,7 +131,10 @@ def index():
                     return redirect(url_for('index')), 400
 
 
-
+    # Get the updated ratings
+    ratings = Rating.query.filter_by(user_id=current_user.id).order_by(
+            Rating.date.desc()).paginate(
+            page, app.config['DAYS_PER_PAGE'], False)
 
     #SQLinjection safe?
     return  render_template("index.html", 
@@ -231,10 +233,7 @@ def delete_row_buffer():
             flash("Something went wrong removing your entry")
             return '', 500
     elif event == 'edit':
-       return 'edit not implemented'
-    #return redirect(url_for('index'))
-    #return 200, {'Content-Type': 'application/json'}
-    #return jsonify('Invalid request'), 200
+       return 'edit not implemented', 404
     return f'{event} OK', 200
 
 @app.route("/delete_edit_row/<id>", methods=["POST", "GET"])
@@ -246,6 +245,18 @@ def delete_edit_row(id):
     contents, after edit, are compared to the corresponding events in
     events table. Changes are made into events table if necessary.
      """
+
+    form_day = EntryForm()
+    form_events = DescriptionForm()
+    for i in request.form.values():
+       print(i)
+    if 'cancel' in request.form.values():
+        print("OK")
+        clear_bf_edit = BufferEdit.query.filter_by(
+                user_id=current_user.id).first()
+        db.session.delete(clear_bf_edit)
+        db.session.commit()
+        return redirect(url_for('index'))
 
     rating = Rating.query.filter_by(id=id).first()
     events = rating.events
@@ -268,6 +279,8 @@ def delete_edit_row(id):
     elif 'EDIT_rating' in request.form.values():
         # Render edit page for making changes
         try:
+            form_day = EntryForm()
+            form_events = DescriptionForm()
             # Copy current events into buffer_edit table
             # for processing edits
             for event in events:
@@ -275,14 +288,33 @@ def delete_edit_row(id):
                         event_tag=event, duration=event.duration)
                 db.session.add(buffer_edit)
                 db.session.commit()
-                return render_template("edit.html", 
-                        ratings=rating, form_day=form_day,
-                        form_events=form_events, events=events)
+
+            # Format the screens 4 digit int format into HH:MM
+            screen_hours = str(rating.screen // 100)
+            screen_minutes = str(rating.screen % 100)
+            if len(screen_hours) != 2:
+                screen_hours = '0'+screen_hours
+            if len(screen_minutes) != 2:
+                screen_minutes = '0'+screen_minutes
+            screen_time=screen_hours+':'+screen_minutes
+
+            return render_template("edit_rating.html", 
+                rating=rating, form_day=form_day,
+                form_events=form_events, events=events,
+                screen_hours=screen_hours, 
+                screen_minutes=screen_minutes,
+                screen_time=screen_time)
+
         except SQLAlchemyError as e:
             print(e)
-            return internal_error("Failed to process your edit request")
+            db.session.rollback()
+            clear_bf_edit = BufferEdit.query.filter_by(
+                    user_id=current_user.id).first()
+            db.session.delete(clear_bf_edit)
+            db.session.commit()
+            flash("Failed to process your edit request")
 
-    return redirect(url_for('index'))
+        return redirect(url_for('index'))
 
 
 @login_required

@@ -13,7 +13,7 @@
 	{% endblock %}
 
 
-<div id='card'>
+<div id='card' class="container-responsive main_board">
  <table id='events_all' class="table w-auto">
   <thead class='upper'>
     <tr>
@@ -137,7 +137,7 @@
 			</div>
 		</div>
     </p>
-		<p class="text-center" > {{ form_day.submit() }} </p>
+		<p class="text-center" > {{ form_day.submit(class="btn fa") }} </p>
 	</div>
 </div>
 
@@ -156,11 +156,12 @@
 			{{ form_events.duration_event_hours(type="number", size=5) }}
 			{{ form_events.duration_event_minutes(type="number", size=5) }}
 
-  			<input id="eventsubmit" name="Submit" type="submit" 
+  			<input id="eventsubmit" name="Submit" type="submit" class="btn"
 								value="Add Event"> 
 		</div>
   </div>
-  			<input id="eventclear" name="Clear" type="submit" value="Clear">
+  			<input id="eventclear" class="btn" name="Clear" 
+				type="submit" value="Clear">
 
 	<!-- globals namespace -->
 	<script type=text/javascript >
@@ -255,14 +256,6 @@
                     <form method=GET
 												action="{{ url_for('delete_row_buffer', 
                         id=events[entry[1]]) }}" >
-                        <!--
-	        					    <input type="button" name="delete" 
-                                             value="&#xf043; Delete"
-																class="btn fa fa-trash" 
-                                data-idx={{ events[entry][1]|tojson }}
-                                id='DeleteBufferButton'>
-                              -->
-
 	        					    <button type="submit" name="delete" 
 																class="buffer_button delete btn fa fa-trash" 
                                 data-idx={{ events[entry][1]|tojson }}
