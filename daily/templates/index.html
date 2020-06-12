@@ -43,9 +43,9 @@
 				<form action="{{url_for('delete_edit_row', id=rating.id) }}" 
 							method="post">
             <button type="hidden" name="_method" class="btn fa fa-trash" 
-										value="DELETE_rating" id='deleteRowButton'>
+                    value="DELETE_rating" id='deleteRowButton-{{ rating.id }}'>
             <button type="hidden" name="_method" class="btn fa fa-pencil"
-                    value="EDIT_rating" id='editRowButton'>
+                    value="EDIT_rating" id='editRowButton-{{ rating.id }}'>
 				</td>
 			</tr>
 		</div>
@@ -170,17 +170,15 @@
 
   <!-- Events confirm -->
 	<script type=text/javascript src="{{
-		url_for('static', filename='js/confirmevents.js') }}"></script>
+		url_for('static', filename='js/add_to_buffer.js') }}"></script>
 
 	<!-- Table control -->
 	<script defer type=text/javascript src="{{
-		url_for('static', filename='js/table_confirmation.js')  }}"></script>
-	<script type=text/javascript src="{{
-		url_for('static', filename='js/empty_confirmations.js') }}"></script>
+		url_for('static', filename='js/buffer_table.js')  }}"></script>
 
   <!-- Edit and remove buffer -->
 	<script type=text/javascript src="{{
-		url_for('static', filename='js/edit_remove.js') }}"></script>
+		url_for('static', filename='js/buffer_control.js') }}"></script>
 
 	<!-- Keep form data for the session duration -->
 	<script type=text/javascript>
@@ -254,17 +252,28 @@
               <td scope=""> {{ entry }}</td>
               <td scope=""> {{ events[entry][0] }}</td>
 							<td scope="">
-                    <form id="buffer_buttons" method=POST
-															action="{{ url_for('delete_row_buffer') }}?
-															id={{ events[entry][1]|tojson }}" >
-	        					    <input type="button" name="delete" value="&#xf043; Input"
+                    <form method=GET
+												action="{{ url_for('delete_row_buffer', 
+                        id=events[entry[1]]) }}" >
+                        <!--
+	        					    <input type="button" name="delete" 
+                                             value="&#xf043; Delete"
 																class="btn fa fa-trash" 
                                 data-idx={{ events[entry][1]|tojson }}
                                 id='DeleteBufferButton'>
-                        <input type="submit" name="edit"
-                                class="btn fa fa-pencil" 
+                              -->
+
+	        					    <button type="submit" name="delete" 
+																class="buffer_button delete btn fa fa-trash" 
                                 data-idx={{ events[entry][1]|tojson }}
-                                id='EditBufferButton'>
+                            id='DeleteBufferButton-{{ events[entry][1] }}'>
+                        </button>
+
+                        <button type="submit" name="edit"
+                                class="buffer_button edit btn fa fa-pencil" 
+                                data-idx={{ events[entry][1]|tojson }}
+                            id='EditBufferButton-{{ events[entry][1] }}'>
+                        </button>
 	        					</form>
             </tr>
         {% endfor %}

@@ -29,12 +29,9 @@ $(function()  {
 
         globals.addRow = function addRow(table) {
 
-            console.log("Addrow ran") // TEST
-            // Append row to table
             function appendRow(table) {
                 
                 let items = [globals.ev, globals.dr]
-                console.log("items: ", items) // TEST
                 let row_append = table.insertRow(-1);
                 for (let item of items) {
                     let text = document.createTextNode(item);
@@ -49,7 +46,6 @@ $(function()  {
                     (globals.response_obj !== undefined)) {
                 appendRow(table);
             } 
-            console.log("globals after table: ", globals)
         }
 });
 

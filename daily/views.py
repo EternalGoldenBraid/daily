@@ -173,11 +173,6 @@ def events_confirm():
                 event_tag=event).all():
             return jsonify("Event already exists"), 400
 
-        # TEST
-        test =Buffer.query.filter_by(user_id=user_id).all()
-        for i in test:
-            print(i.event_tag)
-        
         # Add to database
         buffer_add = Buffer(user_id = user_id, event_tag= event,
                     duration = duration)
@@ -191,7 +186,10 @@ def events_confirm():
             events[event] = duration
         else:
             events[event] = ''
-        return jsonify(events)
+        return redirect(url_for('index')), 200 
+        # For when we decide use an asych rendering of the confirmevents
+        # table.
+        #return jsonify(events)
 
     except SQLAlchemyError as e:
         print(e)
@@ -230,15 +228,14 @@ def delete_row_buffer():
             db.session.commit()
         except SQLAlchemyError as e:
             print(e)
-            request.status = 500
             flash("Something went wrong removing your entry")
-            #return redirect(url_for('index')), 400
-            return '', {'Content-Type': 'application/json'}
+            return '', 500
     elif event == 'edit':
-        pass
+       return 'edit not implemented'
     #return redirect(url_for('index'))
     #return 200, {'Content-Type': 'application/json'}
-    return ''
+    #return jsonify('Invalid request'), 200
+    return f'{event} OK', 200
 
 @app.route("/delete_edit_row/<id>", methods=["POST", "GET"])
 @login_required
