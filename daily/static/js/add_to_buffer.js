@@ -25,11 +25,8 @@
              * All the pre comment code above renders a table asynch.
              */
             location.reload();
-            // test
-            console.log("globals.response: ", globals.response_obj)
         }).fail(function(error) {
-            console.log(error.responseText)
-            console.log("confirmevents failed to add event")
+
         });
     });
   });
