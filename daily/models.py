@@ -104,7 +104,7 @@ class Buffer(db.Model):
 
 # A buffer to hold event: duration pairs for a user during editing rows
 class BufferEdit(db.Model):
-    __tablename__= 'buffer_edits'
+    __tablename__= 'buffer_edt'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id= db.Column(db.Integer, index=True, nullable=False)
