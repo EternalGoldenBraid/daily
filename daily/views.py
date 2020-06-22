@@ -63,8 +63,8 @@ def index():
             scr = int(scr)
         except TypeError:
             print("Error line 71" )
-            return bad_request_error(
-                "Please enter numbers on screens field")
+            flash("Please enter numbers on screens field")
+            return redirect(url_for('index')), 400
 
         rating = Rating(user_id=current_user.id, date=form_day.date.data,
                 rating_sleep=form_day.sleep_rating.data,
@@ -76,7 +76,8 @@ def index():
         try:
             db.session.add(rating)
             db.session.commit()
-        except (SQLAlchemyError, InvalidRequestError) as e1:
+        except (SQLAlchemyError, InvalidRequestError) as e:
+            print(e)
             db.session.rollback()
             flash("New entry overlaps with old one")
             return redirect(url_for('index')), 409
