@@ -152,7 +152,7 @@ def events_confirm():
         # Collect and validate the event entry from event field
         event = request.form.get('event').rstrip()
         if event == '':
-            return 'Please add a note to the event field', 400
+            return jsonify({'error':'Please add a note to the event field'}), 400
 
         # Format the requests hours:minutes representation to minutes
         try:
@@ -172,9 +172,8 @@ def events_confirm():
         # Validate that entry does not already exist
         if Buffer.query.filter_by(user_id = user_id,
                 event_tag=event).all():
-            flash("Event already exists")
-            return redirect(url_for("index")), 400
-            #return jsonify("Event already exists"), 400
+            return jsonify(address=url_for("index"),
+                           error='Event already exists'), 400
 
         # Add to database
         buffer_add = Buffer(user_id = user_id, event_tag= event,
@@ -189,10 +188,7 @@ def events_confirm():
             events[event] = duration
         else:
             events[event] = ''
-        return redirect(url_for('index')), 200
-        # For when we decide use an asych rendering of the confirmevents
-        # table.
-        #return jsonify(events)
+        return jsonify({'address':url_for('index')}), 201
 
     except SQLAlchemyError as e:
         print(e)

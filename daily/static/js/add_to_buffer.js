@@ -23,9 +23,12 @@
              * on page load. In future either change the page load for 
              * js only or server side only.
              * All the pre comment code above renders a table asynch.
-            location.reload();
              */
+            if (response['address'] !== null ) {
+                window.location.replace(response['address']);
+            }
         }).fail(function(error) {
+            alert(error.responseJSON['error'])
         });
     });
   });
