@@ -23,10 +23,10 @@
              * on page load. In future either change the page load for 
              * js only or server side only.
              * All the pre comment code above renders a table asynch.
-             */
             location.reload();
+             */
         }).fail(function(error) {
-
+            alert("Server side failure: Failed to add event")
         });
     });
   });

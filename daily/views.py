@@ -55,7 +55,7 @@ def index():
         except ValueError as e:
             print(e)
             return bad_request_error(
-                    'Make sure your Creative work hours and Meditation' 
+                    'Make sure your Creative work hours and Meditation'
                     + 'inputs are integers')
 
         try:
@@ -66,10 +66,10 @@ def index():
             return bad_request_error(
                 "Please enter numbers on screens field")
 
-        rating = Rating(user_id=current_user.id, date=form_day.date.data, 
+        rating = Rating(user_id=current_user.id, date=form_day.date.data,
                 rating_sleep=form_day.sleep_rating.data,
-                meditation=meditation, cw=cw, 
-                screen=scr, 
+                meditation=meditation, cw=cw,
+                screen=scr,
                 rating_day=form_day.day_rating.data)
 
         # Push a new rating row to database
@@ -136,12 +136,11 @@ def index():
             Rating.date.desc()).paginate(
             page, app.config['DAYS_PER_PAGE'], False)
 
-    #SQLinjection safe?
-    return  render_template("index.html", 
-            ratings=ratings.items, form_day=form_day,
-            form_events=form_events, events=events_buffer,
-            next_url=next_url, prev_url=prev_url)
-    
+    return render_template("index.html",
+           ratings=ratings.items, form_day=form_day,
+           form_events=form_events, events=events_buffer,
+           next_url=next_url, prev_url=prev_url)
+
 
 @app.route("/events_confirm", methods=["POST"])
 @login_required
@@ -170,8 +169,8 @@ def events_confirm():
         for buffer in buffers:
             events[buffer.event_tag] = buffer.duration
 
-        # Validate that entry does not already exist 
-        if Buffer.query.filter_by(user_id = user_id, 
+        # Validate that entry does not already exist
+        if Buffer.query.filter_by(user_id = user_id,
                 event_tag=event).all():
             return jsonify("Event already exists"), 400
 
@@ -180,7 +179,7 @@ def events_confirm():
                     duration = duration)
         db.session.add(buffer_add)
         db.session.commit()
-    
+
         # Render to user current events awaiting confirmation
         # Pass empty string is no duration to render an empty row with
         #   tableconfirmation.js
@@ -188,7 +187,7 @@ def events_confirm():
             events[event] = duration
         else:
             events[event] = ''
-        return redirect(url_for('index')), 200 
+        return redirect(url_for('index')), 200
         # For when we decide use an asych rendering of the confirmevents
         # table.
         #return jsonify(events)
@@ -248,8 +247,11 @@ def delete_edit_row(id):
 
     form_day = EntryForm()
     form_events = DescriptionForm()
+
+    # TEST
     for i in request.form.values():
        print(i)
+    print("Rating id: ", id)
     if 'cancel' in request.form.values():
         print("OK")
         clear_bf_edit = BufferEdit.query.filter_by(
@@ -264,13 +266,21 @@ def delete_edit_row(id):
     # Check if request is to delete
     if 'DELETE_rating' in request.form.values():
         # Remove rating event association
+        print("Enter delition branch")
         try:
+            print("Attempting to delete event from rating") # BBG
             for event in events:
                 db.session.delete(event)
-
+            print("delete sucess") # DBG
+            print("Attempting to commit") # DBG
             db.session.commit()
+            print("commit sucess") # DBG
+            print("Attempting to delete rating") # DBG
             db.session.delete(rating)
+            print("delete sucess") # DBG
+            print("Attempting to commit deletion") # DBG
             db.session.commit()
+            print("commit sucess") # DBG
         except SQLAlchemyError as e:
             print(e)
             request.status = 400
@@ -314,7 +324,7 @@ def delete_edit_row(id):
             db.session.commit()
             flash("Failed to process your edit request")
 
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
 
 @login_required
