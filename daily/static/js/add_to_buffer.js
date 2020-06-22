@@ -26,7 +26,6 @@
             location.reload();
              */
         }).fail(function(error) {
-            alert("Server side failure: Failed to add event")
         });
     });
   });

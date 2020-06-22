@@ -172,7 +172,9 @@ def events_confirm():
         # Validate that entry does not already exist
         if Buffer.query.filter_by(user_id = user_id,
                 event_tag=event).all():
-            return jsonify("Event already exists"), 400
+            flash("Event already exists")
+            return redirect(url_for("index")), 400
+            #return jsonify("Event already exists"), 400
 
         # Add to database
         buffer_add = Buffer(user_id = user_id, event_tag= event,
