@@ -30,9 +30,12 @@
 				<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 				<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-        <script src="maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-        <script src="maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"></script>
-        <script src="cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+            <script src="maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+            <script src="maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"></script>
+            <script src="cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+
+		        <script type=text/javascript src="{{
+  			    url_for('static', filename='js/style.js') }}"></script>
 
 				<!-- favicon -->
 				<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -47,13 +50,6 @@
     </head>
 
     <body>
-
-			 <style>
-					body {
-						background-size: 100% 100%;
-					  background-image: url('static/close_leaves_droplets.jpg');
-					}
-			</style>
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
         <div class="container-fluid">

@@ -126,10 +126,14 @@
 }
 
 /* Here it ends */
-div {
-  background-image; url('./static/close_leaves_droplets.jpg')
-  opacity: 0.9;
+body {
+    opacity: 0.9;
+    /* background-size: 100% 100%; */
+    background-image: url('close_leaves_droplets.jpg');
+    background-size: contain;
+    background-position: center bottom,
 }
+
 main
 {
     /* scroll horizontally as needed */
@@ -137,7 +141,7 @@ main
     background-color: white;
     background-opacity: 10%;
     border: ;
-    
+
 }
 
 main img
