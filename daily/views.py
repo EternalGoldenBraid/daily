@@ -16,6 +16,7 @@ from flask_login import (current_user, login_user,
 from werkzeug.urls import url_parse
 
 
+@app.route("/", methods=["GET", "POST"])
 @app.route("/index", methods=["GET", "POST"])
 @login_required
 def index():
