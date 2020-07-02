@@ -9,6 +9,7 @@ eggs/
 MANIFEST
 
 # Environments
+config.py
 .env
 .venv
 env/
