@@ -2,7 +2,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
-    
+
     SECRET_KEY = os.environ.get('SECRET_KEY')
 
     # SQLAlchemy
@@ -14,7 +14,6 @@ class Config(object):
     DAYS_PER_PAGE = 7
     EVENTS_PER_PAGE = 4
 
-
- #TESTING
-   # SQLALCHEMY_DATABASE_URI= 'sqlite:///' + os.path.join(basedir, 'database.db')
-   # SECRET_KEY = 'adb'
+    if os.environ.get('FLASK_ENV') == 'development':
+        SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb:///daily:test@localhost'
+        SECRET_KEY = 'asd'
