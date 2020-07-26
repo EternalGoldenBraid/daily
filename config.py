@@ -15,5 +15,5 @@ class Config(object):
     EVENTS_PER_PAGE = 4
 
     if os.environ.get('FLASK_ENV') == 'development':
-        SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://daily:test@localhost/database'
+        SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://daily:dev@localhost/dailydb'
         SECRET_KEY = 'asd'
