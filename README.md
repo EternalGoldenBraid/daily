@@ -34,11 +34,13 @@ Run the application with `flask run` and test using the provided URL.
 
 - [x] Implement a web UI 
 
+- [ ] Add timestamps for event inputs and edits.
+
 - [ ] Add data visualization
       
 - [ ] Add multi-user support
 
 - [ ] Add an about page
 
-- [ ] Configure Database backups
+- [x] Configure Database backups
 
