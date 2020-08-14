@@ -125,6 +125,7 @@
   background-color: #be3400;
 }
 
+
 /*
   For table mobile support
   */
@@ -259,86 +260,81 @@ div .main_board {
     color: #eabaac;
 }
 
-  @media screen and (max-width: 1800px) {
-
-   #card table {
-      border: 0;
-    }
-
-   #card table thead {
-      display: none;
-    }
 
    #card table tr {
 	margin-bottom: 20px;
-	display: inline flow;
+	display: inline flex;
 	border-bottom: 2px solid #ddd;
 	border-bottom: 7px dotted gray;
-	/*	
-  	box-shadow: 2px 2px 1px #dadada;
-	*/
-    }
-
-   #card table td .upper {
-      display: run-in;
-      text-align: left;
-      font-size: 16px;
-    }
-
-   #card table td .lower {
-      display: block;
-      text-align: left;
-      font-size: 19px;
-    }
-
-    
-    /
-   #card table td:last-child {
-      border-bottom: 0;
-    }
-
-   #card table td::before {
-      content: attr(data-label);
-      float: left;
-      text-transform: uppercase;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-   #card .space::before {
-      content: attr(data-label)  '  ';
-      float: left;
-      text-transform: uppercase;
-      font-weight: bold;
-      letter-spacing: 1px;
-      white-space: pre;
-    }
-
-
-
-    /*
-     * what are these last 3?
-    #card tbody{
-	line-height:!important;
 	}
-	*/
 
-    /*
-   #description td::before {
-	   
-      content: attr(id);
-      float: left;
-      text-transform: uppercase;
-      font-weight: bold;
-    }
+card table {
+  border: 0;
+}
 
-    #description {
-	line-height:auto!important;
+card table thead {
+  display: none;
+}
+
+card table td .upper {
+  display: run-in;
+  text-align: left;
+  font-size: 16px;
+}
+
+card table td .lower {
+  display: block;
+  text-align: left;
+  font-size: 19px;
+}
+
+
+
+card table td:last-child {
+  border-bottom: 0;
+}
+
+card table td::before {
+  content: attr(data-label);
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+card .space::before {
+  content: attr(data-label)  '  ';
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+  white-space: pre;
+}
+
+
+
+/*
+ * what are these last 3?
+#card tbody{
+    line-height:!important;
     }
+    */
+
+/*
+description td::before {
+       
+  content: attr(id);
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+#description {
+    line-height:auto!important;
+}
 	*/ 
 
 
-}
 
   
 
