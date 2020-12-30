@@ -1,0 +1,278 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	Daily
+
+{% endblock %}
+
+{% block main %}
+
+	{% block content %}
+		<h1> Hi, {{ current_user.username }}!</h1>
+		
+	{% endblock %}
+
+
+<div id='card' class="container-responsive main_board">
+ <table id='events_all' class="table table-responsive w-auto">
+  <thead class='upper'>
+    <tr>
+      <th scope="col"> Date: 				</th>
+      <th scope="col"> Sleep 				</th>
+      <th scope="col"> Meditation 	</th>
+      <th scope="col"> Screens 			</th>
+			<th scope="col"> Rating 			</th> 
+      <th scope="col"> Creative Work</th>
+			<th></th>
+			<th></th>
+    </tr>
+  </thead>
+  <tbody>
+	  <!-- Render per date in ratings table, join event_date==rating_date -->
+		{% for rating in ratings %}
+		<div class='upper'>
+			<tr >
+				<td class= 'space' data-label='Date'   			 > {{	rating.date.strftime('%Y-%m-%d') }}</td>
+				<td class= 'space' data-label='Sleep' 				 > {{	rating.rating_sleep }}</td>
+				<td class= 'space' data-label='Meditation' 	 > {{	rating.meditation }}</td>
+				<td class= 'space' data-label='Screens'    	 > {{ rating.screen }}</td>
+				<td class= 'space' data-label='Rating'    		 > {{ rating.rating_day }}</td>
+				<td class= 'space' data-label='Creative Work '> {{ rating.cw }}</td>
+
+				<td class = events_buttons >
+				<form action="{{url_for('delete_edit_row', id=rating.id) }}" 
+							method="post">
+            <button type="hidden" name="_method" class="btn fa fa-trash" 
+                    value="DELETE_rating" id='deleteRowButton-{{ rating.id }}'>
+            <button type="hidden" name="_method" class="btn fa fa-pencil"
+                    value="EDIT_rating" id='editRowButton-{{ rating.id }}'>
+				</td>
+			</tr>
+		</div>
+		<div class='lower'>
+			<tr>
+				<td id='description' data-label='Description'>
+					<br>
+					{% for event in rating.events %}
+					<li>
+						{% for tag in event.tags %}
+							{{ tag.tag_name.capitalize() }}:	
+						{% endfor %}
+					{{ event.story }} 
+					{% if event.duration != 0 %}
+						{% if event.duration % 60 == 0 %}
+							: {{ event.duration // 60 }}h
+						{% elif event.duration // 60 == 0 %}
+							: {{ event.duration%60 }}m
+						{% else %}
+							: {{ event.duration // 60 }}h: {{ event.duration % 60 }}m
+						{% endif %}
+					{% endif %}
+					</li>
+					{% endfor %}
+				</td>
+			</tr>
+		</div>
+          </form>
+		{% endfor %}
+  </tbody>
+</table>
+</div>
+<div>
+    {% if prev_url %}
+		<a class="btn fa fa-hand-o-left" href="{{ prev_url }}"></a>
+    {% endif %}
+    {% if next_url %}
+		<a class="btn fa fa-hand-o-right" href="{{ next_url }}"></a>
+    {% endif %}
+</div>
+
+<div id="newEntries" class="form-container">
+<h2> How was your day? </h2>
+
+<div class="align-items-center">
+  <form id="mainform" class= "form form-horizontal" 
+				action="" method="post" >
+    {{ form_day.hidden_tag() }}
+    <p>
+		<div class="form-row">
+			<div class="form-group col-auto">
+	{{ form_day.date.label }} 
+  {{ form_day.date(class="form-control", type="date", size=12) }}
+			</div>
+
+			<div class="form-group col-auto">
+	{{ form_day.sleep_rating.label }} 
+  {{ form_day.sleep_rating(class="form-control", type="number", size=3) }}
+			</div>
+
+			<div class="form-group col-auto">
+				<div class="form-row">
+	{{ form_day.meditation_hours.label }}
+				</div>
+
+				<div class="form-row">
+	{{ form_day.meditation_hours(class="form-control", 
+																	type="number", size=5) }}
+	{{ form_day.meditation_minutes(class="form-control", type="number", 
+																	size=5, value=30) }}
+				</div>
+			</div>
+
+			<div class="form-group col-auto">
+	{{ form_day.day_rating.label }}
+	{{ form_day.day_rating(class="form-control", size=6) }} 
+			</div>
+
+
+			<div class="form-group col-auto">
+	{{ form_day.lights.label }} 
+	{{ form_day.lights(class="form-control", type="time", size=5) }} 
+			</div>
+
+			<div class="form-group col-auto">
+	{{ form_day.cw_hours.label }}
+	{{ form_day.cw_hours(class="form-control", type="number", size=5) }} 
+	{{ form_day.cw_minutes(class="form-control", type="number", size=5) }} 
+			</div>
+		</div>
+    </p>
+		<p class="text-center" > {{ form_day.submit(class="btn fa") }} </p>
+	</div>
+</div>
+
+
+  <div class="form-group">
+  		<div class="col-auto">
+  	  {{ form_events.hidden_tag() }}
+
+			{{ form_events.event.label }}
+			{{ form_events.event(class="form-control form-control-lg",
+														id="event_field", rows='5') }}
+
+			</div>
+
+			{{ form_events.duration_event_hours.label }}
+			{{ form_events.duration_event_hours(type="number", size=5) }}
+			{{ form_events.duration_event_minutes(type="number", size=5) }}
+
+  			<input id="eventsubmit" name="Submit" type="submit" class="btn"
+								value="Add Event"> 
+		</div>
+  </div>
+  			<input id="eventclear" class="btn" name="Clear" 
+				type="submit" value="Clear">
+
+	<!-- globals namespace -->
+	<script type=text/javascript >
+		var globals = {};
+	</script>
+
+
+  <!-- Events confirm -->
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/add_to_buffer.js') }}"></script>
+
+	<!-- Table control -->
+	<script defer type=text/javascript src="{{
+		url_for('static', filename='js/buffer_table.js')  }}"></script>
+
+  <!-- Edit and remove buffer -->
+	<script type=text/javascript src="{{
+		url_for('static', filename='js/buffer_control.js') }}"></script>
+
+	<!-- Keep form data for the session duration -->
+	<script type=text/javascript>
+    // Run on page load
+    window.onload = function() {
+
+				// TESTING
+				console.log('date up: ', date);
+
+        // If sessionStorage is storing default values (ex. date), 
+				// exit the function and do not restore data
+        if (sessionStorage.getItem('date') == "date") {
+            return;
+        }
+
+        // If values are not blank, restore them to the fields
+
+
+        var date= sessionStorage.getItem('date');
+        if (date!== null) $('[name=date]').val(date);
+
+        var sleep_rating= sessionStorage.getItem('sleep_rating');
+        if (sleep_rating!== null) $('[name=sleep_rating]').val(sleep_rating);
+
+        var meditation_hours= sessionStorage.getItem('meditation_hours');
+        if (meditation_hours!== null) $('[name=meditation_hours]').val(
+																							meditation_hours);
+
+        var meditation_minutes=sessionStorage.getItem('meditation_minutes');
+        if (meditation_minutes!== null) $('[name=meditation_minutes]').val(
+																							meditation_minutes);
+
+        var day_rating= sessionStorage.getItem('day_rating');
+        if (day_rating!== null) $('[name=day_rating]').val(day_rating);
+
+
+        var lights= sessionStorage.getItem('lights');
+        if (lights!== null) $('[name=lights]').val(lights);
+
+
+        var cw_hours= sessionStorage.getItem('cw_hours');
+        if (cw_hours!== null) $('[name=cw_hours]').val(cw_hours);
+
+        var cw_minutes= sessionStorage.getItem('cw_minutes');
+        if (cw_minutes!== null) $('[name=cw_minutes]').val(cw_minutes);
+
+				// TESTING
+				console.log('date down: ', date);
+    }
+
+    // Before refreshing the page, save the form data to sessionStorage
+    window.onbeforeunload = function() {
+        sessionStorage.setItem("date", $('[name=date]').val());
+        sessionStorage.setItem("sleep_rating", $('[name=sleep_rating]').val());
+        sessionStorage.setItem("meditation_hours", $('[name=meditation_hours]').val());
+        sessionStorage.setItem("meditation_minutes", $('[name=meditation_minutes]').val());
+        sessionStorage.setItem("day_rating", $('[name=day_rating]').val());
+        sessionStorage.setItem("lights", $('[name=lights]').val());
+        sessionStorage.setItem("cw_hours", $('[name=cw_hours]').val());
+        sessionStorage.setItem("cw_minutes", $('[name=cw_minutes]').val());
+    }
+</script>
+
+	<!-- Table generated for tag:story confirmation-->
+<body>
+	<div class=table-responsive">
+<table id="confirmevents" class= "table table-sm">
+	{% if events|length != 0 %}
+        {% for entry in events %}
+            <tr>
+              <td scope=""> {{ entry }}</td>
+              <td scope=""> {{ events[entry][0] }}</td>
+							<td scope="">
+                    <form method=GET
+												action="{{ url_for('delete_row_buffer', 
+                        id=events[entry[1]]) }}" >
+	        					    <button type="submit" name="delete" 
+																class="buffer_button delete btn fa fa-trash" 
+                                data-idx={{ events[entry][1]|tojson }}
+                            id='DeleteBufferButton-{{ events[entry][1] }}'>
+                        </button>
+
+                        <button type="submit" name="edit"
+                                class="buffer_button edit btn fa fa-pencil" 
+                                data-idx={{ events[entry][1]|tojson }}
+                            id='EditBufferButton-{{ events[entry][1] }}'>
+                        </button>
+	        					</form>
+            </tr>
+        {% endfor %}
+	</table>
+	{% endif %}
+	</body>
+	</div>
+        
+{% endblock %}
