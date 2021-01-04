@@ -8,7 +8,7 @@ The project also coincides with my intereset in data and extracting patterns tha
 
 ## Project Status
 
-A minimal web interface is up and running [here](http://dailyapp.eu.pythonanywhere.com/) using pythonanywhere. The application currently only supports adding data for a single user. A demo account is available with username: demo, password: demo
+A minimal web interface is up and running [here](http://dailyapp.eu.pythonanywhere.com/) using pythonanywhere. A demo account is available with username: demo, password: demo
 
 ## Installation and Setup Instructions
 
