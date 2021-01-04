@@ -1,4 +1,6 @@
 import os
+import requests
+import json
 from copy import deepcopy
 from datetime import datetime
 from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
@@ -6,7 +8,7 @@ from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
 from daily.models import (User, Rating, Tag, Event, Buffer,
                             rating_as, event_as, BufferEdit)
 from daily import app, db
-from daily.forms import (LoginForm, EntryForm,
+from daily.forms import (LoginForm, EntryForm, BacklogForm,
                         EventsForm, DescriptionForm)
 from daily.helpers import hours_minutes
 from flask import (render_template, redirect, flash,
@@ -419,3 +421,53 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+# Renders a view of the users backlog
+@app.route("/backlogs", methods=["GET", "POST"])
+@login_required
+def backlogs():
+    """
+    Acess to user's backlogs.
+    """
+
+    backlog_form = BacklogForm(request.form)
+
+    #if backlog_form.validate_on_submit():
+    if request.method == 'POST' and backlog_form.validate():
+
+        # Query the api for the user account related to the api_key
+        # and use the account_id to fetch a view of the backlogs.
+        api_key = backlog_form.api_key.data
+        headers = {f'Authorization': 'token ' + api_key }
+        url = 'https://easybacklog.com/api/accounts'
+
+        # Account object
+        response_account = requests.get(url, headers=headers)
+        response_account_dict = json.loads(response_account.text)
+
+        # The response_account_dict is a list since apparently
+        # an account_id can have multiple users.
+        # This implementation only valid for a single user.
+        #if response_account_dict[0]["status"] == "error":
+        if response_account.status_code != 200:
+            flash(
+                f'{response_account_dict["status"]}:{response_account_dict["message"]}')
+            print(response_account.text)
+            return redirect(url_for('backlogs'))
+
+        account_id = response_account_dict[0]["id"]
+        url = f'https://easybacklog.com/api/accounts/{account_id}/backlogs'
+        response_backlogs = requests.get(url, headers=headers)
+        response_backlogs_dict = json.loads(response_backlogs.text)
+
+        if response_backlogs.status_code != 200:
+            flash(
+                f'{response_backlogs_dict["status"]}:{response_backlogs_dict["message"]}')
+            print(response_backlogs.text)
+            return redirect(url_for('backlogs'))
+
+        return render_template('backlog_todo.html', title = 'Backlog',
+                                foo = response_backlogs_dict, form = backlog_form)
+    else:
+        return render_template('backlog_todo.html', title = 'Backlog',
+                                foo=False, form = backlog_form)

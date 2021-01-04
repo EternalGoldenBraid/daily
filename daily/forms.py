@@ -81,3 +81,9 @@ class EntryForm(FlaskForm):
                     message= 'Creative work input field contains too many digits')],
                 render_kw={"placeholder": "Minutes"})
     submit=SubmitField('Submit For the day')
+
+class BacklogForm(FlaskForm):
+    api_key=StringField('API key', validators=[DataRequired()])
+    remember_me=BooleanField('Remember Me')
+    submit=SubmitField('Fetch')
+
