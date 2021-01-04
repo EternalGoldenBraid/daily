@@ -44,3 +44,5 @@ Run the application with `flask run` and test using the provided URL.
 
 - [x] Configure Database backups
 
+- [ ] Integrate easybacklog.com API into Daily
+
