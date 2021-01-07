@@ -57,7 +57,7 @@ $(function() {
             //tbl = $("#confirmevents");
             
             // find table 'confirmevents'
-            let tbl = document.getElementsByTagName('table')[1];
+            let tbl = document.getElementsByTagName('table')[0];
             tbl.remove();
         }).fail(function() {
             console.log("Failed to empty")
