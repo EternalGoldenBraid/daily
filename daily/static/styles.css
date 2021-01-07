@@ -261,28 +261,28 @@ div .main_board {
 }
 
 
-   #card table tr {
+#card table tr {
 	margin-bottom: 20px;
 	display: inline flex;
 	border-bottom: 2px solid #ddd;
 	border-bottom: 7px dotted gray;
 	}
 
-card table {
+#card table {
   border: 0;
 }
 
-card table thead {
+#card table thead {
   display: none;
 }
 
-card table td .upper {
+#card table td .upper {
   display: run-in;
   text-align: left;
   font-size: 16px;
 }
 
-card table td .lower {
+#card table td .lower {
   display: block;
   text-align: left;
   font-size: 19px;
@@ -311,33 +311,6 @@ card .space::before {
   white-space: pre;
 }
 
-
-
-/*
- * what are these last 3?
-#card tbody{
-    line-height:!important;
-    }
-    */
-
-/*
-description td::before {
-       
-  content: attr(id);
-  float: left;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-#description {
-    line-height:auto!important;
-}
-	*/ 
-
-
-
-  
-
    /* Style buttons */
 .btn {
   background-color: #eabaac; /* Blue background */
@@ -351,4 +324,16 @@ description td::before {
 /* Darker background on mouse-over */
 .btn:hover {
   background-color: #015045;
+}
+
+.upper {
+	display: flex;
+}
+
+.upper.header {
+	justify-content:space-around;
+}
+
+.upper {
+	justify-content:space-around;
 }
