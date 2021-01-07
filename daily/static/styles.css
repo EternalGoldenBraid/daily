@@ -328,6 +328,7 @@ card .space::before {
 
 .upper {
 	display: flex;
+	font-weight: bold;
 }
 
 .upper.header {
