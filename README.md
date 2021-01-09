@@ -46,3 +46,6 @@ Run the application with `flask run` and test using the provided URL.
 
 - [ ] Integrate easybacklog.com API into Daily
 
+## Resources used
+- https://realpython.com/python-requests/#the-response
+- https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world

@@ -1,0 +1,354 @@
+.navbar {
+  background-color: #eabaac;
+}
+.navbar .navbar-brand {
+  color: #020d22;
+}
+.navbar .navbar-brand:hover,
+.navbar .navbar-brand:focus {
+  color: #020d22;
+}
+.navbar .navbar-text {
+  color: #020d22;
+}
+.navbar .navbar-text a {
+  color: #020d22;
+}
+.navbar .navbar-text a:hover,
+.navbar .navbar-text a:focus {
+  color: #020d22;
+}
+.navbar .navbar-nav .nav-link {
+  color: #020d22;
+  border-radius: .25rem;
+  margin: 0 0.25em;
+}
+.navbar .navbar-nav .nav-link:not(.disabled):hover,
+.navbar .navbar-nav .nav-link:not(.disabled):focus {
+  color: #020d22;
+}
+.navbar .navbar-nav .nav-item.active .nav-link,
+.navbar .navbar-nav .nav-item.active .nav-link:hover,
+.navbar .navbar-nav .nav-item.active .nav-link:focus,
+.navbar .navbar-nav .nav-item.show .nav-link,
+.navbar .navbar-nav .nav-item.show .nav-link:hover,
+.navbar .navbar-nav .nav-item.show .nav-link:focus {
+  color: #020d22;
+  background-color: #be3400;
+}
+.navbar .navbar-toggle {
+  border-color: #be3400;
+}
+.navbar .navbar-toggle:hover,
+.navbar .navbar-toggle:focus {
+  background-color: #be3400;
+}
+.navbar .navbar-toggle .navbar-toggler-icon {
+  color: #020d22;
+}
+.navbar .navbar-collapse,
+.navbar .navbar-form {
+  border-color: #020d22;
+}
+.navbar .navbar-link {
+  color: #020d22;
+}
+.navbar .navbar-link:hover {
+  color: #020d22;
+}
+
+@media (max-width: 575px) {
+  .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item {
+    color: #020d22;
+  }
+  .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+  .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+    color: #020d22;
+  }
+  .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item.active {
+    color: #020d22;
+    background-color: #be3400;
+  }
+}
+
+@media (max-width: 767px) {
+  .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item {
+    color: #020d22;
+  }
+  .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+  .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+    color: #020d22;
+  }
+  .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item.active {
+    color: #020d22;
+    background-color: #be3400;
+  }
+}
+
+@media (max-width: 991px) {
+  .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item {
+    color: #020d22;
+  }
+  .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+  .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+    color: #020d22;
+  }
+  .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item.active {
+    color: #020d22;
+    background-color: #be3400;
+  }
+}
+
+@media (max-width: 1199px) {
+  .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item {
+    color: #020d22;
+  }
+  .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+  .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+    color: #020d22;
+  }
+  .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item.active {
+    color: #020d22;
+    background-color: #be3400;
+  }
+}
+
+.navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item {
+  color: #020d22;
+}
+.navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+.navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+  color: #020d22;
+}
+.navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item.active {
+  color: #020d22;
+  background-color: #be3400;
+}
+
+
+/*
+  For table mobile support
+  */
+	@media only screen and (max-width: 800px) {
+
+	/* Force table to not be like tables anymore */
+	#no-more-tables table,
+	#no-more-tables thead,
+	#no-more-tables tbody,
+	#no-more-tables th,
+	#no-more-tables td,
+	#no-more-tables tr {
+		display: block;
+	}
+
+	/* Hide table headers (but not display: none;, for accessibility) */
+	#no-more-tables thead tr {
+		position: absolute;
+		top: -9999px;
+		left: -9999px;
+	}
+
+	#no-more-tables tr { border: 1px solid #ccc; }
+
+	#no-more-tables td {
+		/* Behave  like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee;
+		position: relative;
+		padding-left: 50%;
+		white-space: normal;
+		text-align:left;
+	}
+
+	#no-more-tables td:before {
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 45%;
+		padding-right: 10px;
+		white-space: nowrap;
+		text-align:left;
+		font-weight: bold;
+	}
+
+	/*
+	Label the data
+	*/
+	#no-more-tables td:before { content: attr(data-title); }
+}
+
+body {
+    opacity: 0.9;
+    /* background-size: 100% 100%; */
+    background-image: url('close_leaves_droplets.jpg');
+    background-size: contain;
+    background-position: center bottom,
+}
+
+main
+{
+    /* scroll horizontally as needed */
+    overflow-x: auto;
+    background-color: white;
+    background-opacity: 10%;
+    border: ;
+
+}
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+
+h1, h2{
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+}
+
+space {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+}
+
+input[type=text]
+{
+	width: auto;
+	box-sizing: border-box;
+	padding: 12px 20px;
+	margin 8px 0;
+	align: center;
+}
+
+input[type=submit]
+{
+	width: auto;
+	box-sizing: border-box;
+	padding: 12px 20px;
+	margin 8px 0;
+	align: center;
+}
+
+table {
+    width: 100%;
+    margin:0;
+    padding:0;
+    /*border-collapse: collapse;
+    border-spacing: 10px;*/
+  }
+
+  table tr {
+    /*border: 1px solid #ddd;*/
+    padding: 5px;
+    background: #fff;
+    opacity: 85%
+
+  }
+
+  table th {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-top: 0;
+  }
+  
+
+div .main_board {
+    color: #eabaac;
+}
+
+
+   #card table tr {
+	margin-bottom: 20px;
+	display: inline flex;
+	border-bottom: 2px solid #ddd;
+	border-bottom: 7px dotted gray;
+	}
+
+card table {
+  border: 0;
+}
+
+card table thead {
+  display: none;
+}
+
+card table td .upper {
+  display: run-in;
+  text-align: left;
+  font-size: 16px;
+}
+
+card table td .lower {
+  display: block;
+  text-align: left;
+  font-size: 19px;
+}
+
+
+
+card table td:last-child {
+  border-bottom: 0;
+}
+
+card table td::before {
+  content: attr(data-label);
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+card .space::before {
+  content: attr(data-label)  '  ';
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+  white-space: pre;
+}
+
+
+
+/*
+ * what are these last 3?
+#card tbody{
+    line-height:!important;
+    }
+    */
+
+/*
+description td::before {
+       
+  content: attr(id);
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+#description {
+    line-height:auto!important;
+}
+	*/ 
+
+
+
+  
+
+   /* Style buttons */
+.btn {
+  background-color: #eabaac; /* Blue background */
+  border: none; /* Remove borders */
+  color: #be3400;
+  padding: 6px 8px; /* Some padding */
+  font-size: 16px; /* Set a font size */
+  cursor: pointer; /* Mouse pointer on hover */
+}
+
+/* Darker background on mouse-over */
+.btn:hover {
+  background-color: #015045;
+}

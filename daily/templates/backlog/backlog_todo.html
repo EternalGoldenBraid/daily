@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	Daily
+
+{% endblock %}
+
+{% block main %}
+
+	{% if foo %}
+	<h1> Results </h1>
+		<ul id = "backlogs">
+		{% for i in foo %}
+		<li> {{ i['name'] }} </li>
+		{% endfor %}
+		</ul>
+	{% else %}
+	<h1> Fetch backlogs	</h1>
+	<form id="backlog" action="" method="post">
+		{{ form.hidden_tag() }}
+		<p>
+				{{ form.api_key.label  }}<br>
+				{{ form.api_key(size=32) }}
+		</p>
+		<p> {{ form.remember_me() }} {{ form.remember_me.label }} </p>
+		<p> {{ form.submit() }} </p>
+	</form>
+	{%endif%}
+        
+{% endblock %}

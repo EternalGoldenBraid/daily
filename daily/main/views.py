@@ -1,4 +1,6 @@
 import os
+import requests
+import json
 from copy import deepcopy
 from datetime import datetime
 from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
@@ -6,8 +8,9 @@ from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
 from daily.models import (User, Rating, Tag, Event, Buffer,
                             rating_as, event_as, BufferEdit)
 from daily import app, db
-from daily.forms import (LoginForm, EntryForm,
+from daily.main.forms import (EntryForm, BacklogForm,
                         EventsForm, DescriptionForm)
+from daily.auth.forms import LoginForm
 from daily.helpers import hours_minutes
 from flask import (render_template, redirect, flash,
         url_for, request, jsonify, session, abort)
@@ -15,9 +18,11 @@ from flask_login import (current_user, login_user,
                     logout_user, login_required)
 from werkzeug.urls import url_parse
 
+from daily.main import bp
 
-@app.route("/", methods=["GET", "POST"])
-@app.route("/index", methods=["GET", "POST"])
+
+@bp.route("/", methods=["GET", "POST"])
+@bp.route("/index", methods=["GET", "POST"])
 @login_required
 def index():
     """
@@ -30,9 +35,9 @@ def index():
             Rating.date.desc()).paginate(
             page, app.config['DAYS_PER_PAGE'], False)
 
-    next_url = url_for('index', page=ratings.next_num) \
+    next_url = url_for('main.index', page=ratings.next_num) \
         if ratings.has_next else None
-    prev_url = url_for('index', page=ratings.prev_num) \
+    prev_url = url_for('main.index', page=ratings.prev_num) \
         if ratings.has_prev else None
 
     form_day = EntryForm()
@@ -56,7 +61,7 @@ def index():
             print(e)
             flash('Make sure your Creative work hours and Meditation'
                   + 'inputs are integers')
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
 
         try:
             scr = form_day.lights.data.replace(':','')
@@ -64,7 +69,7 @@ def index():
         except TypeError:
             print("Error line 71" )
             flash("Please enter numbers on screens field")
-            return redirect(url_for('index')), 400
+            return redirect(url_for('main.index')), 400
 
         rating = Rating(user_id=current_user.id, date=form_day.date.data,
                 rating_sleep=form_day.sleep_rating.data,
@@ -80,7 +85,7 @@ def index():
             print(e)
             db.session.rollback()
             flash("New entry overlaps with old one")
-            return redirect(url_for('index')), 409
+            return redirect(url_for('main.index')), 409
 
         # Read tags from user input
         tags = Tag.query.all()
@@ -129,7 +134,7 @@ def index():
                     db.session.commit()
                 except SQLAlchemyError as e:
                     print(e)
-                    return redirect(url_for('index')), 400
+                    return redirect(url_for('main.index')), 400
 
 
     # Get the updated ratings
@@ -137,13 +142,17 @@ def index():
             Rating.date.desc()).paginate(
             page, app.config['DAYS_PER_PAGE'], False)
 
+    # DEBUG
+    #$import logging
+    #$logging.info("Hep")
+    # END DEBUG
     return render_template("index.html",
            ratings=ratings.items, form_day=form_day,
            form_events=form_events, events=events_buffer,
            next_url=next_url, prev_url=prev_url)
 
 
-@app.route("/events_confirm", methods=["POST"])
+@bp.route("/events_confirm", methods=["POST"])
 @login_required
 def events_confirm():
 
@@ -173,7 +182,7 @@ def events_confirm():
         # Validate that entry does not already exist
         if Buffer.query.filter_by(user_id = user_id,
                 event_tag=event).all():
-            return jsonify(address=url_for("index"),
+            return jsonify(address=url_for("main.index"),
                            error='Event already exists'), 400
 
         # Add to database
@@ -189,7 +198,7 @@ def events_confirm():
             events[event] = duration
         else:
             events[event] = ''
-        return jsonify({'address':url_for('index')}), 201
+        return jsonify({'address':url_for('main.index')}), 201
 
     except SQLAlchemyError as e:
         print(e)
@@ -197,7 +206,7 @@ def events_confirm():
         return jsonify()
 
 
-@app.route("/empty", methods=["POST", "GET"])
+@bp.route("/empty", methods=["POST", "GET"])
 @login_required
 def empty():
 
@@ -207,7 +216,7 @@ def empty():
     return "Table emptied", 200
 
 
-@app.route("/delete_row_buffer", methods=["POST", "GET"])
+@bp.route("/delete_row_buffer", methods=["POST", "GET"])
 @login_required
 def delete_row_buffer():
     """
@@ -234,7 +243,7 @@ def delete_row_buffer():
        return 'edit not implemented', 404
     return f'{event} OK', 200
 
-@app.route("/delete_edit_row/<id>", methods=["POST", "GET"])
+@bp.route("/delete_edit_row/<id>", methods=["POST", "GET"])
 @login_required
 def delete_edit_row(id):
     """
@@ -257,7 +266,7 @@ def delete_edit_row(id):
                 user_id=current_user.id).first()
         db.session.delete(clear_bf_edit)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
     rating = Rating.query.filter_by(id=id).first()
     events = rating.events
@@ -284,7 +293,7 @@ def delete_edit_row(id):
             print(e)
             request.status = 400
             flash("Something went wrong removing your entry")
-            return redirect(url_for('index')), 400
+            return redirect(url_for('main.index')), 400
     elif 'EDIT_rating' in request.form.values():
         # Render edit page for making changes
         try:
@@ -307,7 +316,7 @@ def delete_edit_row(id):
                 screen_minutes = '0'+screen_minutes
             screen_time=screen_hours+':'+screen_minutes
 
-            return render_template("edit_rating.html",
+            return render_template("main/edit_rating.html",
                 rating=rating, form_day=form_day,
                 form_events=form_events, events=events,
                 screen_hours=screen_hours,
@@ -323,7 +332,7 @@ def delete_edit_row(id):
             db.session.commit()
             flash("Failed to process your edit request")
 
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 
 @login_required
@@ -333,89 +342,52 @@ def edit_row():
         pass
     return "Table emptied", 200
 
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """
-    Logs user in
-    """
-
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-    # Check if request was a POST request
-        # Attempt to fetch users username from the database, 
-        # take the first result
-        user = User.query.filter_by(username=form.username.data).first()
-
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-
-        # Forward to the page the attempted to get at before authentication
-        if not next_page or url_parse(next_page) != '':
-            return redirect(url_for('index'))
-
-        return redirect(next_page)
-
-    return render_template('login.html', title='Log In', form=form)
-
-# url_parse() Parses a URL from a string into a URL tuple.
-#If the URL is lacking a scheme it can be provided as second argument.
-#Otherwise, it is ignored. Optionally fragments can be stripped from
-#the URL by setting allow_fragments to False.
-#The inverse of this function is url_unparse().
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    """
-    Registers user 
-    """
-
-    # Awaiting rating table modification for multi user support
-    return url_for('register')
-
-    #    if form.password != form.password_confimation:
-    #        flash("Passwords don't match")
-    #        return redirect(url_for('register'))
-    #
-    #    if current_user.is_authenticated:
-    #        return redirect(url_for('index'))
-    #    form = RegisterForm()
-    #    if form.validate_on_submit():         
-    #    # Check if request was a POST request 
-    #
-    #        # Check if user already exists
-    #        username = form.username.data
-    #        user = User.query.filter_by(username=username).first()
-    #
-    #        if user is not None:
-    #            flash('Username already exists')
-    #            return redirect(url_for('register'))
-    #
-    #        # Create user
-    #        u = User(username=username, email=#TODO)
-    #        u.set_password(form.password.data)
-    #
-    #        login_user(user, remember=form.remember_me.data)
-    #        next_page = request.args.get('next')
-    #        
-    #        # Forward to the page the attempted to get at before authentication
-    #        if not next_page or url_parse(next_page) != '':
-    #            return redirect(url_for('index'))
-    #
-    #        return redirect(next_page)
-    #
-    #    return render_template('login.html', title='Log In', form=form)
-
-
-# Route for loggine the user out
-@app.route("/logout")
+# Renders a view of the users backlog
+@bp.route("/backlogs", methods=["GET", "POST"])
 @login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
+def backlogs():
+    """
+    Acess to user's backlogs.
+    """
+
+    backlog_form = BacklogForm(request.form)
+
+    #if backlog_form.validate_on_submit():
+    if request.method == 'POST' and backlog_form.validate():
+
+        # Query the api for the user account related to the api_key
+        # and use the account_id to fetch a view of the backlogs.
+        api_key = backlog_form.api_key.data
+        headers = {f'Authorization': 'token ' + api_key }
+        url = 'https://easybacklog.com/api/accounts'
+
+        # Account object
+        response_account = requests.get(url, headers=headers)
+        response_account_dict = json.loads(response_account.text)
+
+        # The response_account_dict is a list since apparently
+        # an account_id can have multiple users.
+        # This implementation only valid for a single user.
+        #if response_account_dict[0]["status"] == "error":
+        if response_account.status_code != 200:
+            flash(
+                f'{response_account_dict["status"]}:{response_account_dict["message"]}')
+            print(response_account.text)
+            return redirect(url_for('backlogs'))
+
+        account_id = response_account_dict[0]["id"]
+        url = f'https://easybacklog.com/api/accounts/{account_id}/backlogs'
+        response_backlogs = requests.get(url, headers=headers)
+        response_backlogs_dict = json.loads(response_backlogs.text)
+
+        if response_backlogs.status_code != 200:
+            flash(
+                f'{response_backlogs_dict["status"]}:{response_backlogs_dict["message"]}')
+            print(response_backlogs.text)
+            return redirect(url_for('backlogs'))
+
+        return render_template('backlog/backlog_todo.html', title = 'Backlog',
+                                foo = response_backlogs_dict, form = backlog_form)
+    else:
+        return render_template('backlog/backlog.backlog_todo.html', title = 'Backlog',
+                                foo=False, form = backlog_form)
