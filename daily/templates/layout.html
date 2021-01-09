@@ -64,22 +64,22 @@
                 {% if current_user.is_anonymous %}
                     <ul class="navbar-nav ml-auto mt-2">
                         <li class="nav-item">
-                          <a class="nav-link" href="/login">Log In</a>
+                          <a class="nav-link" href="/auth/login">Log In</a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" href="/register">Register
+                          <a class="nav-link" href="/auth/register">Register
                           </a></li>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
                         <li class="nav-item">
-                          <a class="nav-link" href="main.index">Home</a>
+                          <a class="nav-link" href="/index">Home</a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" href="log/log">Logs</a>
+                          <a class="nav-link" href="">Logs</a>
                         </li>
 												<li class="nav-item">
-                          <a class="nav-link" href="graphs/graphs">Graphs</a>
+                          <a class="nav-link" href="">Graphs</a>
                         </li>
 												<li class="nav-item">
                           <a class="nav-link" href="auth/logout">Log out</a>
