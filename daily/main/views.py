@@ -142,7 +142,11 @@ def index():
             Rating.date.desc()).paginate(
             page, app.config['DAYS_PER_PAGE'], False)
 
-    return render_template("main/index.html",
+    # DEBUG
+    #$import logging
+    #$logging.info("Hep")
+    # END DEBUG
+    return render_template("index.html",
            ratings=ratings.items, form_day=form_day,
            form_events=form_events, events=events_buffer,
            next_url=next_url, prev_url=prev_url)

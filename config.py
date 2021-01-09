@@ -17,3 +17,4 @@ class Config(object):
     if os.environ.get('FLASK_ENV') == 'development':
         SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://dev:test@localhost/dailydb'
         SECRET_KEY = 'asd'
+        EXPLAIN_TEMPLATE_LOADING = True;
