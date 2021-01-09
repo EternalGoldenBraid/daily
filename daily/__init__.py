@@ -24,21 +24,35 @@ dictConfig({
 ## end DEBUG
 
 
-app = Flask(__name__)
-app.config.from_object(Config)
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db, compare_type=True)
+db = SQLAlchemy()
+#migrate = Migrate(app, db, compare_type=True)
+migrate = Migrate(compare_type=True)
 
 #View module (view functions) must be imported after the application object is created.
-login = LoginManager(app)
+login = LoginManager()
 login.login_view = 'auth.login'
 from daily import models 
 
-# Register blueprints
-from daily.main import bp as main_bp
-from daily.auth import bp as auth_bp
-from daily.errors import bp as errors_bp
-app.register_blueprint(auth_bp, url_prefix='/auth')
-app.register_blueprint(errors_bp)
-app.register_blueprint(main_bp)
+
+def create_app(config_class=Config):
+
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login.init_app(app)
+
+    if not app.debug and not app.testing:
+        pass
+
+    # Register blueprints
+    from daily.main import bp as main_bp
+    from daily.auth import bp as auth_bp
+    from daily.errors import bp as errors_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(errors_bp)
+    app.register_blueprint(main_bp)
+
+    return app
