@@ -53,7 +53,7 @@
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
         <div class="container-fluid">
-          <a class="navbar-brand" href="{{ url_for('index') }}">
+          <a class="navbar-brand" href="{{ url_for('main/index') }}">
               <span class="light">Daily</span></a>
             <button aria-controls="navbar" aria-expanded="false" 
               aria-label="Toggle navigation" class="navbar-toggler" 
@@ -73,16 +73,16 @@
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
                         <li class="nav-item">
-                          <a class="nav-link" href="/index">Home</a>
+                          <a class="nav-link" href="main/index">Home</a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" href="/log">Logs</a>
+                          <a class="nav-link" href="log/log">Logs</a>
                         </li>
 												<li class="nav-item">
-                          <a class="nav-link" href="/graphs">Graphs</a>
+                          <a class="nav-link" href="graphs/graphs">Graphs</a>
                         </li>
 												<li class="nav-item">
-                          <a class="nav-link" href="/logout">Log out</a>
+                          <a class="nav-link" href="auth/logout">Log out</a>
                         </li>
                     </ul>
                 {% endif %}

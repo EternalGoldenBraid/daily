@@ -40,7 +40,7 @@
 				<td class= 'space' data-label='Creative Work '> {{ rating.cw }}</td>
 
 				<td class = events_buttons >
-				<form action="{{url_for('delete_edit_row', id=rating.id) }}" 
+				<form action="{{url_for('main.delete_edit_row', id=rating.id) }}" 
 							method="post">
             <button type="hidden" name="_method" class="btn fa fa-trash" 
                     value="DELETE_rating" id='deleteRowButton-{{ rating.id }}'>
@@ -254,7 +254,7 @@
               <td scope=""> {{ events[entry][0] }}</td>
 							<td scope="">
                     <form method=GET
-												action="{{ url_for('delete_row_buffer', 
+												action="{{ url_for('main.delete_row_buffer', 
                         id=events[entry[1]]) }}" >
 	        					    <button type="submit" name="delete" 
 																class="buffer_button delete btn fa fa-trash" 

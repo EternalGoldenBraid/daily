@@ -8,7 +8,7 @@ from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
 from daily.models import (User, Rating, Tag, Event, Buffer,
                             rating_as, event_as, BufferEdit)
 from daily import app, db
-from daily.forms import (EntryForm, BacklogForm,
+from daily.main.forms import (EntryForm, BacklogForm,
                         EventsForm, DescriptionForm)
 from daily.auth.forms import LoginForm
 from daily.helpers import hours_minutes
@@ -18,9 +18,11 @@ from flask_login import (current_user, login_user,
                     logout_user, login_required)
 from werkzeug.urls import url_parse
 
+from daily.main import bp
 
-@app.route("/", methods=["GET", "POST"])
-@app.route("/index", methods=["GET", "POST"])
+
+@bp.route("/", methods=["GET", "POST"])
+@bp.route("/index", methods=["GET", "POST"])
 @login_required
 def index():
     """
@@ -33,9 +35,9 @@ def index():
             Rating.date.desc()).paginate(
             page, app.config['DAYS_PER_PAGE'], False)
 
-    next_url = url_for('index', page=ratings.next_num) \
+    next_url = url_for('main.index', page=ratings.next_num) \
         if ratings.has_next else None
-    prev_url = url_for('index', page=ratings.prev_num) \
+    prev_url = url_for('main.index', page=ratings.prev_num) \
         if ratings.has_prev else None
 
     form_day = EntryForm()
@@ -59,7 +61,7 @@ def index():
             print(e)
             flash('Make sure your Creative work hours and Meditation'
                   + 'inputs are integers')
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
 
         try:
             scr = form_day.lights.data.replace(':','')
@@ -67,7 +69,7 @@ def index():
         except TypeError:
             print("Error line 71" )
             flash("Please enter numbers on screens field")
-            return redirect(url_for('index')), 400
+            return redirect(url_for('main.index')), 400
 
         rating = Rating(user_id=current_user.id, date=form_day.date.data,
                 rating_sleep=form_day.sleep_rating.data,
@@ -83,7 +85,7 @@ def index():
             print(e)
             db.session.rollback()
             flash("New entry overlaps with old one")
-            return redirect(url_for('index')), 409
+            return redirect(url_for('main.index')), 409
 
         # Read tags from user input
         tags = Tag.query.all()
@@ -132,7 +134,7 @@ def index():
                     db.session.commit()
                 except SQLAlchemyError as e:
                     print(e)
-                    return redirect(url_for('index')), 400
+                    return redirect(url_for('main.index')), 400
 
 
     # Get the updated ratings
@@ -140,13 +142,13 @@ def index():
             Rating.date.desc()).paginate(
             page, app.config['DAYS_PER_PAGE'], False)
 
-    return render_template("index.html",
+    return render_template("main/index.html",
            ratings=ratings.items, form_day=form_day,
            form_events=form_events, events=events_buffer,
            next_url=next_url, prev_url=prev_url)
 
 
-@app.route("/events_confirm", methods=["POST"])
+@bp.route("/events_confirm", methods=["POST"])
 @login_required
 def events_confirm():
 
@@ -176,7 +178,7 @@ def events_confirm():
         # Validate that entry does not already exist
         if Buffer.query.filter_by(user_id = user_id,
                 event_tag=event).all():
-            return jsonify(address=url_for("index"),
+            return jsonify(address=url_for("main.index"),
                            error='Event already exists'), 400
 
         # Add to database
@@ -192,7 +194,7 @@ def events_confirm():
             events[event] = duration
         else:
             events[event] = ''
-        return jsonify({'address':url_for('index')}), 201
+        return jsonify({'address':url_for('main.index')}), 201
 
     except SQLAlchemyError as e:
         print(e)
@@ -200,7 +202,7 @@ def events_confirm():
         return jsonify()
 
 
-@app.route("/empty", methods=["POST", "GET"])
+@bp.route("/empty", methods=["POST", "GET"])
 @login_required
 def empty():
 
@@ -210,7 +212,7 @@ def empty():
     return "Table emptied", 200
 
 
-@app.route("/delete_row_buffer", methods=["POST", "GET"])
+@bp.route("/delete_row_buffer", methods=["POST", "GET"])
 @login_required
 def delete_row_buffer():
     """
@@ -237,7 +239,7 @@ def delete_row_buffer():
        return 'edit not implemented', 404
     return f'{event} OK', 200
 
-@app.route("/delete_edit_row/<id>", methods=["POST", "GET"])
+@bp.route("/delete_edit_row/<id>", methods=["POST", "GET"])
 @login_required
 def delete_edit_row(id):
     """
@@ -260,7 +262,7 @@ def delete_edit_row(id):
                 user_id=current_user.id).first()
         db.session.delete(clear_bf_edit)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
     rating = Rating.query.filter_by(id=id).first()
     events = rating.events
@@ -287,7 +289,7 @@ def delete_edit_row(id):
             print(e)
             request.status = 400
             flash("Something went wrong removing your entry")
-            return redirect(url_for('index')), 400
+            return redirect(url_for('main.index')), 400
     elif 'EDIT_rating' in request.form.values():
         # Render edit page for making changes
         try:
@@ -310,7 +312,7 @@ def delete_edit_row(id):
                 screen_minutes = '0'+screen_minutes
             screen_time=screen_hours+':'+screen_minutes
 
-            return render_template("edit_rating.html",
+            return render_template("main/edit_rating.html",
                 rating=rating, form_day=form_day,
                 form_events=form_events, events=events,
                 screen_hours=screen_hours,
@@ -326,7 +328,7 @@ def delete_edit_row(id):
             db.session.commit()
             flash("Failed to process your edit request")
 
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 
 @login_required
@@ -337,7 +339,7 @@ def edit_row():
     return "Table emptied", 200
 
 # Renders a view of the users backlog
-@app.route("/backlogs", methods=["GET", "POST"])
+@bp.route("/backlogs", methods=["GET", "POST"])
 @login_required
 def backlogs():
     """
@@ -380,8 +382,8 @@ def backlogs():
             print(response_backlogs.text)
             return redirect(url_for('backlogs'))
 
-        return render_template('backlog_todo.html', title = 'Backlog',
+        return render_template('backlog/backlog_todo.html', title = 'Backlog',
                                 foo = response_backlogs_dict, form = backlog_form)
     else:
-        return render_template('backlog_todo.html', title = 'Backlog',
+        return render_template('backlog/backlog.backlog_todo.html', title = 'Backlog',
                                 foo=False, form = backlog_form)

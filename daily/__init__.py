@@ -14,10 +14,12 @@ migrate = Migrate(app, db, compare_type=True)
 #View module (view functions) must be imported after the application object is created.
 login = LoginManager(app)
 login.login_view = 'auth.login'
-from daily import models, views 
+from daily import models 
 
 # Register blueprints
-from daily.errors import bp as errors_bp
+from daily.main import bp as main_bp
 from daily.auth import bp as auth_bp
-app.register_blueprint(errors_bp)
+from daily.errors import bp as errors_bp
 app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(errors_bp)
+app.register_blueprint(main_bp)
