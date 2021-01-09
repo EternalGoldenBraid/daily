@@ -11,8 +11,13 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
 
-
 #View module (view functions) must be imported after the application object is created.
 login = LoginManager(app)
-login.login_view = 'login'
-from daily import  models, views, errors
+login.login_view = 'auth.login'
+from daily import models, views 
+
+# Register blueprints
+from daily.errors import bp as errors_bp
+from daily.auth import bp as auth_bp
+app.register_blueprint(errors_bp)
+app.register_blueprint(auth_bp, url_prefix='/auth')
