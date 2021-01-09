@@ -14,30 +14,23 @@
 
 
 <div id='card' class="container-responsive main_board">
- <table id='events_all' class="table table-responsive w-auto">
-  <thead class='upper'>
-    <tr>
-      <th scope="col"> Date: 				</th>
-      <th scope="col"> Sleep 				</th>
-      <th scope="col"> Meditation 	</th>
-      <th scope="col"> Screens 			</th>
-			<th scope="col"> Rating 			</th> 
-      <th scope="col"> Creative Work</th>
-			<th></th>
-			<th></th>
-    </tr>
-  </thead>
-  <tbody>
+ <div id='events_all' class="table table-responsive w-auto">
+  <tbody width="1100px">
 	  <!-- Render per date in ratings table, join event_date==rating_date -->
 		{% for rating in ratings %}
 		<div class='upper'>
-			<tr >
-				<td class= 'space' data-label='Date'   			 > {{	rating.date.strftime('%Y-%m-%d') }}</td>
-				<td class= 'space' data-label='Sleep' 				 > {{	rating.rating_sleep }}</td>
-				<td class= 'space' data-label='Meditation' 	 > {{	rating.meditation }}</td>
-				<td class= 'space' data-label='Screens'    	 > {{ rating.screen }}</td>
-				<td class= 'space' data-label='Rating'    		 > {{ rating.rating_day }}</td>
-				<td class= 'space' data-label='Creative Work '> {{ rating.cw }}</td>
+				<span class= 'space' data-label='Date'   			 > 
+					Date: {{	rating.date.strftime('%Y-%m-%d') }}</span>
+				<span class= 'space' data-label='Sleep' 				 > 
+					Sleep: {{	rating.rating_sleep }}</span>
+				<span class= 'space' data-label='Meditation' 	 > 
+					Meditation: {{	rating.meditation }}</span>
+				<span class= 'space' data-label='Screens'    	 >
+					Screens: {{ rating.screen }}</span>
+				<span class= 'space' data-label='Rating'    		 >
+					Rating: {{ rating.rating_day }}</span>
+				<span class= 'space' data-label='Creative Work '> 
+					Creative Work: {{ rating.cw }}</span>
 
 				<td class = events_buttons >
 				<form action="{{url_for('main.delete_edit_row', id=rating.id) }}" 
@@ -51,7 +44,7 @@
 		</div>
 		<div class='lower'>
 			<tr>
-				<td id='description' data-label='Description'>
+				<div id='description' data-label='Description'>
 					<br>
 					{% for event in rating.events %}
 					<li>
@@ -68,15 +61,15 @@
 							: {{ event.duration // 60 }}h: {{ event.duration % 60 }}m
 						{% endif %}
 					{% endif %}
-					</li>
+					</li> </br>
 					{% endfor %}
-				</td>
+				</div>
 			</tr>
 		</div>
           </form>
 		{% endfor %}
   </tbody>
-</table>
+</div>
 </div>
 <div>
     {% if prev_url %}
