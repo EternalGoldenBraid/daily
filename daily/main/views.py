@@ -7,13 +7,13 @@ from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
                             InvalidRequestError)
 from daily.models import (User, Rating, Tag, Event, Buffer,
                             rating_as, event_as, BufferEdit)
-from daily import app, db
+from daily import db
 from daily.main.forms import (EntryForm, BacklogForm,
                         EventsForm, DescriptionForm)
 from daily.auth.forms import LoginForm
 from daily.helpers import hours_minutes
-from flask import (render_template, redirect, flash,
-        url_for, request, jsonify, session, abort)
+from flask import (render_template, redirect, flash, url_for,
+        request, jsonify, session, abort, current_app)
 from flask_login import (current_user, login_user,
                     logout_user, login_required)
 from werkzeug.urls import url_parse
@@ -33,7 +33,7 @@ def index():
     page = request.args.get('page', 1, type=int)
     ratings = Rating.query.filter_by(user_id=current_user.id).order_by(
             Rating.date.desc()).paginate(
-            page, app.config['DAYS_PER_PAGE'], False)
+            page, current_app.config['DAYS_PER_PAGE'], False)
 
     next_url = url_for('main.index', page=ratings.next_num) \
         if ratings.has_next else None
@@ -140,7 +140,7 @@ def index():
     # Get the updated ratings
     ratings = Rating.query.filter_by(user_id=current_user.id).order_by(
             Rating.date.desc()).paginate(
-            page, app.config['DAYS_PER_PAGE'], False)
+            page, current_app.config['DAYS_PER_PAGE'], False)
 
     # DEBUG
     #$import logging
