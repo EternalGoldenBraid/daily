@@ -1,5 +1,3 @@
-# Don't think is needed besides unit tests.
-
 from daily import create_app, db
 
 app = create_app()
