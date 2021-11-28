@@ -15,7 +15,7 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 from numpy.random import default_rng
-from scipy import stats
+#from scipy import stats
 import os
 
 
@@ -103,7 +103,6 @@ def tag_freq(engine):
     match = pd.merge(match, tags, how='right', on='tag.id')
     tags_name = match.groupby('tag_name').count()['tag.id']
 
-    print(stats.describe(tags_name))
     tags_name = tags_name[tags_name > 20]
     tags_name = tags_name.sort_values(ascending=False)
 
@@ -227,7 +226,6 @@ def cluster(engine):
     threshold = np.max(cov)*0.9
     cov = cov[cov > threshold]
     print([cov>threshold])
-    #print(stats.describe(cov))
 
     #fig_cov,ax_cov = plt.subplots(1)
     #ax_cov.imshow(cov)
