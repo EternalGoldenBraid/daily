@@ -8,7 +8,7 @@ from daily.data_analysis import bp
 from daily import db
 
 import matplotlib
-import matplotlib.pyplot as plt,mpld3
+import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 from collections import Counter
