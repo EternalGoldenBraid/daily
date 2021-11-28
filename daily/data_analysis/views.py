@@ -104,19 +104,34 @@ def tag_freq(engine):
     tags_name = match.groupby('tag_name').count()['tag.id']
 
     print(stats.describe(tags_name))
-    tags_name = tags_name[tags_name > 10]
+    tags_name = tags_name[tags_name > 20]
     tags_name = tags_name.sort_values(ascending=False)
 
     labels = tags_name.index
     
     # Plot
-    fig, ax = plt.subplots(1)
-    #ax.hist(tags_name, bins=tags_name.shape[0])
-    #ax.hist(tags_name, bins=labels.shape[0]+1-0.5)
+    fig, ax = plt.subplots(1, figsize=(20,10), dpi=300)
     ax.stem(tags_name)
+
     ax.set_xticks(range(labels.shape[0]))
-    ax.set_xticklabels(labels, rotation=45,fontsize=8)
-    ax.grid(True)
+    ax.set_xticklabels(labels, rotation=45,fontsize=10)
+
+    ax.tick_params(axis='x', bottom=True, top=True,
+            labelbottom=True, labeltop=True)
+    
+    # Set everyother tick top and bot
+    ticks_bot = [tick.label1 for tick in ax.xaxis.get_major_ticks()]
+    for idx, tick in enumerate(ticks_bot):
+        if idx % 2 == 0: tick.set_visible(False)
+    plt.setp(ticks_bot,ha='right')
+
+    ticks_top = [tick.label2 for tick in ax.xaxis.get_major_ticks()]
+    for idx, tick in enumerate(ticks_top):
+        if idx % 2 == 1: tick.set_visible(False)
+    plt.setp(ticks_top, ha='left' )
+
+    #ax.grid(True)
+    plt.tight_layout()
     name = 'tag_freq'
     name = save_plot(fig,name=name,type="img",form='png')
 
