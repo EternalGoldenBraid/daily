@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	Data analysis
+{% endblock %}
+
+{% block main %}
+<body>
+	  <h2>Some visualizations</h2>
+		{% for row in images %}
+		  <div class="row">
+			{% for col in row %}
+						<div class="column">
+						<img src={{col}} alt="Resultado final" style="width:100%">
+						</div>
+			{% endfor %}
+			</div>
+		{% endfor %}
+
+</body>
+{% endblock %}

@@ -51,8 +51,10 @@ def create_app(config_class=Config):
     from daily.main import bp as main_bp
     from daily.auth import bp as auth_bp
     from daily.errors import bp as errors_bp
+    from daily.data_analysis import bp as data_bp 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(errors_bp)
+    app.register_blueprint(data_bp)
     app.register_blueprint(main_bp)
 
     return app
