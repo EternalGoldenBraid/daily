@@ -8,6 +8,7 @@ from daily.data_analysis import bp
 from daily import db
 
 import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -134,7 +135,6 @@ def tag_freq(engine):
     name = 'tag_freq'
     name = save_plot(fig,name=name,type="img",form='png')
 
-    #plt.show()
     return name
 
 
