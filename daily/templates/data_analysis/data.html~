@@ -23,8 +23,7 @@
 			<p> One file found with name: {{ filenames[0] }} </p>
 			<div class="row">
 				<img 
-					src={{ url_for('data_analysis.display_plot',
-					 				filename=filenames[0]) }} 
+					src={{ url_for('data_analysis.display_plot',filename=filenames[0]) }} 
 					alt="Someimage" style="width:100%">
 			</div>
 
