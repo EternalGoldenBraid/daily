@@ -37,6 +37,7 @@ Run the application with `flask run` and test using the provided URL.
 - [ ] Add timestamps for event inputs and edits.
 
 - [ ] Add data visualization
+      - [ ] Asychronous parallel processing of data when big operations: https://docs.python.org/3/library/concurrent.futures.html
       
 - [ ] Add multi-user support
 
