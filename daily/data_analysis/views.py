@@ -31,11 +31,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 def data():
     engine = db.get_engine()
 
-    #filenames = []
-    #filenames.append(tag_freq(engine))
-    #return render_template("data_analysis/data.html",filenames=filenames)
-
-    return test_img(engine)
+    return tag_freq(engine)
 
 def save_plot(fig, name, form=None):
 
@@ -54,18 +50,14 @@ def display_plot():
             filename=request.args.get("filename")),
             code=301)
 
-def test_img(engine):
-
-
-    fig, ax = plt.subplots(1, figsize=(20,10), dpi=300)
-    x = np.arange(3)
-    ax.stem(x)
-
+def plot_img(fig):
     output = io.BytesIO()
     FC(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
 def tag_freq(engine):
+
+    ### Data analysis
     tags = pd.read_sql('tag',engine, index_col=False)
     tags.columns = tags.columns.str.replace('id','tag.id')
 
@@ -105,12 +97,12 @@ def tag_freq(engine):
         if idx % 2 == 1: tick.set_visible(False)
     plt.setp(ticks_top, ha='left' )
 
-    #ax.grid(True)
+    ax.grid(True)
     plt.tight_layout()
     name = 'tag_freq'
-    name = save_plot(fig,name=name,type="img",form='png')
+    
+    return plot_img(fig)
 
-    return name
 
 def time_series(engine):
     rng = default_rng()
