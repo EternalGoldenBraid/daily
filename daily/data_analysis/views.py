@@ -7,8 +7,8 @@ from flask_login import (current_user, login_user,
 from daily.data_analysis import bp
 from daily import db
 
-import matplotlib
-matplotlib.use("Agg")
+#import matplotlib
+#matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -19,6 +19,9 @@ from numpy.random import default_rng
 #from scipy import stats
 import os
 
+import io
+from flask import Response
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 
 
 
@@ -28,67 +31,39 @@ import os
 def data():
     engine = db.get_engine()
 
-    filenames = []
-    filenames.append(tag_freq(engine))
-    return render_template("data_analysis/data.html",filenames=filenames)
+    #filenames = []
+    #filenames.append(tag_freq(engine))
+    #return render_template("data_analysis/data.html",filenames=filenames)
 
-def save_plot(fig, name, type="img", form=None):
+    return test_img(engine)
 
-    if type=="html":
-        #html = mpld3.fig_to_html(
-        #        fig1, d3_url=None, mpld3_url=None, no_extras=False,
-        #        template_type='general', figid=None, use_http=False))
-        html = mpld3.fig_to_html(fig)
-        file = open(f"daily/templates/data_analysis/{name}.html","w")
-        file.write(html)
-        file.close()
-        return name
-    elif type=="img":
-        path = "plots/"
-        filename = path+name+"."+form
-        plt.savefig("daily/static/"+filename, format=form)
-        #plt.savefig(filename)
-        return filename
+def save_plot(fig, name, form=None):
+
+    path = "plots/"
+    filename = path+name+"."+form
+    plt.savefig("daily/static/"+filename, format=form)
+    #plt.savefig(filename)
+    return filename
         
 @bp.route("/display_plot", methods=["GET", "POST"])
 @login_required
-#def display_plot(filename):
 def display_plot():
-    #print("DISPLAY_PLOT ARGS: ", filename)
-    #print(help(request.args))
     print("DISPLAY_PLOT ARGS: ", request.args.get("filename"))
     return redirect(
             url_for('static', 
             filename=request.args.get("filename")),
             code=301)
 
-def time_series(engine):
-    rng = default_rng()
-    # Sleep ratings
-    s= pd.read_sql('rating',engine, index_col=False)
-    s['date'] = pd.to_datetime(s['date']).dt.date
-    s_date = s
-    s_date = s_date.set_index(s_date['date'])
-    idx = pd.date_range(min(s['date']), max(s['date']), freq='D')
-    s_date.index = pd.DatetimeIndex(s_date.index)
-    s_date = s_date.reindex(idx)
-    s_date = s_date.set_index(s_date['date'])
-    s_date = s_date[:3]
-    idx = pd.date_range(min(s_date['date']), max(s_date['date']), freq='D')
-    fig, ax = plt.subplots(2, figsize=(8,8))
-    fig.autofmt_xdate()
-    ax[0].scatter(range(209),s_date['rating_sleep'],s=5)
-    ax.plot(s_date['rating_sleep'],c='g')
-    ax.plot('date',data=s_date['rating_sleep'])
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y'))
-    ax.xaxis.set_major_locator(mdates.MonthLocator())
-    ax.xaxis.set_minor_locator(mdates.MonthLocator())
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b'))
-    ax.set_xticks(np.arange(s_date['date'].size))
-    ax.set_xticklabels(s_date['date'])
-    ax.xaxis.set_major_locator(mdates.YearLocator(1, month=1, day=1))
-    plt.xticks(rotation=30)
+def test_img(engine):
 
+
+    fig, ax = plt.subplots(1, figsize=(20,10), dpi=300)
+    x = np.arange(3)
+    ax.stem(x)
+
+    output = io.BytesIO()
+    FC(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
 
 def tag_freq(engine):
     tags = pd.read_sql('tag',engine, index_col=False)
@@ -136,6 +111,35 @@ def tag_freq(engine):
     name = save_plot(fig,name=name,type="img",form='png')
 
     return name
+
+def time_series(engine):
+    rng = default_rng()
+    # Sleep ratings
+    s= pd.read_sql('rating',engine, index_col=False)
+    s['date'] = pd.to_datetime(s['date']).dt.date
+    s_date = s
+    s_date = s_date.set_index(s_date['date'])
+    idx = pd.date_range(min(s['date']), max(s['date']), freq='D')
+    s_date.index = pd.DatetimeIndex(s_date.index)
+    s_date = s_date.reindex(idx)
+    s_date = s_date.set_index(s_date['date'])
+    s_date = s_date[:3]
+    idx = pd.date_range(min(s_date['date']), max(s_date['date']), freq='D')
+    fig, ax = plt.subplots(2, figsize=(8,8))
+    fig.autofmt_xdate()
+    ax[0].scatter(range(209),s_date['rating_sleep'],s=5)
+    ax.plot(s_date['rating_sleep'],c='g')
+    ax.plot('date',data=s_date['rating_sleep'])
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%y'))
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_minor_locator(mdates.MonthLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b'))
+    ax.set_xticks(np.arange(s_date['date'].size))
+    ax.set_xticklabels(s_date['date'])
+    ax.xaxis.set_major_locator(mdates.YearLocator(1, month=1, day=1))
+    plt.xticks(rotation=30)
+
+
 
 
 def kmeans(engine, data, k:int = 5):
