@@ -15,5 +15,10 @@ env/
 venv/
 
 # Database
-database.db
-dailyapp.sql
+*.db
+*.sql
+
+#
+*.swp
+*.un
+*.*~

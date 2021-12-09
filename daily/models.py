@@ -62,7 +62,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer) 
     rating_date = db.Column(db.DateTime, index=True, nullable=False) 
-    story = db.Column(db.String(2000), nullable=False, index=True)
+    story = db.Column(db.Text, nullable=False, index=True)
 
     # Many-to-many for rating-events, defines an Rating.events attribute
     rating_events = db.relationship('Rating', secondary=rating_as,
@@ -72,8 +72,8 @@ class Event(db.Model):
 
 # Many-to-many association table for Event-Tag
 event_as = db.Table('event_tags',
-        db.Column('event.id', db.Integer, db.ForeignKey('tag.id')),
-        db.Column('tag.id', db.Integer, db.ForeignKey('event.id'))
+        db.Column('tag.id', db.Integer, db.ForeignKey('tag.id')),
+        db.Column('event.id', db.Integer, db.ForeignKey('event.id'))
         )
 
 
@@ -97,19 +97,19 @@ class Buffer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
-    event_tag = db.Column(db.String(2000), unique=True,
+    event_tag = db.Column(db.Text, unique=True,
             index=True, nullable=False)     
     duration = db.Column(db.Integer) 
 
 
 # A buffer to hold event: duration pairs for a user during editing rows
 class BufferEdit(db.Model):
-    __tablename__= 'buffer_edt'
+    __tablename__= 'buffer_edit'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id= db.Column(db.Integer, index=True, nullable=False)
-    event_tag= db.Column(db.String(2000), unique=True,
-            index=True, nullable=False)     
+    event_tag= db.Column(db.Text, unique=True,
+            index=False, nullable=False)     
     duration= db.Column(db.Integer) 
 
 
