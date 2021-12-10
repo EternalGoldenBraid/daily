@@ -12,7 +12,7 @@ idna==2.8
 itsdangerous==1.1.0
 Jinja2>=2.11.3
 Mako==1.0.14
-MarkupSafe==1.1.1
+MarkupSafe>=1.1.1
 mysqlclient==2.0.1
 python-dateutil==2.8.0
 python-editor==1.0.4
