@@ -66,9 +66,6 @@ def tag_freq(engine):
 
     # Add tags associated with events to events.
     event_tag = pd.read_sql('event_tags',engine, index_col=False)
-    print(event_tag[:2])
-    print(events[:2])
-    input()
     match = pd.merge(event_tag,events,how='right', on='event_id')
     match = pd.merge(match, tags, how='right', on='tag_id')
     tags_name = match.groupby('tag_name').count()['tag_id']
