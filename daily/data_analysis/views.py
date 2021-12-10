@@ -59,17 +59,19 @@ def tag_freq(engine):
 
     ### Data analysis
     tags = pd.read_sql('tag',engine, index_col=False)
-    tags.columns = tags.columns.str.replace('id','tag.id')
-
-    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    tags.columns = tags.columns.str.replace('id','tag_id')
 
     events = pd.read_sql('event',engine, index_col=False)
-    events.columns = events.columns.str.replace('id','event.id')
+    events.columns = events.columns.str.replace('id','event_id')
 
     # Add tags associated with events to events.
-    match = pd.merge(event_tag,events,how='right', on='event.id')
-    match = pd.merge(match, tags, how='right', on='tag.id')
-    tags_name = match.groupby('tag_name').count()['tag.id']
+    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    print(event_tag[:2])
+    print(events[:2])
+    input()
+    match = pd.merge(event_tag,events,how='right', on='event_id')
+    match = pd.merge(match, tags, how='right', on='tag_id')
+    tags_name = match.groupby('tag_name').count()['tag_id']
 
     tags_name = tags_name[tags_name > 20]
     tags_name = tags_name.sort_values(ascending=False)
