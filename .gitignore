@@ -17,3 +17,7 @@ venv/
 # Database
 database.db
 dailyapp.sql
+
+#
+.*~
+*.un
