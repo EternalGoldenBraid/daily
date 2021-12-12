@@ -32,7 +32,8 @@ import datetime
 def data():
     engine = db.get_engine()
 
-    return tag_freq(engine)
+    #return tag_freq(engine)
+    return cluster(engine)
 
 def save_plot(fig, name, form=None):
 
@@ -134,7 +135,6 @@ def tag_freq(engine):
     
     return plot_img(fig)
 
-
 def time_series(engine):
     rng = default_rng()
     # Sleep ratings
@@ -162,51 +162,48 @@ def time_series(engine):
     ax.xaxis.set_major_locator(mdates.YearLocator(1, month=1, day=1))
     plt.xticks(rotation=30)
 
-
-
-
-def kmeans(engine, data, k:int = 5):
-
-    k = k
-
 def cluster(engine):
-    """ TAGS """
-    tags = pd.read_sql('tag',engine, index_col=False)
-    tags.columns = tags.columns.str.replace('id','tag.id')
 
-    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    # Merge ratings, events and tags to get a df of dates with combinations of tags.
+    ratings = pd.read_sql('rating',engine,index_col=False)
+    ratings = ratings[ratings['user_id'] == current_user.id][['id', 'date','user_id']]
+    ratings.columns = ratings.columns.str.replace('id','rating_id')
+
+    tags = pd.read_sql('tag',engine,index_col=False)
+    tags.columns = tags.columns.str.replace('id','tag_id')
 
     events = pd.read_sql('event',engine, index_col=False)
-    events.columns = events.columns.str.replace('id','event.id')
+    events.columns = events.columns.str.replace('id','event_id')
 
-    # Add tags associated with events to events.
-    match = pd.merge(event_tag,events,how='right', on='event.id')
-    #match = pd.merge(event_tag,events,how='left', on='event.id')
+    re_m2m = pd.read_sql('rating_events',engine,index_col=False)
+    re_m2m=re_m2m[re_m2m['user_id']== current_user.id]
+    rating_events = re_m2m \
+        .merge(ratings,how='right', on='rating_id') \
+        .merge(events,how='left', on='event_id')
 
-    # Include tag names
-    #match = pd.merge(match,tags,on='tag.id')
-    #tags_name = match.groupby('rating_date')['tag_name'].apply(list)
+    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    event_tag = event_tag[event_tag['user_id']==current_user.id]
+    rating_events_tags = rating_events.merge(event_tag,how='left',on='event_id')
+    rating_events_tags = rating_events_tags[['date','tag_id']]
+    rating_events_tags.fillna(-1,inplace=True)
+    rating_events_tags['tag_id']=rating_events_tags['tag_id'].astype(int)
 
-    #tags_id = match.groupby('rating_date')['tag.id'].agg(list) # Series
-    tags_id = match.groupby('rating_date').agg(list) # Series
+    tag_list = rating_events_tags.groupby('date').agg(list)
 
-    days = (max(tags_id.index) - min(tags_id.index))
-    days = days.days
-    data = np.zeros((days,max(tags['tag.id'])))
-    for row, day in enumerate(tags_id.index):
-        print(row)
-        print(day)
-        input()
-        a = Counter(tags_id[day])
-        input()
-        for col in a.keys():
-            data[row][col]=a[col]
+    date_tags = list(map(Counter, tag_list['tag_id']))
+
+    data = np.zeros((tag_list.shape[0], tags['tag_id'].shape[0]))
+    for row in range(data.shape[0]):
+        for col in range(data.shape[1]):
+            data[row][col]=date_tags[row][col]
     
+    # TODO: Get eigenvectors out
     #data = (data-np.mean(data,axis=0))/np.std(data,axis=0)
     data = (data-np.mean(data,axis=0))
     cov = np.cov(data, rowvar=False)
 
-    method = "random"
+    #method = "random"
+    method = "not random"
     if method != "random":
         e_values, e_vectors = np.linalg.eigh(cov)
     else:
@@ -270,12 +267,7 @@ def cluster(engine):
     #foo = e_vectors[eigen_day_idx]
     #print(foo)
 
-    #plt.show()
-    #print (mpld3.fig_to_html(fig1, d3_url=None, mpld3_url=None, no_extras=False, template_type='general', figid=None, use_http=False))
-    #html = mpld3.fig_to_html(fig)
-    #file = open("daily/templates/data_analysis/data.html","w")
-    #file.write(html)
-    #file.close()
+    return plot_img(fig)
 
 def rSVD(X,r,q,p):
     """
