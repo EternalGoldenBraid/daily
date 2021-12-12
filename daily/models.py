@@ -48,8 +48,9 @@ class Rating(db.Model):
 
 # Many-to-many association table for Rating-Event
 rating_as = db.Table('rating_events',
-        db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
+        db.Column('rating_id', db.Integer, db.ForeignKey('rating.id'),nullable=False),
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id'),nullable=False),
+        db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
         )
 
     
@@ -72,8 +73,9 @@ class Event(db.Model):
 
 # Many-to-many association table for Event-Tag
 event_as = db.Table('event_tags',
-        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
-        db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), nullable=False),
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), nullable=False),
+        db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
         )
 
 
