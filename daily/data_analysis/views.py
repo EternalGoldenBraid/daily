@@ -22,6 +22,7 @@ import os
 import io
 from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
+import datetime
 
 
 
@@ -55,33 +56,9 @@ def plot_img(fig):
     FC(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
-def tag_freq(engine):
-
-    ### Data analysis
-    tags = pd.read_sql('tag',engine, index_col=False)
-    tags.columns = tags.columns.str.replace('id','tag_id')
-
-    events = pd.read_sql('event',engine, index_col=False)
-    events.columns = events.columns.str.replace('id','event_id')
-
-    # Add tags associated with events to events.
-    event_tag = pd.read_sql('event_tags',engine, index_col=False)
-    match = pd.merge(event_tag,events,how='right', on='event_id')
-    match = pd.merge(match, tags, how='right', on='tag_id')
-    tags_name = match.groupby('tag_name').count()['tag_id']
-
-    tags_name = tags_name[tags_name > 20]
-    tags_name = tags_name.sort_values(ascending=False)
-
-    labels = tags_name.index
-    
-    # Plot
-    fig, ax = plt.subplots(1, figsize=(20,10), dpi=300)
-    ax.stem(tags_name)
-
+def create_subplots(ax, labels):
     ax.set_xticks(range(labels.shape[0]))
     ax.set_xticklabels(labels, rotation=45,fontsize=10)
-
     ax.tick_params(axis='x', bottom=True, top=True,
             labelbottom=True, labeltop=True)
     
@@ -98,6 +75,61 @@ def tag_freq(engine):
 
     ax.grid(True)
     plt.tight_layout()
+
+def tag_freq(engine):
+    """ Return a runnig average of tag frequencies for
+        the past week, month and all time.
+
+    TODO: Add user_id checks
+        - requires user_id columns in events and tags.
+    """
+
+    ### Data analysis
+    tags = pd.read_sql('tag',engine, index_col=False)
+    tags.columns = tags.columns.str.replace('id','tag_id')
+
+    events = pd.read_sql('event',engine, index_col=False)
+    events.columns = events.columns.str.replace('id','event_id')
+
+    # Add tags associated with events to events.
+    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    match = pd.merge(event_tag,events,how='right', on='event_id')
+    events_tags_joined = pd.merge(match, tags, how='right', on='tag_id')
+
+    # Pick tags corresponding to weekly, monthly and all time freq.
+    min_date = events['rating_date'].min()
+    max_date = events['rating_date'].max()
+    # All time
+    tags_name_all = events_tags_joined.groupby('tag_name').count()['tag_id']
+    #tags_name_all = tags_name_all[tags_name_all > 20]
+    tags_name_all = tags_name_all.sort_values(ascending=False)
+    tags_name_all = tags_name_all[:20]
+    labels_all = tags_name_all.index
+
+    # Monthly 
+    month = events_tags_joined[events_tags_joined['rating_date'] > max_date - datetime.timedelta(30)]
+    tags_name_monthly = month.groupby('tag_name').count()['tag_id']
+    tags_name_monthly = tags_name_monthly.sort_values(ascending=False)
+    tags_name_monthly= tags_name_monthly[:20]
+    labels_monthly = tags_name_monthly.index
+
+    # Weekly 
+    week = events_tags_joined[events_tags_joined['rating_date'] > max_date - datetime.timedelta(7)]
+    tags_name_weekly = week.groupby('tag_name').count()['tag_id']
+    tags_name_weekly = tags_name_weekly.sort_values(ascending=False)
+    tags_name_weekly= tags_name_weekly[:20]
+    labels_weekly = tags_name_weekly.index
+
+    # Plot
+    fig, ax = plt.subplots(1,3, figsize=(20,10), dpi=300)
+    ax[0].stem(tags_name_all)
+    create_subplots(ax=ax[0], labels=labels_all)
+
+    ax[1].stem(tags_name_monthly)
+    create_subplots(ax=ax[1], labels=labels_monthly)
+
+    ax[2].stem(tags_name_weekly)
+    create_subplots(ax=ax[2], labels=labels_weekly)
     name = 'tag_freq'
     
     return plot_img(fig)

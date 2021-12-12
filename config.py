@@ -19,7 +19,9 @@ class Config(object):
                 #'mysql+mysqldb://dev:test@localhost/dailydb'
         #SQLALCHEMY_DATABASE_URI = \
                 #'mysql+mysqldb://test:test@localhost/dailyapp$daily' # Home
+        #SQLALCHEMY_DATABASE_URI = \
+        #        'mysql+mysqldb://test:test@localhost/dailydev' # Home
         SQLALCHEMY_DATABASE_URI = \
-                'mysql+mysqldb://test:test@localhost/dailydev' # Home
+                'mysql+mysqldb://dailydev:dailydev@localhost/daily' # Home
         SECRET_KEY = 'asd'
         EXPLAIN_TEMPLATE_LOADING = True;
