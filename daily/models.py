@@ -49,7 +49,7 @@ class Rating(db.Model):
 # Many-to-many association table for Rating-Event
 rating_as = db.Table('rating_events',
         db.Column('rating_id', db.Integer, db.ForeignKey('rating.id')),
-        db.Column('event.id', db.Integer, db.ForeignKey('event.id'))
+        db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
         )
 
     
