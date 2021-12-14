@@ -26,6 +26,18 @@ Run the application with `flask run` and test using the provided URL.
 
 ## Task List
 
+### Visualization
+- [ ] Add data visualization
+	- [ ] Asychronous parallel processing of data when big operations: https://docs.python.org/3/library/concurrent.futures.html
+	- [x] Plot frequency plots for tags. Minimal working model (MWM) up.
+	- [x] Plot eigenvalues for tags. MWM up.
+
+### Statistics
+- [ ] Find eigentags and eigendays. Can I use the covariance matrix of tag distributions
+across days to compose and eigenday using Principal componen analysis (PCA).
+- [ ] Create a Bayesian (generative) model to predict `sleep_rating` and `rating` given a `tag` vector.
+
+### Backend
 - [x] Read and setup from SQLAlchemy, Flask and it's plugins' Documentation
 
 - [x] Create database models
@@ -36,14 +48,13 @@ Run the application with `flask run` and test using the provided URL.
 
 - [ ] Add timestamps for event inputs and edits.
 
-- [ ] Add data visualization
-	- [ ] Asychronous parallel processing of data when big operations: https://docs.python.org/3/library/concurrent.futures.html
-	- [x] Plot frequency plots for tags. Minimal working model (MWM) up.
-	- [x] Plot eigenvalues for tags. MWM up.
-      
 - [ ] Add multi-user support
 	- [ ] Add user_id relationships to association tables.
 
+### UI
+- [ ] Add buttons for graphs. Currently <url>/data works as a path for a single page image.
+      
+### Others
 - [x] Add an about page. This readme?
 
 - [x] Configure Database backups
