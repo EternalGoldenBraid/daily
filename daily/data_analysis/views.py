@@ -165,47 +165,90 @@ def time_series(engine):
 def cluster(engine):
 
     # Merge ratings, events and tags to get a df of dates with combinations of tags.
+    
+    # Read ratings for user
     ratings = pd.read_sql('rating',engine,index_col=False)
     ratings = ratings[ratings['user_id'] == current_user.id][['id', 'date','user_id']]
     ratings.columns = ratings.columns.str.replace('id','rating_id')
 
+    # Read all tags.
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
     tags = pd.read_sql('tag',engine,index_col=False)
     tags.columns = tags.columns.str.replace('id','tag_id')
 
+    # Read all events.
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
     events = pd.read_sql('event',engine, index_col=False)
     events.columns = events.columns.str.replace('id','event_id')
 
+    # Read all rating event associations.
+    # TODO: Which first join is sensible here? Inner or right?
     re_m2m = pd.read_sql('rating_events',engine,index_col=False)
-    re_m2m=re_m2m[re_m2m['user_id']== current_user.id]
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #re_m2m=re_m2m[re_m2m['user_id']== current_user.id]
     rating_events = re_m2m \
-        .merge(ratings,how='right', on='rating_id') \
+        .merge(ratings,how='inner', on='rating_id') \
         .merge(events,how='left', on='event_id')
 
+    # Read all event tag associations.
+    # Not all events have tags, thus merge innner vs. left
+    # dictates whether null tags are included.
     event_tag = pd.read_sql('event_tags',engine, index_col=False)
-    event_tag = event_tag[event_tag['user_id']==current_user.id]
-    rating_events_tags = rating_events.merge(event_tag,how='left',on='event_id')
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #event_tag = event_tag[event_tag['user_id']==current_user.id]
+    rating_events_tags = rating_events.merge(event_tag,how='inner',on='event_id')
     rating_events_tags = rating_events_tags[['date','tag_id']]
+
+    # Clean
     rating_events_tags.fillna(-1,inplace=True)
     rating_events_tags['tag_id']=rating_events_tags['tag_id'].astype(int)
 
     tag_list = rating_events_tags.groupby('date').agg(list)
 
+    #print(tag_list[100:105])
+    #print(tag_list[99:100].index)
+    print("TESTING")
+    for i in range(1,4):
+        foo = tag_list[i-1:i].iloc[0]
+        foo=np.array(foo)
+        print(foo)
+        print("length: ", len(foo))
+        print("")
+
+    
+
+    # Produce dictionary for each rating/date where
+    # key is tag_id and value it's count in that rating/date.
     date_tags = list(map(Counter, tag_list['tag_id']))
+    dates = rating_events_tags['date']
 
     data = np.zeros((tag_list.shape[0], tags['tag_id'].shape[0]))
+    # TODO: More optimal way than for loop
     for row in range(data.shape[0]):
         for col in range(data.shape[1]):
             data[row][col]=date_tags[row][col]
     
     # TODO: Get eigenvectors out
-    #data = (data-np.mean(data,axis=0))/np.std(data,axis=0)
-    data = (data-np.mean(data,axis=0))
-    cov = np.cov(data, rowvar=False)
+    mean = np.mean(data,axis=0)
+    data = (data-mean)
+    #data = (data-mean)/np.std(data,axis=0)
+
+    # Data rows are tags, columns are days.
+    # Element x_ij is the expression level of the i_th
+    # tag on the j_th day.
+    data = data.T
+    cov = np.dot(data,data.T)
 
     #method = "random"
     method = "not random"
     if method != "random":
         e_values, e_vectors = np.linalg.eigh(cov)
+
+        # Sort eigenvalues and their eigenvectors in descending order
+        e_ind_order = np.flip(e_values.argsort())
+        e_values = e_values[e_ind_order]
+        # note that we have to re-order the columns, not rows
+        e_vectors = e_vectors[:, e_ind_order] 
     else:
         r, p, q = 20, 5, 5
         u, s, vt = rSVD(data,r,q,p)
@@ -213,13 +256,8 @@ def cluster(engine):
         e_vectors = vt.T
     
 
-    # Sort eigenvalues and their eigenvectors in descending order
-    e_ind_order = np.flip(e_values.argsort())
-    e_values = e_values[e_ind_order]
-    # note that we have to re-order the columns, not rows
-    e_vectors = e_vectors[:, e_ind_order] 
     # pca
-    prin_comp_evd = data @ e_vectors
+    #prin_comp_evd = data @ e_vectors
 
     """ 3D plot """
     #fig_pca = plt.figure(figsize=(10,10))
@@ -231,42 +269,53 @@ def cluster(engine):
 
 
     """ eigen plot """
-    fig, ax = plt.subplots(3, figsize=(8,8))
-    #ax[1].scatter(
-    ax[1].plot(np.cumsum(e_values)/np.sum(e_values))
+    fig, ax = plt.subplots(2,2, figsize=(8,8))
+    print(ax.shape)
+    ax[0][0].plot(e_values)
+    ax[0][0].set_title("Eigenvalues")
+
+    k = 200
+    ax[1][0].plot(e_values[:k])
+    ax[1][0].set_title(f"Eigenvalues for first {k} tags.")
+
+    sum_eig = np.sum(e_values)
+    cum_sum = np.cumsum(e_values/sum_eig)
+    r = 0.7
+    ax[0][1].plot(cum_sum)
+    ax[0][1].set_title(f"Cumulative sum, capture {r*100}%")
+    ax[0][1].axhline(r, color='r')
 
 
-    """ Eigen tags/days """
-    N = 2
-    #e_vectors = e_vectors[:,:N]
-    
-    # Sort the e_vector weighted by it's element values
-    e_vec= e_vectors[:,1]
-    order = np.flip(e_vec.argsort())
-    e_vec = e_vec[order]
+    cum_sum_r = cum_sum[cum_sum > r]
+    total = data.shape[0]
+    r_count = len(cum_sum_r)
+    ax[1][1].plot(cum_sum_r)
+    ax[1][1].set_title(
+            f"{r_count}/{total} = {r_count/total*100:.1f}%  tags required.")
 
-    ax[0].plot(np.cumsum(e_vec)/np.sum(e_vec))
+    # Find tags corresponding to eigenvectors.
+    #for vector in e_vectors:
 
-    threshold = np.max(cov)*0.9
-    cov = cov[cov > threshold]
-    print([cov>threshold])
+    print("")
+    print("FIND")
 
-    #fig_cov,ax_cov = plt.subplots(1)
-    #ax_cov.imshow(cov)
+    # TODO: How does an eigenvector's entry correspond to TAGID??
+    tag_id = np.flatnonzero(e_vectors[0])
+    print(tag_id)
+    print(type(tag_id))
+    t = tags[tags['tag_id']==tag_id[0]]
+    print(t)
+    #for idx in range(4):
+        #indices = (e_vectors[idx].nonzero())
+        #for i in indices:
 
-    idx = np.transpose(np.nonzero(e_vectors))
-    #idx = np.transpose(np.nonzero(e_vectors[e_vectors >= 1]))
-    
-    #print(e_vectors)
-    #print(idx.shape)
+
+    #print(e_vectors[0][e_vectors[0] != 0])
+    #idx = (np.argmax(e_vectors[0]))
     #print(idx)
-    #print(tags[idx])
-    print(tags.shape)
-
-    #eigen_day_idx = eigen_id[0,:]
-    #foo = e_vectors[eigen_day_idx]
-    #print(foo)
-
+    #tag_id = ((e_vectors[0][idx]))
+    #print(tag_id)
+    #print(tags[tags['tag_id']==tag_id])
     return plot_img(fig)
 
 def rSVD(X,r,q,p):
