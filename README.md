@@ -37,16 +37,19 @@ Run the application with `flask run` and test using the provided URL.
 - [ ] Add timestamps for event inputs and edits.
 
 - [ ] Add data visualization
-      - [ ] Asychronous parallel processing of data when big operations: https://docs.python.org/3/library/concurrent.futures.html
+	- [ ] Asychronous parallel processing of data when big operations: https://docs.python.org/3/library/concurrent.futures.html
+	- [x] Plot frequency plots for tags. Minimal working model (MWM) up.
+	- [x] Plot eigenvalues for tags. MWM up.
       
 - [ ] Add multi-user support
+	- [ ] Add user_id relationships to association tables.
 
-- [ ] Add an about page
+- [x] Add an about page. This readme?
 
 - [x] Configure Database backups
-
-- [ ] Integrate easybacklog.com API into Daily
 
 ## Resources used
 - https://realpython.com/python-requests/#the-response
 - https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
+SVD/PCA For genetics. Does a gene correspond to tag? A day to a participant? Why? Why not?
+- https://public.lanl.gov/mewall/kluwer2002.html
