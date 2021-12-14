@@ -50,7 +50,7 @@ class Rating(db.Model):
 rating_as = db.Table('rating_events',
         db.Column('rating_id', db.Integer, db.ForeignKey('rating.id'),nullable=False),
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'),nullable=False),
-        db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
+        #db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
         )
 
     
@@ -66,6 +66,7 @@ class Event(db.Model):
     story = db.Column(db.Text, nullable=False)
 
     # Many-to-many for rating-events, defines an Rating.events attribute
+    # TODO: Requires renaming!
     rating_events = db.relationship('Rating', secondary=rating_as,
                     backref='events', lazy='dynamic')
                     #cascade="save-update, merge, delete")
@@ -75,7 +76,8 @@ class Event(db.Model):
 event_as = db.Table('event_tags',
         db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), nullable=False),
         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), nullable=False),
-        db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
+        #db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
+        # TODO: How to make this work?
         )
 
 
@@ -88,6 +90,7 @@ class Tag(db.Model):
                  nullable=False)
 
     # Many-to-many for events-tags, defines a Event.tags attribute
+    # TODO: This defined here makes no sense! Why would tag.tags exist?
     tags = db.relationship('Event', secondary=event_as, 
             backref='tags', lazy='dynamic')
             #cascade="save-update, merge, delete",
