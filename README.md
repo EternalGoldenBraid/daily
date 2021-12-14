@@ -59,8 +59,9 @@ across days to compose and eigenday using Principal componen analysis (PCA).
 
 - [x] Configure Database backups
 
-## Resources used
+## Resources
 - https://realpython.com/python-requests/#the-response
-- https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
-SVD/PCA For genetics. Does a gene correspond to tag? A day to a participant? Why? Why not?
-- https://public.lanl.gov/mewall/kluwer2002.html
+- Foundations of Flask
+	- https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
+- SVD/PCA For genetics. Does a gene correspond to tag? A day to a participant? Why? Why not?
+	- https://public.lanl.gov/mewall/kluwer2002.html
