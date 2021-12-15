@@ -26,15 +26,24 @@ import datetime
 
 
 
+@bp.route("/data/index")
+def index():
+
+    return render_template("data_analysis/index.html")
 
 @bp.route("/data", methods=["GET", "POST"])
-@login_required
 def data():
     engine = db.get_engine()
 
-    #return tag_freq(engine)
-    return cluster(engine)
+    target = request.args.get('target')
+    if target == 'tag_freq':
+        return tag_freq(engine)
+    elif target == 'eigen':
+        return cluster(engine)
+    elif target == 'bayes':
+        flash("I'm working on it!")
 
+    return redirect(url_for('data_analysis.index'))
 def save_plot(fig, name, form=None):
 
     path = "plots/"
@@ -53,6 +62,7 @@ def display_plot():
             code=301)
 
 def plot_img(fig):
+    # BytesIO write stream to RAM.
     output = io.BytesIO()
     FC(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
@@ -164,11 +174,19 @@ def time_series(engine):
 
 def cluster(engine):
 
+    # Allow demoers to view plots generated from my data.
+    if current_user.is_anonymous or current_user.id == 2:
+        # TODO: Change this to query by my username.
+        user_id_ = 1
+    else:
+        user_id_ = current_user.id
+        #user_id_ = current_user.get_id()
+
     # Merge ratings, events and tags to get a df of dates with combinations of tags.
     
     # Read ratings for user
     ratings = pd.read_sql('rating',engine,index_col=False)
-    ratings = ratings[ratings['user_id'] == current_user.id][['id', 'date','user_id']]
+    ratings = ratings[ratings['user_id'] == user_id_][['id', 'date','user_id']]
     ratings.columns = ratings.columns.str.replace('id','rating_id')
 
     # Read all tags.
@@ -185,7 +203,7 @@ def cluster(engine):
     # TODO: Which first join is sensible here? Inner or right?
     re_m2m = pd.read_sql('rating_events',engine,index_col=False)
     # TODO: Inefficient, fetch only for user, or lazy=dynamic.
-    #re_m2m=re_m2m[re_m2m['user_id']== current_user.id]
+    #re_m2m=re_m2m[re_m2m['user_id']== user_id_]
     rating_events = re_m2m \
         .merge(ratings,how='inner', on='rating_id') \
         .merge(events,how='left', on='event_id')
@@ -195,7 +213,7 @@ def cluster(engine):
     # dictates whether null tags are included.
     event_tag = pd.read_sql('event_tags',engine, index_col=False)
     # TODO: Inefficient, fetch only for user, or lazy=dynamic.
-    #event_tag = event_tag[event_tag['user_id']==current_user.id]
+    #event_tag = event_tag[event_tag['user_id']==user_id_]
     rating_events_tags = rating_events.merge(event_tag,how='inner',on='event_id')
     rating_events_tags = rating_events_tags[['date','tag_id']]
 

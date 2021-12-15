@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	Data analysis
+{% endblock %}
+
+{% block main %}
+<body>
+	  <h2>Some visualizations</h2>
+			<h5> What would you like to see? </h5>
+			<a href={{ url_for('data_analysis.data', target='eigen') }} 
+				 target="_blank">Eigendays</a> <br>
+			<a href={{ url_for('data_analysis.data', target='tag_freq') }} 
+				 target="_blank">Tag frequencies</a> <br>
+			<a href="" 
+					target="">Bayesian Inference (In progress)</a>
+</body>
+{% endblock %}

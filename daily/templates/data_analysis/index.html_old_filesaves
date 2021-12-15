@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	Data analysis
+{% endblock %}
+
+{% block main %}
+<body>
+	  <h2>Some visualizations</h2>
+		{% if filenames %}
+		
+			{% if filenames|length > 1 %}
+
+				{% for file in filenames %}
+				  <div class="row">
+						<img 
+							 src={{ url_for('data_analysis.display_plot',filename=file) }} 
+							 alt="Someimage" style="width:100%">
+					</div>
+				{% endfor %}
+
+			{% else %}
+			<p> One file found with name: {{ filenames[0] }} </p>
+			<div class="row">
+				<img 
+					src={{ url_for('data_analysis.display_plot',
+					 				filename=filenames[0]) }} 
+					alt="Someimage" style="width:200%" height="auto">
+			</div>
+
+			{% endif %}
+		{% endif %}
+
+</body>
+{% endblock %}
