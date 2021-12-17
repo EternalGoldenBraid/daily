@@ -137,6 +137,58 @@ def time_series(engine):
     ax.xaxis.set_major_locator(mdates.YearLocator(1, month=1, day=1))
     plt.xticks(rotation=30)
 
+def get_rating_events_tags(engine, columns):
+    # Return a complete view to ratings, events and tags.
+
+    # Allow demoers to view plots generated from my data.
+    if current_user.is_anonymous or current_user.id == 2:
+        # TODO: Change this to query by my username.
+        user_id_ = 1
+    else:
+        user_id_ = current_user.id
+        #user_id_ = current_user.get_id()
+
+    # Merge ratings, events and tags to get a df of dates with combinations of tags.
+    
+    # Read ratings for user
+    ratings = pd.read_sql('rating',engine,index_col=False)
+    columns_ratings = ['id', 'date', 'user_id','rating_sleep', 'rating_day']
+    #ratings = ratings[ratings['user_id'] == user_id_][['id', 'date','user_id',]]
+    ratings = ratings[ratings['user_id'] == user_id_][columns_ratings]
+    ratings.columns = ratings.columns.str.replace('id','rating_id')
+
+    # Read all tags.
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    tags = pd.read_sql('tag',engine,index_col=False)
+    tags.columns = tags.columns.str.replace('id','tag_id')
+
+    # Read all events.
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    events = pd.read_sql('event',engine, index_col=False)
+    events.columns = events.columns.str.replace('id','event_id')
+
+    # Read all rating event associations.
+    # TODO: Which first join is sensible here? Inner or right?
+    re_m2m = pd.read_sql('rating_events',engine,index_col=False)
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #re_m2m=re_m2m[re_m2m['user_id']== user_id_]
+    rating_events = re_m2m \
+        .merge(ratings,how='inner', on='rating_id') \
+        .merge(events,how='left', on='event_id')
+
+    # Read all event tag associations.
+    # Not all events have tags, thus merge innner vs. left
+    # dictates whether null tags are included.
+    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #event_tag = event_tag[event_tag['user_id']==user_id_]
+    rating_events_tags = rating_events.merge(event_tag,how='inner',on='event_id')
+
+    # Clean
+    rating_events_tags.fillna(-1,inplace=True)
+
+    return rating_events_tags[columns]
+
 def cluster(engine):
 
     # Allow demoers to view plots generated from my data.
@@ -300,6 +352,26 @@ def cluster(engine):
     #print(tag_id)
     #print(tags[tags['tag_id']==tag_id])
     return plot_img(fig)
+
+def bayes(engine):
+    # Lesson 1:
+    # Do naive bayes on tags. I.e. tag occurences are i.i.d.
+
+    columns = ['rating_id', 'rating_sleep', 'rating_day', 'tag_id']
+    data = get_rating_events_tags(engine, columns)
+
+    rating_id_rate = data[['rating_id','rating_sleep','rating_day']]
+    data = data[['rating_id','tag_id']]
+    data = data.groupby('rating_id').agg(list)
+
+    # Build a priori distributions for ratings and tags
+    # TODO: do it
+    tags = pd.read_sql('tag',engine,index_col=False)
+    tags.columns = tags.columns.str.replace('id','tag_id')
+    prior_tags = 
+
+    # Calculate a posteriori distributions for tags given ratings.
+
 
 def rSVD(X,r,q,p):
     """
