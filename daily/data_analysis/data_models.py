@@ -1,4 +1,5 @@
 from daily.models import User, Rating, Tag, rating_as, event_as
+from flask import Response
 from flask_login import current_user
 
 #import matplotlib
@@ -13,7 +14,6 @@ from numpy.random import default_rng
 #from scipy import stats
 
 import io
-from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 import datetime
 
@@ -137,17 +137,21 @@ def time_series(engine):
     ax.xaxis.set_major_locator(mdates.YearLocator(1, month=1, day=1))
     plt.xticks(rotation=30)
 
-def get_rating_events_tags(engine, columns):
-    # Return a complete view to ratings, events and tags.
-
+def get_user_id_():
     # Allow demoers to view plots generated from my data.
     if current_user.is_anonymous or current_user.id == 2:
         # TODO: Change this to query by my username.
-        user_id_ = 1
+        user_id = 1
     else:
-        user_id_ = current_user.id
-        #user_id_ = current_user.get_id()
+        user_id = current_user.id
+        #user_id_= current_user.get_id()
 
+    return user_id
+
+def get_rating_events_tags(engine, columns):
+    # Return a complete view to ratings, events and tags.
+
+    user_id_ = get_user_id_()
     # Merge ratings, events and tags to get a df of dates with combinations of tags.
     
     # Read ratings for user
@@ -357,20 +361,92 @@ def bayes(engine):
     # Lesson 1:
     # Do naive bayes on tags. I.e. tag occurences are i.i.d.
 
-    columns = ['rating_id', 'rating_sleep', 'rating_day', 'tag_id']
-    data = get_rating_events_tags(engine, columns)
+    RATING_DAY_MAX = 2
+    RATING_DAY_MIN = -2 
+    RATING_SLEEP_MAX = 2
+    RATING_SLEEP_MIN = -2 
 
-    rating_id_rate = data[['rating_id','rating_sleep','rating_day']]
-    data = data[['rating_id','tag_id']]
-    data = data.groupby('rating_id').agg(list)
+    user_id_ = get_user_id_()
 
-    # Build a priori distributions for ratings and tags
-    # TODO: do it
+    # Fetch data
+    #columns = ['rating_id', 'rating_sleep', 'rating_day', 'tag_id']
+    #data = get_rating_events_tags(engine, columns)
+
+    ratings = pd.read_sql('rating',engine,index_col=False)
+    columns_ratings = ['id', 'date', 'user_id','rating_sleep', 'rating_day']
+    ratings = ratings[ratings['user_id'] == user_id_][columns_ratings]
+    ratings.columns = ratings.columns.str.replace('id','rating_id')
+    ratings['rating_sleep'] = ratings['rating_sleep'].clip(RATING_SLEEP_MAX, RATING_SLEEP_MIN)
+    ratings['rating_day'] = ratings['rating_day'].clip(RATING_DAY_MAX, RATING_DAY_MIN)
+
+    # Split to training and testing data.
+    ratings_tets = ratings.iloc[-10:]
+    ratings = ratings[:-10]
+
+    # TODO: Add support to filter by user_id!
+    re_m2m = pd.read_sql('rating_events',engine,index_col=False)
+    et_m2m = pd.read_sql('event_tags',engine, index_col=False)
+    if ( 'user_id' in re_m2m.columns and 'user_id' in et_m2m.columns ):
+        re_m2m=re_m2m[re_m2m['user_id']== user_id_]
+        et_m2m=et_m2m[et_m2m['user_id']== user_id_]
+
     tags = pd.read_sql('tag',engine,index_col=False)
     tags.columns = tags.columns.str.replace('id','tag_id')
-    prior_tags = 
+
+    events = pd.read_sql('event',engine, index_col=False)
+    events.columns = events.columns.str.replace('id','event_id')
+
+    # Build a priori distributions for ratings and tags
+
+    ### Get tag frequencies.
+    # Merge many-2-many tables: rating_id - event_id and event_id - tag_id
+    # to produce rating_id - tag_id data rt_m2m.
+    rt_m2m = re_m2m.merge(et_m2m,how='inner', on='event_id')
+    rt_m2m = rt_m2m[['rating_id', 'tag_id']]
+
+    ## DEBUG
+    print("TEST")
+    #print(rt_m2m[-20:])
+    #print((re_m2m.merge(et_m2m,how='inner', on='event_id')).size)
+    #print((re_m2m.merge(et_m2m,how='left', on='event_id')).size)
+    #print((re_m2m.merge(et_m2m,how='right', on='event_id')).size)
+    ## END DEBUG
+
+    tag_prior = rt_m2m.groupby('tag_id').count()
+
+    # Get rating frequencies.
+    ratings_tags = ratings.merge(rt_m2m, how='inner', on='rating_id')
+    prior_rating_day = ratings_tags[['tag_id', 'rating_day']]
+    prior_rating_day = prior_rating_day.groupby('rating_day').count()['tag_id']
+
+    prior_rating_sleep = ratings_tags[['tag_id', 'rating_sleep']]
+    prior_rating_sleep = prior_rating_sleep.groupby('rating_sleep').count()['tag_id']
 
     # Calculate a posteriori distributions for tags given ratings.
+    #print(prior_rating_day)
+    print("CHECK1")
+    #print(prior_rating_sleep)
+    #print(tag_prior)
+
+    #print(rt_m2m[-5:])
+    #print(ratings_tags[-5:])
+
+    # Posterior for sleep_rating
+    rating_sleep_tags = ratings_tags[['rating_sleep', 'tag_id']]
+    # TODO: Potentially very slow grouping?
+    # See https://medium.com/@aivinsolatorio/optimizing-pandas-groupby-50x-using-numpy-to-speedup-an-agent-based-model-a-story-of-8b0d25614915
+    rating_sleep_group = rating_sleep_tags.groupby('rating_sleep').agg(list)
+
+    # Scale indices from -2 to 2 --> 0 to 4.
+    indices = rating_sleep_group.index+rating_sleep_group.index.max()
+    if indices[0] != 0: 
+        # Indices are expected to be between 0 and some positive integer.
+        return redirect(url_for('data_analysis.index')), 500
+
+    posteriors = [np.array(list_[0]) for list_ in rating_sleep_group.values]
+
+    # Posterior for day_rating
+        
 
 
 def rSVD(X,r,q,p):
