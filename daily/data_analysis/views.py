@@ -25,7 +25,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 import datetime
 
 from daily.data_analysis.data_models import (tag_freq,
-        time_series, cluster, bayes)
+        time_series, cluster, naive_bayes)
 
 @bp.route("/data/index")
 def index():
@@ -42,7 +42,7 @@ def data():
     elif target == 'eigen':
         return cluster(engine)
     elif target == 'bayes':
-        bayes(engine)
+        naive_bayes(engine)
         return render_template("data_analysis/index.html")
 
     return redirect(url_for('data_analysis.index'))

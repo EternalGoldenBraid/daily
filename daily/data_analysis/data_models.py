@@ -1,5 +1,5 @@
 from daily.models import User, Rating, Tag, rating_as, event_as
-from flask import Response
+from flask import Response, redirect, url_for, flash
 from flask_login import current_user
 
 #import matplotlib
@@ -7,6 +7,7 @@ from flask_login import current_user
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
+import math
 from collections import Counter
 import numpy as np
 import pandas as pd
@@ -357,9 +358,18 @@ def cluster(engine):
     #print(tags[tags['tag_id']==tag_id])
     return plot_img(fig)
 
-def bayes(engine):
-    # Lesson 1:
-    # Do naive bayes on tags. I.e. tag occurences are i.i.d.
+def get_naive_bayes_data(engine, split=80):
+    """
+    Return data to be used in naive bayes model.
+    priors_tags: counts for all tags.
+    priors_rating_sleep: counts for each sleep rating label.
+    priors_rating_day: counts for each day rating label.
+    posteriors_sleep: tags that occur given each sleep rating label.
+    posteriors_day: tags that occur given each day rating label.
+    testing_tags: testing data to evaluate accuracy against.
+       split: 0 --> evaluate the most recent date.
+       split: 80 --> 80/20 training testing split.
+    """
 
     RATING_DAY_MAX = 2
     RATING_DAY_MIN = -2 
@@ -367,10 +377,6 @@ def bayes(engine):
     RATING_SLEEP_MIN = -2 
 
     user_id_ = get_user_id_()
-
-    # Fetch data
-    #columns = ['rating_id', 'rating_sleep', 'rating_day', 'tag_id']
-    #data = get_rating_events_tags(engine, columns)
 
     ratings = pd.read_sql('rating',engine,index_col=False)
     columns_ratings = ['id', 'date', 'user_id','rating_sleep', 'rating_day']
@@ -380,8 +386,9 @@ def bayes(engine):
     ratings['rating_day'] = ratings['rating_day'].clip(RATING_DAY_MAX, RATING_DAY_MIN)
 
     # Split to training and testing data.
-    ratings_tets = ratings.iloc[-10:]
-    ratings = ratings[:-10]
+    sample_size = math.floor(split/100*ratings.size)
+    testing_ratings = ratings.iloc[-sample_size:]
+    ratings = ratings.iloc[:sample_size]
 
     # TODO: Add support to filter by user_id!
     re_m2m = pd.read_sql('rating_events',engine,index_col=False)
@@ -396,40 +403,29 @@ def bayes(engine):
     events = pd.read_sql('event',engine, index_col=False)
     events.columns = events.columns.str.replace('id','event_id')
 
-    # Build a priori distributions for ratings and tags
+    ###### Build a priori distributions for ratings and tags
 
     ### Get tag frequencies.
     # Merge many-2-many tables: rating_id - event_id and event_id - tag_id
     # to produce rating_id - tag_id data rt_m2m.
     rt_m2m = re_m2m.merge(et_m2m,how='inner', on='event_id')
+
+    testing_tags = rt_m2m.merge(testing_ratings, how='inner',on='rating_id')
+    testing_tags = testing_tags[['date','tag_id','rating_sleep','rating_day']]
+
     rt_m2m = rt_m2m[['rating_id', 'tag_id']]
 
-    ## DEBUG
-    print("TEST")
-    #print(rt_m2m[-20:])
-    #print((re_m2m.merge(et_m2m,how='inner', on='event_id')).size)
-    #print((re_m2m.merge(et_m2m,how='left', on='event_id')).size)
-    #print((re_m2m.merge(et_m2m,how='right', on='event_id')).size)
-    ## END DEBUG
-
-    tag_prior = rt_m2m.groupby('tag_id').count()
+    priors_tags = rt_m2m.groupby('tag_id').count()
 
     # Get rating frequencies.
     ratings_tags = ratings.merge(rt_m2m, how='inner', on='rating_id')
-    prior_rating_day = ratings_tags[['tag_id', 'rating_day']]
-    prior_rating_day = prior_rating_day.groupby('rating_day').count()['tag_id']
+    priors_rating_day = ratings_tags[['tag_id', 'rating_day']]
+    priors_rating_day = priors_rating_day.groupby('rating_day').count()['tag_id']
 
-    prior_rating_sleep = ratings_tags[['tag_id', 'rating_sleep']]
-    prior_rating_sleep = prior_rating_sleep.groupby('rating_sleep').count()['tag_id']
+    priors_rating_sleep = ratings_tags[['tag_id', 'rating_sleep']]
+    priors_rating_sleep = priors_rating_sleep.groupby('rating_sleep').count()['tag_id']
 
-    # Calculate a posteriori distributions for tags given ratings.
-    #print(prior_rating_day)
-    print("CHECK1")
-    #print(prior_rating_sleep)
-    #print(tag_prior)
-
-    #print(rt_m2m[-5:])
-    #print(ratings_tags[-5:])
+    ####### Build a posteriori distributions for tags given ratings.
 
     # Posterior for sleep_rating
     rating_sleep_tags = ratings_tags[['rating_sleep', 'tag_id']]
@@ -438,15 +434,105 @@ def bayes(engine):
     rating_sleep_group = rating_sleep_tags.groupby('rating_sleep').agg(list)
 
     # Scale indices from -2 to 2 --> 0 to 4.
-    indices = rating_sleep_group.index+rating_sleep_group.index.max()
-    if indices[0] != 0: 
-        # Indices are expected to be between 0 and some positive integer.
-        return redirect(url_for('data_analysis.index')), 500
+    #indices = rating_sleep_group.index+rating_sleep_group.index.max()
+    #idx = indices[0]
+    #print(idx)
+    #print(idx == 0)
+    #print(idx == indices[0])
+    #if indices[0] != 0: 
+    #    # Indices are expected to be between 0 and some positive integer.
+    #    flash("Backend error")
+    #    return redirect(url_for('data_analysis.index')), 500
 
-    posteriors = [np.array(list_[0]) for list_ in rating_sleep_group.values]
+    posteriors_sleep = [np.array(list_[0]) for list_ in rating_sleep_group.values]
 
     # Posterior for day_rating
+    # TODO.
+    rating_day_tags = ratings_tags[['rating_day', 'tag_id']]
+    # TODO: Potentially very slow grouping?
+    # See https://medium.com/@aivinsolatorio/optimizing-pandas-groupby-50x-using-numpy-to-speedup-an-agent-based-model-a-story-of-8b0d25614915
+    rating_day_group = rating_day_tags.groupby('rating_day').agg(list)
+
+    ## Scale indices from -2 to 2 --> 0 to 4.
+    #indices = rating_day_group.index+rating_day_group.index.max()
+    #print("Before: ", indices[0])
+    #if indices[0] != 0: 
+    #    print(indices[0] != 0)
+    #    print(indices[0] == 0)
+    #    print("HERE")
+    #    # Indices are expected to be between 0 and some positive integer.
+    #    return redirect(url_for('data_analysis.index')), 500
+
+    posteriors_day = [np.array(list_[0]) for list_ in rating_day_group.values]
+
+    return (priors_tags,
+            priors_rating_sleep, posteriors_sleep,
+            priors_rating_day, posteriors_day,
+            testing_tags)
+
+def predict(observations, labels, label_prior, posterior_sleep):
+    # Todo: Add denominator of bayes formula for confidence.
+    distribution = np.zeros_like(labels)
+    for label_idx, label in enumerate(labels):
+        result = 1
+        for obs in observations:
+            result*=sum(posterior_sleep[label_idx] == obs)/sum(posterior_sleep[label_idx])
+        result *= label_prior.iloc[label_idx]
+        #print(result)
+        distribution[label_idx] = result
+
+    return distribution
+
+
+
         
+def naive_bayes(engine, evaluate_model=False):
+
+    # split 80/20 training testing.
+    split = 80 
+    #priors_tags, priors_rating_sleep, posteriors_sleep, priors_rating_day, posteriors_day, testing_tags = get_naive_bayes_data(engine, split=split)
+    data = get_naive_bayes_data(engine, split=split)
+    priors_tags = data[0]
+    priors_rating_sleep, posteriors_sleep = data[1], data[2]
+    priors_rating_day, posteriors_day = data[3], data[4]
+    testing_tags = data[5]
+
+    if evaluate_model:
+        # Tags, rating_sleep and rating_day in test data.
+        print(testing_tags.columns)
+        testing_per_date = [
+                [np.array(date[0]), date[1][0], date[2][0]]
+                for date in testing_tags.groupby('date').agg(list).values]
+
+        print(testing_per_date[:2])
+    else: testing_per_date = [0]
+    
+    labels = ['-2', '-1', '0', '1', '2']
+
+    correct = 0
+    for count, date in enumerate(testing_per_date[:]):
+        distribution = predict(
+                date[0], labels,
+                priors_rating_sleep, posteriors_sleep)
+        
+        correct += (np.argmax(distribution) == date[1]+2)
+
+        #print(distribution)
+
+    print(f"Correct: {correct}/{count}.", correct/count*100)
+
+
+
+
+
+    #label_values = ['-2','-1','0','1','2']
+    #num = []
+    #for label_idx, label in enumerate(label_values):
+    #    num.append(priors_rating_sleep[label_idx])
+    #    for date in testing_per_date:
+    #        #for tag in date['tag_id']:
+    #            #asd
+
 
 
 def rSVD(X,r,q,p):
