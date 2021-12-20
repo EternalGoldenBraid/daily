@@ -338,3 +338,15 @@ card .space::before {
 .upper {
 	justify-content:space-around;
 }
+
+/* data_analysis */
+.statisticasd { 
+	text-indent:60px;
+	margin-left:40px;
+      }
+
+.model_performance {
+  font-size: 16px;
+}
+
+

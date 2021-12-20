@@ -18,30 +18,51 @@ import pandas as pd
 from numpy.random import default_rng
 #from scipy import stats
 import os
+import json
 
 import io
-from flask import Response
+from flask import Response, jsonify
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 import datetime
 
-from daily.data_analysis.data_models import tag_freq, time_series, cluster
+from daily.data_analysis.data_models import (tag_freq,
+        time_series, cluster, 
+        naive_bayes, sk_naive_bayes_multinomial)
 
 @bp.route("/data/index")
 def index():
 
     return render_template("data_analysis/index.html")
 
-@bp.route("/data", methods=["GET", "POST"])
-def data():
+@bp.route("/plots", methods=["GET"])
+def plots():
     engine = db.get_engine()
-
     target = request.args.get('target')
     if target == 'tag_freq':
         return tag_freq(engine)
     elif target == 'eigen':
         return cluster(engine)
-    elif target == 'bayes':
-        return bayes(engine)
+    return redirect(url_for('data_analysis.index'))
+
+@bp.route("/data", methods=["GET", "POST"])
+def data():
+    engine = db.get_engine()
+    args = request.args
+    summary = None
+
+    target = request.args.get('target')
+    if target == 'nbayes':
+        re_train = args.get('re_train')
+        path = os.getcwd() +'/daily/data_analysis/summary.json'
+        sk_naive_bayes_multinomial(engine, 
+            save_path=path, evaluate_model=re_train)
+        #naive_bayes(engine)
+        with open(path,"r") as file: 
+            summary = json.load(file)
+
+    print(summary)
+    return render_template("data_analysis/index.html", summary=summary)
+                
 
     return redirect(url_for('data_analysis.index'))
 def save_plot(fig, name, form=None):
