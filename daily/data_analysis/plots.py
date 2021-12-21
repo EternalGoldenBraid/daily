@@ -287,32 +287,23 @@ def polar(engine):
 
     # Plot
     theta = range(ratings.shape[0])
-    r_1 = ratings['rating_sleep']
+    r = ratings['rating_sleep']
     r_2 = ratings['rating_day']
-    m = ratings['meditation']
-
-    ntheta = 30; dtheta = 360/ntheta;
-    nradius =20; dradius_1 = max(r_1)/nradius;
-    nradius =20; dradius_2 = max(r_2)/nradius;
-
-    
-    colors = ['#000052','#0c44ac','#faf0ca','#ed0101','#970005'] 
-    cm = LinearSegmentedColormap.from_list('custom', colors,N=10)
-    cm.set_bad(color='white')
+    #m = ratings['meditation']
 
     labels = ['rating_sleep', 'rating_day']
 
     fig, ax = plt.subplots(2,3, figsize=(20,10), dpi=300,
                         subplot_kw={'projection': 'polar'})
     ax = ax.flatten()
-    ax[0].plot(theta, r_1, 'ro')
+    ax[0].plot(theta, r, 'ro')
     ax[0].set_title(labels[0])
     #ax[0].legend()
 
     ax[1].plot(theta, r_2, 'bx')
     ax[1].set_title(labels[1])
 
-    ax[2].plot(theta, r_1, 'ro')
+    ax[2].plot(theta, r, 'ro')
     ax[2].plot(theta, r_2, 'bx')
     ax[2].set_title('Sleep and Day ratings')
     fig.legend(labels)
@@ -346,9 +337,17 @@ def polar_nice(engine):
     ratings['rating_day'] = ratings['rating_day'].clip(RATING_DAY_MAX, RATING_DAY_MIN)
 
     # Plot
-    theta = range(ratings.shape[0])
+
+    ratings = ratings[['rating_sleep','rating_day','meditation']]
+    ratings.dropna()
+
+    #ratings = ratings.iloc[:4]
+    #ratings['rating_day'] = [ -1, 0, 1, 2]
+    #ratings['meditation'] = [ 0, 10, 20, 30]
+
+    theta = np.arange(0,360,360/(ratings.shape[0]))
     r_1 = ratings['rating_sleep']; r_1 += r_1.max()
-    r_2 = ratings['rating_day']
+    r_2 = ratings['rating_day']; r_2 += r_2.max()
     m = ratings['meditation']
     avg_temp = []
     patches = []
@@ -357,43 +356,36 @@ def polar_nice(engine):
     columns = ['r1', 'r2', 'med', 'theta']
     df = pd.DataFrame(list(zip(r_1,r_2,m,theta)),
             columns=columns)
-    df.dropna()
 
+    r = r_2
     ntheta  =df.shape[0]; dtheta = 360/ntheta;
-    nradius =5; dradius_1 = max(r_1)/nradius;
-    drarius_2 =20; dradius_2 = max(r_2)/nradius;
+    #nradius = r.max()-r.min()+1; nradius = max(r)/nradius;
+    nradius = r.max() - r.min(); dradius = max(r)/nradius;
 
     print(""" Attempting plots with """)
-    print(f"{ntheta} number of days")
+    #print(df)
+    print(f"{ratings.shape[0]} number of days")
     print(f"ntheta: {ntheta}, dtheta: {dtheta}")
-    print(f"nradius: {nradius}, dradius_1: {dradius_1}")
+    print(f"nradius: {nradius}, nradius: {dradius}")
+    print(f"Max rad: {max(r)}")
 
     print("TEST START") 
-
+    
     # Create wedges starting from outer radius.
-    #for nr in range(nradius, 0, -1):
-    for nr in [5, 4, 3, 2, 1, 0]:
-        start_r = (nr-1)*dradius_1
-        end_r = nr*dradius_1
-
-        print(f"Start_r: {start_r}")
-        print(f"end_r : {end_r}")
+    for nr in range(nradius, 0, -1):
+        start_r = (nr-1)*dradius
+        end_r = nr*dradius
 
         for nt in range(0,ntheta):
             start_t = nt*dtheta
             end_t = (nt+1)*dtheta
 
-            stripped = df[(df['r1']>=start_r) & (df['r1']<end_r) &
-                        (df['theta']>=start_t) & (df['theta']<end_t)]
-
-            #print(stripped.empty)
-            #if not False: 
-            if not stripped.empty:
-                #avg_temp.append(stripped['med'].mean() + np.random.uniform(-100, 110))
-                avg_temp.append(stripped['med'].mean())
-                wedge = mpatches.Wedge(0,end_r, start_t, end_t)
-                patches.append(wedge)
-
+            stripped = df[(df['r2']>start_r) & (df['r2']<=end_r) &
+                            (df['theta']>=start_t) & (df['theta']<end_t)]
+            
+            avg_temp.append(stripped['med'].mean())
+            wedge = mpatches.Wedge(0,end_r, start_t, end_t)
+            patches.append(wedge)
 
     colors = ['#000052','#0c44ac','#faf0ca','#ed0101','#970005'] 
     cm = LinearSegmentedColormap.from_list('custom', colors,N=10)
@@ -401,38 +393,23 @@ def polar_nice(engine):
 
     # Assign patch colors
     collection = PatchCollection(patches, linewidth=0.0,
-            edgecolor=['#ffffff' for x in avg_temp],
-            #edgecolor=['#000000' for x in avg_temp],
-            #facecolor=cm([( x-263.15 )/( 303.15-263.15 ) for x in avg_temp]))
-            facecolor=cm([ x + np.random.uniform(-100, 110) for x in avg_temp]))
-    
-    #print(df['med'])
-    #print(stripped)
-    print(avg_temp)
-
-    print("Number of patches: ", len(patches))
+            edgecolor=['#000000' for x in avg_temp],
+            #facecolor=cm([( x )/( m.max()-m.min() ) for x in avg_temp]))
+            facecolor=cm([( x )/( m.abs().max() ) for x in avg_temp]))
 
     labels = ['rating_sleep', 'rating_day']
-
-    #fig, ax = plt.subplots(1,1, figsize=(20,10), dpi=300,
-                        #subplot_kw={'projection': 'polar'})
 
     fig, ax = plt.subplots(1,2, figsize=(40,20), dpi=200,
                         edgecolor='w', facecolor='w')
     ax = ax.flatten()
-    #ax[0].add_subplot()
     ax[0].add_collection(collection)
-    #ax[0].set_title(labels[0])
+    ax[0].set_title(labels[0])
     #fig.legend(labels)
-    ax[0].set_xlim(-3,3)
-    ax[0].set_ylim(-3,3)
+    ax[0].set_xlim(-6,6)
+    ax[0].set_ylim(-6,6)
 
     plt.axis('equal')
     plt.axis('off')
     plt.tight_layout()
-
-
-    #for axis in ax:
-    #    axis.set_yticks([-2, -1, 0, 1, 2])
 
     return plot_img(fig)
