@@ -343,7 +343,8 @@ def polar_heat_map(engine, label, heat, ax, timespan=0, cycle=4):
     ratings.dropna()
 
     theta = np.arange(0,360,360/(ratings.shape[0]))
-    r = ratings[label]; r += r.max()+1
+    theta = theta[::-1]
+    r = ratings[label]; r += r.abs().max()+1
     temperature = ratings[heat]
     avg_temp = []
     patches = []
@@ -352,8 +353,12 @@ def polar_heat_map(engine, label, heat, ax, timespan=0, cycle=4):
     df = pd.DataFrame(list(zip(r,temperature,theta)),
             columns=columns)
 
+    #pr = df[['r', 'theta','heat']]
+    #pr['r'] = pr['r']-3
+    #print(pr)
+
     ntheta  =int(df.shape[0]/cycle); dtheta = 360/ntheta;
-    nradius = r.max() - r.min(); dradius = max(r)/nradius;
+    nradius = r.max() - r.min()+1; dradius = max(r)/nradius;
     
     # Create wedges starting from outer radius.
     for nr in range(nradius, 0, -1):
@@ -371,7 +376,10 @@ def polar_heat_map(engine, label, heat, ax, timespan=0, cycle=4):
             wedge = mpatches.Wedge(0,end_r, start_t, end_t)
             patches.append(wedge)
 
-    colors = ['#000052','#0c44ac','#faf0ca','#ed0101','#970005'] 
+    # Color generator https://coolors.co/c97b84-a85751-7d2e68-251351-040926
+    #colors = ['#000052','#0c44ac','#faf0ca','#ed0101','#970005'] 
+    #colors = ["#04151f","#183a37","#efd6ac","#c44900","#432534"]
+    colors = ["#c97b84","#a85751","#7d2e68","#251351","#040926"]
     cm = LinearSegmentedColormap.from_list('custom', colors,N=10)
     cm.set_bad(color='white')
 
