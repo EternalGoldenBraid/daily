@@ -316,60 +316,44 @@ def polar(engine):
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.patches as mpatches
 from matplotlib.collections import PatchCollection
-def polar_nice(engine):
+def polar_heat_map(engine, label, heat, ax, timespan=0, cycle=4):
     """
 
     Resource: https://towardsdatascience.com/polar-heatmaps-in-python-with-matplotlib-d2a09610bc55
+    TODO: ADD dates/seasons as ticks on outer rim.
     """
 
-    RATING_DAY_MAX = 2
-    RATING_DAY_MIN = -2 
-    RATING_SLEEP_MAX = 2
-    RATING_SLEEP_MIN = -2 
+    RATING_MAX = 2
+    RATING_MIN = -2 
 
     user_id_ = get_user_id_()
 
     ratings = pd.read_sql('rating',engine,index_col=False)
-    columns_ratings = ['id', 'date', 'user_id','rating_sleep', 'rating_day', 'meditation']
+    if timespan != 0:
+        max_date = ratings['date'].max()
+        #ratings = ratings[ratings['date'] > max_date - datetime.timedelta(timespan)]
+        ratings = ratings.iloc[-timespan:]
+    columns_ratings = ['id', 'date', 'user_id', label, heat]
     ratings = ratings[ratings['user_id'] == user_id_][columns_ratings]
     ratings.columns = ratings.columns.str.replace('id','rating_id')
-    ratings['rating_sleep'] = ratings['rating_sleep'].clip(RATING_SLEEP_MAX, RATING_SLEEP_MIN)
-    ratings['rating_day'] = ratings['rating_day'].clip(RATING_DAY_MAX, RATING_DAY_MIN)
+    ratings[label] = ratings[label].clip(RATING_MAX, RATING_MIN)
 
     # Plot
-
-    ratings = ratings[['rating_sleep','rating_day','meditation']]
+    ratings = ratings[[label,heat]]
     ratings.dropna()
 
-    #ratings = ratings.iloc[:4]
-    #ratings['rating_day'] = [ -1, 0, 1, 2]
-    #ratings['meditation'] = [ 0, 10, 20, 30]
-
     theta = np.arange(0,360,360/(ratings.shape[0]))
-    r_1 = ratings['rating_sleep']; r_1 += r_1.max()
-    r_2 = ratings['rating_day']; r_2 += r_2.max()
-    m = ratings['meditation']
+    r = ratings[label]; r += r.max()+1
+    temperature = ratings[heat]
     avg_temp = []
     patches = []
 
-    #columns = ['rating_sleep', 'rating_day', 'meditation']
-    columns = ['r1', 'r2', 'med', 'theta']
-    df = pd.DataFrame(list(zip(r_1,r_2,m,theta)),
+    columns = ['r', 'heat', 'theta']
+    df = pd.DataFrame(list(zip(r,temperature,theta)),
             columns=columns)
 
-    r = r_2
-    ntheta  =df.shape[0]; dtheta = 360/ntheta;
-    #nradius = r.max()-r.min()+1; nradius = max(r)/nradius;
+    ntheta  =int(df.shape[0]/cycle); dtheta = 360/ntheta;
     nradius = r.max() - r.min(); dradius = max(r)/nradius;
-
-    print(""" Attempting plots with """)
-    #print(df)
-    print(f"{ratings.shape[0]} number of days")
-    print(f"ntheta: {ntheta}, dtheta: {dtheta}")
-    print(f"nradius: {nradius}, nradius: {dradius}")
-    print(f"Max rad: {max(r)}")
-
-    print("TEST START") 
     
     # Create wedges starting from outer radius.
     for nr in range(nradius, 0, -1):
@@ -380,10 +364,10 @@ def polar_nice(engine):
             start_t = nt*dtheta
             end_t = (nt+1)*dtheta
 
-            stripped = df[(df['r2']>start_r) & (df['r2']<=end_r) &
+            stripped = df[(df['r']>start_r) & (df['r']<=end_r) &
                             (df['theta']>=start_t) & (df['theta']<end_t)]
             
-            avg_temp.append(stripped['med'].mean())
+            avg_temp.append(stripped['heat'].mean())
             wedge = mpatches.Wedge(0,end_r, start_t, end_t)
             patches.append(wedge)
 
@@ -392,24 +376,56 @@ def polar_nice(engine):
     cm.set_bad(color='white')
 
     # Assign patch colors
+    #avg_temp = np.array(avg_temp)
+    #print(avg_temp)
+    #avg_temp = avg_temp[~np.isnan(avg_temp)]
+    #print(avg_temp)
+    #print(np.array(avg_temp).max())
+    #print(np.array(avg_temp).min())
     collection = PatchCollection(patches, linewidth=0.0,
             edgecolor=['#000000' for x in avg_temp],
-            #facecolor=cm([( x )/( m.max()-m.min() ) for x in avg_temp]))
-            facecolor=cm([( x )/( m.abs().max() ) for x in avg_temp]))
+            facecolor=cm([( x )/( temperature.abs().max() ) for x in avg_temp]))
+
+
+    #ax.set_title(f"{label} from {ratings[label].min()} to {ratings[label].max()}")
+    ax.set_title(f"{label} from {RATING_MIN} to {RATING_MAX}" \
+            f" for past {timespan} days with {cycle} cycle(s)." \
+            f" Temperature from {heat}.")
+    ax.add_collection(collection)
+
+    return ax
+
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
+def polar_nice(engine):
+    """
+    Resource: https://towardsdatascience.com/polar-heatmaps-in-python-with-matplotlib-d2a09610bc55
+    """
+
 
     labels = ['rating_sleep', 'rating_day']
 
-    fig, ax = plt.subplots(1,2, figsize=(40,20), dpi=200,
+    fig, ax = plt.subplots(2,2, figsize=(20,10), dpi=200,
                         edgecolor='w', facecolor='w')
+
     ax = ax.flatten()
-    ax[0].add_collection(collection)
-    ax[0].set_title(labels[0])
-    #fig.legend(labels)
-    ax[0].set_xlim(-6,6)
-    ax[0].set_ylim(-6,6)
+    #polar_heat_map(engine=engine, label=labels[0], heat='meditation',
+    polar_heat_map(engine=engine, label=labels[0], heat='meditation',
+                    timespan=7, ax=ax[0], cycle=1)
 
-    plt.axis('equal')
-    plt.axis('off')
+    #polar_heat_map(engine=engine, label=labels[0], heat=labels[0],
+    #TODO: Above gives error at line 356. figure out why!
+    polar_heat_map(engine=engine, label=labels[0], heat='meditation',
+                    timespan=30, ax=ax[1], cycle=1)
+
+    polar_heat_map(engine=engine, label=labels[0], heat='meditation',
+                    timespan=4*30, ax=ax[2], cycle=1)
+    polar_heat_map(engine=engine, label=labels[0], heat='meditation',
+                    timespan=3*4*30, ax=ax[3], cycle=1)
+
+    for axis in ax:
+        axis.set_xlim(-5,5); axis.set_ylim(-5,5)
+        axis.axis('off') ;axis.axis('equal')
     plt.tight_layout()
-
     return plot_img(fig)

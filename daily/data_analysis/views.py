@@ -45,7 +45,8 @@ def plots():
     elif target == 'eigen':
         return cluster(engine)
     elif target == 'polar':
-        #return polar(engine)
+        return polar(engine)
+    elif target == 'polar_heat':
         return polar_nice(engine)
     return redirect(url_for('data_analysis.index'))
 
