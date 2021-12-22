@@ -110,6 +110,7 @@ def index():
 
                     # Add tags to db if they're new
                     for tag in parts:
+                        
                         tag = (tag.rstrip()).upper()
                         if tag not in tags_strings:
                             new_tag = Tag(tag_name=tag)

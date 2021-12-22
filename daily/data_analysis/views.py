@@ -29,6 +29,8 @@ from daily.data_analysis.data_models import (tag_freq,
         time_series, cluster, 
         naive_bayes, sk_naive_bayes_multinomial)
 
+from daily.data_analysis.plots import (polar, polar_nice)
+
 @bp.route("/data/index")
 def index():
 
@@ -42,6 +44,10 @@ def plots():
         return tag_freq(engine)
     elif target == 'eigen':
         return cluster(engine)
+    elif target == 'polar':
+        return polar(engine)
+    elif target == 'polar_heat':
+        return polar_nice(engine)
     return redirect(url_for('data_analysis.index'))
 
 @bp.route("/data", methods=["GET", "POST"])

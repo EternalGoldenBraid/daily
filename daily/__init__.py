@@ -3,9 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
 from flask_login import LoginManager, UserMixin
+import os
+from logging.handlers import RotatingFileHandler
 
 ## DEBUG
 from logging.config import dictConfig
+import logging
 dictConfig({
     'version': 1,
     'formatters': {'default': {
@@ -35,6 +38,7 @@ login.login_view = 'auth.login'
 from daily import models 
 
 
+
 def create_app(config_class=Config):
 
     app = Flask(__name__)
@@ -44,8 +48,27 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login.init_app(app)
 
-    if not app.debug and not app.testing:
-        pass
+    #if not app.debug and not app.testing:
+    if not app.debug:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/daily_info.log', maxBytes=10240,
+                        backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+
+        file_handler_error = RotatingFileHandler('logs/daily_error.log', maxBytes=10240,
+                        backupCount=10)
+        file_handler_error.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler_error.setLevel(logging.ERROR)
+
+        app.logger.addHandler(file_handler)
+        app.logger.addHandler(file_handler_error)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Daily startup')
+        
 
     # Register blueprints
     from daily.main import bp as main_bp
