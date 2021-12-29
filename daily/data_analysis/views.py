@@ -28,7 +28,7 @@ import datetime
 
 from daily.data_analysis.data_models import (tag_freq,
         time_series, 
-        cluster, kmodes_cluster, kmodes_elbow_cost,
+        cluster, kmodes_cluster, kprototypes_cluster, kmodes_elbow_cost,
         naive_bayes, sk_naive_bayes_multinomial)
 
 from daily.data_analysis.plots import (
@@ -60,8 +60,12 @@ def plots():
     elif target == 'kmodes_network':
         path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
 
-        retrain=False
-        if retrain: kmodes_cluster(engine, path = path)
+        retrain=True
+        if retrain: 
+
+            #kmodes_cluster(engine, path = path, timespan=7,freq_threshold=4)
+            kprototypes_cluster(engine, path = path, timespan=14,freq_threshold=2)
+
         with open(path,"r") as file: 
             clusters = json.load(file)
         G = nx.Graph()

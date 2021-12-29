@@ -30,6 +30,7 @@ import datetime
 from daily.data_analysis.helpers import save_results, kmeans, plot_img
 
 from kmodes.kmodes import KModes
+from kmodes.kprototypes import KPrototypes
 
 
 
@@ -364,19 +365,62 @@ def get_kmodes_data(engine, timespan=14, freq_threshold=5):
 
     return df.to_numpy(), tag_names
 
-def kmodes_cluster(engine,path=None):
+def kprototypes_cluster(engine,path=None, timespan=30, freq_threshold=5):
     """ Find clusters for some k atm predefined.
         TODO: Add options.
+        freq_threshold: Ignore  entries with less than 'this' occurrences.
+        timespane: How many days from now to consider in the cluster.
     """
-    
-    timespan=30
-    freq_threshold = 5
 
     # Get data for clustering. Rows are measurements and columns features.
     # First n columns are categorical tags and last 3 (?) numeric.
     # TODO: Change to K-prototypes.
     data_counts, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
+    categ_idx = len(tag_names)-1
 
+    #print(tag_names)
+    #print(data_counts)
+    #print(categ_idx)
+    #print(data_counts[:,list(range(categ_idx+1))])
+
+    # Set all above unity frequencies to unity.
+    data_binary = np.zeros_like(data_counts)
+    data_binary[data_counts > 1] = 1
+
+    D = [data_counts, data_binary]
+    inits= ['Huang', 'Cao']
+
+    k = 5
+
+    kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
+    kproto.fit(D[1], categorical=list(range(categ_idx+1)))
+    centroids = (kproto.cluster_centroids_)
+
+    clusters = []
+    for center in centroids:
+
+        cluster_tags = tag_names[np.nonzero(center[-categ_idx-1:])]
+        cluster = np.concatenate((cluster_tags,center[:-categ_idx-1]), axis=0)
+        
+        # To list for json.dump()
+        clusters.append(cluster.tolist())
+
+    print(clusters)
+    # TODO: Re use for saving image?
+    save_results(path, key=f'k{k}', results=clusters)
+
+def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
+    """ Find clusters for some k atm predefined.
+        TODO: Add options.
+        freq_threshold: Ignore  entries with less than 'this' occurrences.
+        timespane: How many days from now to consider in the cluster.
+    """
+
+    # Get data for clustering. Rows are measurements and columns features.
+    # First n columns are categorical tags and last 3 (?) numeric.
+    # TODO: Change to K-prototypes.
+    data_counts, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
+    categ_idx = len(tag_names)-1
 
     # Set all above unity frequencies to unity.
     data_binary = np.zeros_like(data_counts)
@@ -390,6 +434,7 @@ def kmodes_cluster(engine,path=None):
     kmodes = KModes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
     kmodes.fit(D[1])
     centroids = (kmodes.cluster_centroids_)
+
     clusters = []
     for center in centroids:
 
@@ -400,10 +445,11 @@ def kmodes_cluster(engine,path=None):
         # To list for json.dump()
         clusters.append(cluster.tolist())
 
-    # TODO: Re use for saving image?
     save_results(path, key=f'k{k}', results=clusters)
 
-    #print(clusters)
+    print(centroids)
+    print("")
+    for cl in clusters: print(cl)
 
 # Use the venn2 function
 def kmodes_elbow_cost(engine):

@@ -209,7 +209,7 @@ def create_graph(G, fig, clusters):
         
         G.add_edges_from(edges)
 
-    pos = nx.spring_layout(G, k=.5, iterations=20)
+    pos = nx.spring_layout(G, k=.5, iterations=30)
 
     nx.draw(G, pos, with_labels=True,
             alpha=0.7, node_size=1000)
