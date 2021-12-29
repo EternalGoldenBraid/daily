@@ -37,8 +37,12 @@
 			{% endif %}
 			</div>
 
-			<a href={{ url_for('data_analysis.data', target='kmeans', re_train=True) }}
-				 target="">KMeans clustering of tags (In progress)</a> <br>
+			<a href={{ url_for('data_analysis.plots', target='kmodes_network', re_train=False) }}
+				 target="_blank">KModes visualize clusters as a network graph.</a> <br>
+
+			<a href={{ url_for('data_analysis.plots', target='kmodes_elbow', re_train=False) }}
+				 target="_blank">Plot KModes costs for different values of k.</a> <br>
+
 			<div class="model_performance"> 
 			 {% if summary_kmeans %}
 					{% for key in summary_kmeans %} 

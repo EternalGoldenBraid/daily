@@ -11,6 +11,7 @@ from daily import db
 #matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import networkx as nx
 
 from collections import Counter
 import numpy as np
@@ -26,10 +27,15 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 import datetime
 
 from daily.data_analysis.data_models import (tag_freq,
-        time_series, cluster, 
+        time_series, 
+        cluster, kmodes_cluster, kmodes_elbow_cost,
         naive_bayes, sk_naive_bayes_multinomial)
 
-from daily.data_analysis.plots import (polar, polar_nice)
+from daily.data_analysis.plots import (
+            polar, polar_nice,
+            create_graph)
+
+from daily.data_analysis.helpers import plot_img
 
 @bp.route("/data/index")
 def index():
@@ -40,15 +46,45 @@ def index():
 def plots():
     engine = db.get_engine()
     target = request.args.get('target')
+
     if target == 'tag_freq':
         return tag_freq(engine)
     elif target == 'eigen':
-        return cluster(engine)
+        #return cluster(engine)
+        #cluster(engine)
+        return render_template("data_analysis/kmodes.html")
     elif target == 'polar':
         return polar(engine)
     elif target == 'polar_heat':
         return polar_nice(engine)
-    return redirect(url_for('data_analysis.index'))
+    elif target == 'kmodes_network':
+        path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+
+        retrain=False
+        if retrain: kmodes_cluster(engine, path = path)
+        with open(path,"r") as file: 
+            clusters = json.load(file)
+        G = nx.Graph()
+        fig = plt.figure(figsize=(10,10))
+        plt.clf()
+        return create_graph(G=G,fig=fig,clusters=clusters['k7'])
+    elif target == 'kmodes_elbow':
+        path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+
+        # TODO: Add retrain flag to decide whether to serve and old or newly trained img.
+        return kmodes_elbow_cost(engine)
+
+    return render_template("data_analysis/kmodes_py.html")
+
+
+@bp.route("/data/kmodes_data", methods=["GET"])
+def kmodes_data():
+    """ Endpoint for data queries for kmodes """
+
+    path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+    with open(path,"r") as file: 
+        clusters = json.load(file)
+    return jsonify(clusters)
 
 @bp.route("/data", methods=["GET", "POST"])
 def data():
@@ -65,8 +101,18 @@ def data():
         #naive_bayes(engine)
         with open(path,"r") as file: 
             summary = json.load(file)
+    elif target == 'kmodes':
+        re_train = args.get('re_train')
+        #path = os.getcwd() +'/daily/data_analysis/summary.json'
+        #sk_naive_bayes_multinomial(engine, 
+        #    save_path=path, evaluate_model=re_train)
+        ##naive_bayes(engine)
+        #with open(path,"r") as file: 
+        #    summary = json.load(file)
+        #return render_template("data_analysis/kmodes.html")
 
-    print(summary)
+        return kmodes_elbow_cost(engine)
+    #print(summary)
     return render_template("data_analysis/index.html", summary=summary)
                 
 

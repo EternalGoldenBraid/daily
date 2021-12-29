@@ -24,10 +24,12 @@ from collections import Counter
 import os
 
 import io
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
+#from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 import datetime
 
-from daily.data_analysis.helpers import save_results
+from daily.data_analysis.helpers import save_results, kmeans, plot_img
+
+from kmodes.kmodes import KModes
 
 
 
@@ -38,11 +40,11 @@ def save_plot(fig, name, form=None):
     #plt.savefig(filename)
     return filename
         
-def plot_img(fig):
-    # BytesIO write stream to RAM.
-    output = io.BytesIO()
-    FC(fig).print_png(output)
-    return Response(output.getvalue(), mimetype='image/png')
+#def plot_img(fig):
+#    # BytesIO write stream to RAM.
+#    output = io.BytesIO()
+#    FC(fig).print_png(output)
+#    return Response(output.getvalue(), mimetype='image/png')
 
 def create_subplots(ax, labels):
     ax.set_xticks(range(labels.shape[0]))
@@ -296,80 +298,228 @@ def get_rating_events_tags(engine, columns):
 
     return rating_events_tags[columns]
 
-def cluster(engine):
-
-    # Allow demoers to view plots generated from my data.
-    if current_user.is_anonymous or current_user.id == 2:
-        # TODO: Change this to query by my username.
-        user_id_ = 1
-    else:
-        user_id_ = current_user.id
-        #user_id_ = current_user.get_id()
+def get_kmodes_data(engine, timespan=14, freq_threshold=5):
+    # Allows demoers to view plots generated from my data.
+    user_id_ = get_user_id_()
 
     # Merge ratings, events and tags to get a df of dates with combinations of tags.
     
     # Read ratings for user
-    ratings = pd.read_sql('rating',engine,index_col=False)
-    ratings = ratings[ratings['user_id'] == user_id_][['id', 'date','user_id']]
+    #ratings = pd.read_sql('rating',engine,index_col=False)
+    ratings = pd.read_sql('rating',engine,index_col='id')
+    ratings['id'] = ratings.index
+    #ratings = ratings[ratings['user_id'] == user_id_][['id', 'date','user_id']]
+    ratings = ratings[ratings['user_id'] == user_id_].iloc[-timespan:]
+
     ratings.columns = ratings.columns.str.replace('id','rating_id')
 
     # Read all tags.
-    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
-    tags = pd.read_sql('tag',engine,index_col=False)
-    tags.columns = tags.columns.str.replace('id','tag_id')
-
-    # Read all events.
-    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
-    events = pd.read_sql('event',engine, index_col=False)
-    events.columns = events.columns.str.replace('id','event_id')
+    # TODO: Inefficient, fetch only for user, or set lazy=true?.
+    tags = pd.read_sql('tag',engine,index_col='id')
+    #tags.columns = tags.columns.str.replace('id','tag_id')
 
     # Read all rating event associations.
     # TODO: Which first join is sensible here? Inner or right?
     re_m2m = pd.read_sql('rating_events',engine,index_col=False)
     # TODO: Inefficient, fetch only for user, or lazy=dynamic.
     #re_m2m=re_m2m[re_m2m['user_id']== user_id_]
-    rating_events = re_m2m \
-        .merge(ratings,how='inner', on='rating_id') \
-        .merge(events,how='left', on='event_id')
 
     # Read all event tag associations.
     # Not all events have tags, thus merge innner vs. left
     # dictates whether null tags are included.
-    event_tag = pd.read_sql('event_tags',engine, index_col=False)
+    et_m2m = pd.read_sql('event_tags',engine, index_col=False)
     # TODO: Inefficient, fetch only for user, or lazy=dynamic.
     #event_tag = event_tag[event_tag['user_id']==user_id_]
-    rating_events_tags = rating_events.merge(event_tag,how='inner',on='event_id')
-    rating_events_tags = rating_events_tags[['date','tag_id']]
 
-    # Clean
-    rating_events_tags.fillna(-1,inplace=True)
-    rating_events_tags['tag_id']=rating_events_tags['tag_id'].astype(int)
+    rt_m2m = re_m2m \
+            .merge(et_m2m,how='inner',on='event_id')[['rating_id', 'tag_id']]
 
-    tag_list = rating_events_tags.groupby('date').agg(list)
+    #rt_m2m = rt_m2m['rating_id'][rt_m2m['rating_id'].isin(ratings.index)]
+    rt_m2m = rt_m2m[rt_m2m['rating_id'].isin(ratings.index)]
 
-    #print(tag_list[100:105])
-    #print(tag_list[99:100].index)
-    print("TESTING")
-    for i in range(1,4):
-        foo = tag_list[i-1:i].iloc[0]
-        foo=np.array(foo)
-        print(foo)
-        print("length: ", len(foo))
-        print("")
+    # Clean data. Remove rows there tag_id doesn't occur >= n times
+    freq_threshold=5
+    rt_m2m = rt_m2m[rt_m2m.groupby('tag_id')['tag_id'] \
+            .transform('count').ge(freq_threshold)]
 
+    tag_list = rt_m2m.groupby('rating_id').agg(list)
+
+    all_tags = np.concatenate([np.array(i) for i in tag_list['tag_id'].values])
+    columns = np.unique(all_tags)
+    tag_names = tags.loc[columns]['tag_name'].values
+
+    # All ratings where first column is rating_id and rest are tags.
+    data = np.zeros((tag_list.shape[0], len(columns)))
+    for row_idx, entry in enumerate(tag_list.values):
+        mapping = Counter(entry[0])
+        for col_idx, key in enumerate(mapping):
+            data[row_idx][columns == key] = mapping[key]
+
+    # Bring ratings and meditation duration in as well.
+    ratings_columns = ['rating_sleep', 'rating_day', 'meditation']
+    ratings_ = ratings[ratings_columns]
+    df = pd.DataFrame(data, columns=tag_names)
+    df.index = tag_list.index
+    df[ratings_columns] = ratings_[ratings_columns]
+
+    return df.to_numpy(), tag_names
+
+def kmodes_cluster(engine,path=None):
+    """ Find clusters for some k atm predefined.
+        TODO: Add options.
+    """
     
+    timespan=30
+    freq_threshold = 5
 
-    # Produce dictionary for each rating/date where
-    # key is tag_id and value it's count in that rating/date.
-    date_tags = list(map(Counter, tag_list['tag_id']))
-    dates = rating_events_tags['date']
+    # Get data for clustering. Rows are measurements and columns features.
+    # First n columns are categorical tags and last 3 (?) numeric.
+    # TODO: Change to K-prototypes.
+    data_counts, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
 
-    data = np.zeros((tag_list.shape[0], tags['tag_id'].shape[0]))
-    # TODO: More optimal way than for loop
-    for row in range(data.shape[0]):
-        for col in range(data.shape[1]):
-            data[row][col]=date_tags[row][col]
+
+    # Set all above unity frequencies to unity.
+    data_binary = np.zeros_like(data_counts)
+    data_binary[data_counts > 1] = 1
+
+    D = [data_counts, data_binary]
+    inits= ['Huang', 'Cao']
+
+    k = 7
+
+    kmodes = KModes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
+    kmodes.fit(D[1])
+    centroids = (kmodes.cluster_centroids_)
+    clusters = []
+    for center in centroids:
+
+        #center_names = tag_names[np.nonzero(center[:-3])]
+        cluster_tags = tag_names[np.nonzero(center[:-3])]
+        cluster = np.concatenate((cluster_tags,center[-3:]), axis=0)
+        
+        # To list for json.dump()
+        clusters.append(cluster.tolist())
+
+    # TODO: Re use for saving image?
+    save_results(path, key=f'k{k}', results=clusters)
+
+    #print(clusters)
+
+# Use the venn2 function
+def kmodes_elbow_cost(engine):
     
+    timespan=30
+    freq_threshold = 5
+
+    data, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
+
+    fig, ax = plt.subplots(2,1, figsize=(8,8))
+
+    ax = ax.flatten()
+
+    # Set all above unity frequencies to unity.
+    data1 = np.zeros_like(data)
+    data1[data > 1] = 1
+
+    D = [data, data1]
+    #inits= ['Huang', 'Cao']
+    inits= ['Huang', 'Huang']
+    #inits= ['Cao', 'Cao']
+
+    K = list(range(1,20,2))
+
+    for idx, axis in enumerate(ax):
+        costs = []
+        for k in K:
+            kmodes = KModes(n_clusters=k, init=inits[idx], n_jobs=4, verbose=1)
+            kmodes.fit(D[idx])
+            centroids = (kmodes.cluster_centroids_)
+            costs.append(kmodes.cost_)
+            print("Centroids: ")
+            for center in centroids:
+                #center_names = tag_names[np.nonzero(center[:-3])]
+                foo = tag_names[np.nonzero(center[:-3])]
+                cluster = np.concatenate((foo,center[-3:]), axis=0)
+                print(cluster)
+                #clusters[idx].append(cluster)
+        axis.plot(K, costs)
+        axis.set_title(f"Days: {data.shape[0]}, Dim: {len(tag_names)}, " \
+                        f"Init: {inits[idx]}, " \
+                        f"number of iterations: {kmodes.n_iter_}")
+
+    # TODO: Re use for saving image?
+    #if path: save_results(path, key=f'k{k}', results=summary)
+    return plot_img(fig)
+
+def cluster(engine):
+
+    # Allows demoers to view plots generated from my data.
+    user_id_ = get_user_id_()
+
+    # Merge ratings, events and tags to get a df of dates with combinations of tags.
+    
+    # Read ratings for user
+    ratings = pd.read_sql('rating',engine,index_col=False)
+    ratings = ratings[ratings['user_id'] == user_id_][['id', 'date','user_id']]
+
+    ratings.columns = ratings.columns.str.replace('id','rating_id')
+
+    # Read all tags.
+    # TODO: Inefficient, fetch only for user, or set lazy=true?.
+    tags = pd.read_sql('tag',engine,index_col='id')
+    #tags.columns = tags.columns.str.replace('id','tag_id')
+
+    # Read all rating event associations.
+    # TODO: Which first join is sensible here? Inner or right?
+    re_m2m = pd.read_sql('rating_events',engine,index_col=False)
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #re_m2m=re_m2m[re_m2m['user_id']== user_id_]
+
+    # Read all event tag associations.
+    # Not all events have tags, thus merge innner vs. left
+    # dictates whether null tags are included.
+    et_m2m = pd.read_sql('event_tags',engine, index_col=False)
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #event_tag = event_tag[event_tag['user_id']==user_id_]
+
+    rt_m2m = re_m2m.merge(et_m2m,how='inner',on='event_id')[['rating_id', 'tag_id']]
+
+    tag_list = rt_m2m.groupby('rating_id').agg(list)
+    #tag_list = tag_list.loc[:30]
+
+    # TODO: Add switch? The choice for rating_id_tag_id matrix dimensions
+    # dictates whether the tag vector spans history of all tags or just the
+    # timespane one is observing.
+    tag_span = max(map(lambda row: len(row[0]) ,tag_list.values))
+    rating_id_tag_id = np.zeros((tag_list.shape[0], tag_span))
+    tag_id_map = np.zeros_like(rating_id_tag_id)
+    #rating_id_tag_id = np.zeros((tag_list.shape[0]+1, tags.shape[0]+2))
+    #rating_id_tag_id = np.zeros((tags.shape[0]+1, tag_list.shape[0]))
+
+    print(rating_id_tag_id.shape)
+
+    for rating_idx, entry in enumerate(tag_list.values):
+        mapping = Counter(entry[0])
+        for tag_idx, key in enumerate(mapping):
+            rating_id_tag_id[rating_idx][tag_idx] = mapping[key]
+            tag_id_map[rating_idx][tag_idx] = key
+
+    data = rating_id_tag_id
+    #fig, ax = plt.subplots(1,1, figsize=(8,8))
+    #ax.imshow(np.dot(data.T/np.norm(data.T), data/np.norm(data)))
+    #ax.imshow(np.dot(data.T, data))
+    #plt.show()
+
+    k=6
+    centers = kmeans(data,k)
+
+    #ax.hist2d(rating_id_tag_id)
+
+    #return plot_img(fig)
+
+    return
+
+
     # TODO: Get eigenvectors out
     mean = np.mean(data,axis=0)
     data = (data-mean)

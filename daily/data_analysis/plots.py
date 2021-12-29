@@ -6,6 +6,8 @@ from flask_login import current_user
 #matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
+import networkx as nx
 
 import math
 import numpy as np
@@ -22,9 +24,9 @@ import joblib
 import json
 from collections import Counter
 import os
-
 import io
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
+
+
 import datetime
 
 from daily.data_analysis.helpers import save_results
@@ -180,6 +182,43 @@ def get_tag_sleep_day_data(engine):
     # Or is it guaranteed to be preserved by drop_duplicates? I think so but not sure.
 
     return rating_id_tags, labels
+
+def create_graph(G, fig, clusters):
+
+    #fig = plt.figure(figsize=(10,10))
+    #for cluster in clusters[1:5]:
+    for cluster in clusters:
+        # Create cluster
+
+        # TODO: Circumvent this magic number. 
+        # Purpose: Ignore non-string labels. i.e. ratings and meditation.
+        cluster = cluster[:-3]
+        #print(cluster)
+
+        #G = nx.Graph()
+
+        G.add_nodes_from(cluster)
+
+        edges = []
+        # TODO: This add multiple edges in both direction. Is that a problem?
+
+        # Create edges for cluster
+        for idx, node in enumerate(cluster):
+            for adj_node in cluster[:idx]:
+                edges.append((cluster[idx], adj_node))
+        
+        G.add_edges_from(edges)
+
+    pos = nx.spring_layout(G, k=.5, iterations=20)
+
+    nx.draw(G, pos, with_labels=True,
+            alpha=0.7, node_size=1000)
+
+    output = io.BytesIO() # file-like object for the image
+    plt.savefig(output) # save the image to the stream
+    output.seek(0) # writing moved the cursor to the end of the file, reset
+    plt.clf() # clear pyplot
+    return Response(output, mimetype='image/png')
 
 
 def time_series(engine):
