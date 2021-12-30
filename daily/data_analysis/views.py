@@ -1,28 +1,29 @@
+from daily.data_analysis import bp
+from daily import db
 from daily.models import User, Rating, Tag, rating_as, event_as
+from daily.data_analysis.forms import KPrototypes_network_form, KPrototypes_cost_form
+
+from flask import Response, jsonify
 from flask import (render_template, redirect, flash,
         url_for, request)
 from flask_login import (current_user, login_user,
                     logout_user, login_required)
-
-from daily.data_analysis import bp
-from daily import db
 
 #import matplotlib
 #matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import networkx as nx
-
-from collections import Counter
 import numpy as np
 import pandas as pd
 from numpy.random import default_rng
 #from scipy import stats
+
 import os
 import json
-
 import io
-from flask import Response, jsonify
+from collections import Counter
+
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
 import datetime
 
@@ -40,12 +41,19 @@ from daily.data_analysis.helpers import plot_img
 @bp.route("/data/index")
 def index():
 
-    return render_template("data_analysis/index.html")
+    kproto_network_form = KPrototypes_network_form()
+    kproto_cost_form = KPrototypes_cost_form()
+    return render_template("data_analysis/index.html",
+            kproto_network = kproto_network_form,
+            kproto_cost = kproto_cost_form)
 
-@bp.route("/plots", methods=["GET"])
+@bp.route("/plots", methods=["GET", "POST"])
 def plots():
     engine = db.get_engine()
     target = request.args.get('target')
+
+    kproto_network_form = KPrototypes_network_form()
+    kproto_cost_form = KPrototypes_cost_form()
 
     if target == 'tag_freq':
         return tag_freq(engine)
@@ -59,26 +67,31 @@ def plots():
         return polar_nice(engine)
     elif target == 'kmodes_network':
         path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+        #TODO: Add support for range of k plots returned.
+        k = kproto_network_form.k.data
+        timespan = kproto_network_form.timespan.data
 
+        # TODO Add tickbox for retraining.
         retrain=True
         if retrain: 
-
-            #kmodes_cluster(engine, path = path, timespan=7,freq_threshold=4)
-            kprototypes_cluster(engine, path = path, timespan=14,freq_threshold=2)
-
+            #kmodes_cluster(engine, path = path, timespan=timespan,freq_threshold=4)
+            kprototypes_cluster(engine,path = path,
+                    k=k,timespan=timespan,freq_threshold=2)
         with open(path,"r") as file: 
             clusters = json.load(file)
         G = nx.Graph()
         fig = plt.figure(figsize=(10,10))
         plt.clf()
-        return create_graph(G=G,fig=fig,clusters=clusters['k7'])
+        return create_graph(G=G,fig=fig,clusters=clusters[f'k{k}'])
     elif target == 'kmodes_elbow':
         path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
 
         # TODO: Add retrain flag to decide whether to serve and old or newly trained img.
         return kmodes_elbow_cost(engine)
 
-    return render_template("data_analysis/kmodes_py.html")
+    return render_template("data_analysis/index.html",
+            kproto_network = kproto_network_form,
+            kproto_cost = kproto_cost_form)
 
 
 @bp.route("/data/kmodes_data", methods=["GET"])
@@ -116,8 +129,12 @@ def data():
         #return render_template("data_analysis/kmodes.html")
 
         return kmodes_elbow_cost(engine)
-    #print(summary)
-    return render_template("data_analysis/index.html", summary=summary)
+
+    kproto_network_form = KPrototypes_network_form()
+    kproto_cost_form = KPrototypes_cost_form()
+    return render_template("data_analysis/index.html",
+            kproto_network = kproto_network_form,
+            kproto_cost = kproto_cost_form)
                 
 
     return redirect(url_for('data_analysis.index'))

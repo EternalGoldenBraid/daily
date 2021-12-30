@@ -365,7 +365,7 @@ def get_kmodes_data(engine, timespan=14, freq_threshold=5):
 
     return df.to_numpy(), tag_names
 
-def kprototypes_cluster(engine,path=None, timespan=30, freq_threshold=5):
+def kprototypes_cluster(engine,k=5,path=None, timespan=30, freq_threshold=5):
     """ Find clusters for some k atm predefined.
         TODO: Add options.
         freq_threshold: Ignore  entries with less than 'this' occurrences.
@@ -378,11 +378,6 @@ def kprototypes_cluster(engine,path=None, timespan=30, freq_threshold=5):
     data_counts, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
     categ_idx = len(tag_names)-1
 
-    #print(tag_names)
-    #print(data_counts)
-    #print(categ_idx)
-    #print(data_counts[:,list(range(categ_idx+1))])
-
     # Set all above unity frequencies to unity.
     data_binary = np.zeros_like(data_counts)
     data_binary[data_counts > 1] = 1
@@ -390,10 +385,9 @@ def kprototypes_cluster(engine,path=None, timespan=30, freq_threshold=5):
     D = [data_counts, data_binary]
     inits= ['Huang', 'Cao']
 
-    k = 5
-
-    kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
-    kproto.fit(D[1], categorical=list(range(categ_idx+1)))
+    #kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
+    kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=1)
+    kproto.fit(D[0], categorical=list(range(categ_idx+1)))
     centroids = (kproto.cluster_centroids_)
 
     clusters = []
@@ -406,6 +400,7 @@ def kprototypes_cluster(engine,path=None, timespan=30, freq_threshold=5):
         clusters.append(cluster.tolist())
 
     print(clusters)
+
     # TODO: Re use for saving image?
     save_results(path, key=f'k{k}', results=clusters)
 
@@ -431,7 +426,7 @@ def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
 
     k = 7
 
-    kmodes = KModes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
+    kmodes = KModes(n_clusters=k, init=inits[1], n_jobs=1, verbose=1)
     kmodes.fit(D[1])
     centroids = (kmodes.cluster_centroids_)
 
@@ -477,7 +472,7 @@ def kmodes_elbow_cost(engine):
     for idx, axis in enumerate(ax):
         costs = []
         for k in K:
-            kmodes = KModes(n_clusters=k, init=inits[idx], n_jobs=4, verbose=1)
+            kmodes = KModes(n_clusters=k, init=inits[idx], n_jobs=1, verbose=1)
             kmodes.fit(D[idx])
             centroids = (kmodes.cluster_centroids_)
             costs.append(kmodes.cost_)

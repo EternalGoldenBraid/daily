@@ -6,17 +6,9 @@
 
 {% block main %}
 <body>
-	  <h2>Some visualizations</h2>
-			<h5> What would you like to see? </h5>
-			<a href={{ url_for('data_analysis.plots', target='eigen') }} 
-				 target="_blank">Eigendays</a> <br>
-			<a href={{ url_for('data_analysis.plots', target='tag_freq') }} 
-				 target="_blank">Tag frequencies</a> <br>
-			<a href={{ url_for('data_analysis.plots', target='polar') }} 
-				 target="_blank">Ratings in polar plot</a> <br>
-			<a href={{ url_for('data_analysis.plots', target='polar_heat') }} 
-				 target="_blank">Ratings in polar heat plot</a> <br>
-			
+	  <h1>Data analysis</h1>
+
+	  <h4>Supervised models</h4>
 			<a href={{ url_for('data_analysis.data', target='nbayes', re_train=True) }}
 				 target="">
 				Naive Bayes</a> 
@@ -37,11 +29,52 @@
 			{% endif %}
 			</div>
 
-			<a href={{ url_for('data_analysis.plots', target='kmodes_network', re_train=False) }}
-				 target="_blank">KModes visualize clusters as a network graph.</a> <br>
+	  <h4>Unsupervised models</h4>
 
-			<a href={{ url_for('data_analysis.plots', target='kmodes_elbow', re_train=False) }}
-				 target="_blank">Plot KModes costs for different values of k.</a> <br>
+			 <form 
+				 action={{ url_for('data_analysis.plots',
+				 						target='kmodes_network', re_train=False) }} method="post">
+				 {{ kproto_network.hidden_tag() }}
+				 <p> 
+				 </p>
+				 Cluster with KPrototypes and visualize clusters as a network graph.
+				 <p> 
+				 {{ kproto_network.k.label }} 
+				 {{ kproto_network.k(size=1, class="form-control-sm") }} 
+				 {{ kproto_network.timespan.label }}
+				 {{ kproto_network.timespan(size=1, class="form-control-sm") }} 
+				 {{ kproto_network.submit(size=1, class="btn-sm") }} 
+				 </p>
+			 </form>
+
+			 <form action={{ url_for('data_analysis.plots',
+				 												target='kmodes_elbow',
+																re_train=False) }} 
+							method="post">
+				 {{ kproto_cost.hidden_tag() }}
+				 </p> 
+				 Cluster with KPrototypes and visualize costs as a function of number of clusters.
+				 <p> 
+				 <p> 
+				 {{ kproto_cost.k.label }} 
+				 {{ kproto_cost.k(size=1, class="form-control-sm") }} 
+				 {{ kproto_cost.timespan.label }}
+				 {{ kproto_cost.timespan(size=1, class="form-control-sm") }} 
+				 {{ kproto_cost.submit(size=1, class="btn-sm") }} 
+				 </p>
+			 </form>
+
+	  <h4>Descriptive statistics</h4>
+			<a href={{ url_for('data_analysis.plots', target='eigen') }} 
+				 target="_blank">Eigendays</a> <br>
+			<a href={{ url_for('data_analysis.plots', target='tag_freq') }} 
+				 target="_blank">Tag frequencies</a> <br>
+			<a href={{ url_for('data_analysis.plots', target='polar') }} 
+				 target="_blank">Ratings in polar plot</a> <br>
+			<a href={{ url_for('data_analysis.plots', target='polar_heat') }} 
+				 target="_blank">Ratings in polar heat plot</a> <br>
+			
+
 
 			<div class="model_performance"> 
 			 {% if summary_kmeans %}
