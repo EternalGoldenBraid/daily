@@ -376,7 +376,7 @@ def kprototypes_cluster(engine,k=5,path=None, timespan=30, freq_threshold=5):
     # First n columns are categorical tags and last 3 (?) numeric.
     # TODO: Change to K-prototypes.
     data_counts, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
-    categ_idx = len(tag_names)-1
+    categ_idx = len(tag_names)
 
     # Set all above unity frequencies to unity.
     data_binary = np.zeros_like(data_counts)
@@ -387,22 +387,41 @@ def kprototypes_cluster(engine,k=5,path=None, timespan=30, freq_threshold=5):
 
     #kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
     kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=1)
-    kproto.fit(D[0], categorical=list(range(categ_idx+1)))
+    kproto.fit(D[0], categorical=list(range(categ_idx)))
     centroids = (kproto.cluster_centroids_)
 
     clusters = []
-    for center in centroids:
 
-        cluster_tags = tag_names[np.nonzero(center[-categ_idx-1:])]
-        cluster = np.concatenate((cluster_tags,center[:-categ_idx-1]), axis=0)
+    # Kproto returns a flipped array in numerical variable major form.
+    # Flipped back to categorical major.
+    #print(centroids)
+    weights_= []
+    centroids = np.concatenate(
+        (centroids[:,-categ_idx:], centroids[:,:-categ_idx]), axis=1)
+    for idx, center in enumerate(centroids):
+
+        #cluster_tags = tag_names[np.nonzero(center[-categ_idx-1:])]
+        #cluster = np.concatenate((cluster_tags,center[:-categ_idx-1]), axis=0)
+
+        cluster_tags = tag_names[np.nonzero(center[:categ_idx])]
+        cluster = np.concatenate((cluster_tags,center[-(center.shape[0]-categ_idx):]), axis=0)
         
         # To list for json.dump()
         clusters.append(cluster.tolist())
+        weights_.append(center[np.nonzero(center[:categ_idx])].tolist())
 
-    print(clusters)
+    print("CENTROIDS")
+    for cent in centroids: print(cent)
+    print("CLUSTERS")
+    for clus in clusters: print(clus)
 
     # TODO: Re use for saving image?
     save_results(path, key=f'k{k}', results=clusters)
+
+    print("WEIGJTS")
+    print(weights_)
+    #save_results(path, key=f'k{k}_counts', results=weights_.tolist())
+    save_results(path, key=f'k{k}_counts', results=weights_)
 
 def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
     """ Find clusters for some k atm predefined.
@@ -427,7 +446,7 @@ def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
     k = 7
 
     kmodes = KModes(n_clusters=k, init=inits[1], n_jobs=1, verbose=1)
-    kmodes.fit(D[1])
+    kmodes.fit(D[0])
     centroids = (kmodes.cluster_centroids_)
 
     clusters = []
@@ -442,8 +461,10 @@ def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
 
     save_results(path, key=f'k{k}', results=clusters)
 
+    print("CENTROIDS")
     print(centroids)
     print("")
+    print("CLUSTERS")
     for cl in clusters: print(cl)
 
 # Use the venn2 function

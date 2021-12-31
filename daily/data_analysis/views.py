@@ -34,7 +34,7 @@ from daily.data_analysis.data_models import (tag_freq,
 
 from daily.data_analysis.plots import (
             polar, polar_nice,
-            create_graph)
+            create_graph, create_graph_v2)
 
 from daily.data_analysis.helpers import plot_img
 
@@ -66,7 +66,11 @@ def plots():
     elif target == 'polar_heat':
         return polar_nice(engine)
     elif target == 'kmodes_network':
-        path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+
+        THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(THIS_FOLDER, 'kmodes_cluster.json')
+
+        #path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
         #TODO: Add support for range of k plots returned.
         k = kproto_network_form.k.data
         timespan = kproto_network_form.timespan.data
@@ -80,9 +84,14 @@ def plots():
         with open(path,"r") as file: 
             clusters = json.load(file)
         G = nx.Graph()
+        #G = nx.cubical_graph()
         fig = plt.figure(figsize=(10,10))
-        plt.clf()
-        return create_graph(G=G,fig=fig,clusters=clusters[f'k{k}'])
+        #return create_graph(G=G,fig=fig,
+        #        clusters=clusters[f'k{k}'],
+        #        weights=clusters[f'k{k}_counts'])
+        return create_graph_v2(G=G,fig=fig,
+                clusters=clusters[f'k{k}'],
+                frequencies=clusters[f'k{k}_counts'])
     elif target == 'kmodes_elbow':
         path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
 
