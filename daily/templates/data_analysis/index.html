@@ -9,10 +9,10 @@
 	  <h1>Data analysis</h1>
 
 	  <h4>Supervised models</h4>
+		<b>  Predicting day and sleep ratings using tags. </b> <br>
 			<a href={{ url_for('data_analysis.data', target='nbayes', re_train=True) }}
 				 target="">
 				Naive Bayes</a> 
-			<p>  Predicting day and sleep ratings using tags. </p>
 			<div class="model_performance"> 
 			{% if summary %}
 				{% if summary['nbayes'] %}
@@ -29,41 +29,58 @@
 			{% endif %}
 			</div>
 
+			<br>
 	  <h4>Unsupervised models</h4>
 
 			 <form 
 				 action={{ url_for('data_analysis.plots',
-				 						target='kmodes_network', re_train=False) }} method="post">
+				 						target='kmodes_network', re_train=False) }}
+										method="post" target="_blank">
 				 {{ kproto_network.hidden_tag() }}
-				 <p> 
-				 </p>
-				 Cluster with KPrototypes and visualize clusters as a network graph.
-				 <p> 
-				 {{ kproto_network.k.label }} 
-				 {{ kproto_network.k(size=1, class="form-control-sm") }} 
-				 {{ kproto_network.timespan.label }}
-				 {{ kproto_network.timespan(size=1, class="form-control-sm") }} 
-				 {{ kproto_network.submit(size=1, class="btn-sm") }} 
-				 </p>
+				 <b>Cluster tags and numeric attributes with KPrototypes
+					 and visualize clusters as a network of tags.</b>
+				 <table> 
+					<tr>
+						<td>{{ kproto_network.k.label }} 
+							{{ kproto_network.k(size=1, class="form-control-sm") }} </td>
+				 		<td>{{ kproto_network.timespan.label }} 
+							{{ kproto_network.timespan(size=1, class="form-control-sm") }} </td>
+						<td>{{ kproto_network.freq_threshold.label }} 
+							{{ kproto_network.freq_threshold(size=1, class="form-control-sm") }} </td>
+
+					</tr>
+						<tr>
+				 		<td>{{ kproto_network.init.label }} {{ kproto_network.init}} </td>
+				 		<td>{{ kproto_network.version.label }} {{ kproto_network.version }} </td>
+						<td>{{ kproto_network.fit.label }} {{ kproto_network.fit }} </td>
+				 		<td>{{ kproto_network.d_set.label }} {{ kproto_network.d_set }} </td>
+				 		<td>{{ kproto_network.submit(size=1, class="btn") }} </td>
+					</tr>
+				 </table>
 			 </form>
+
 
 			 <form action={{ url_for('data_analysis.plots',
 				 												target='kmodes_elbow',
 																re_train=False) }} 
-							method="post">
-				 {{ kproto_cost.hidden_tag() }}
-				 </p> 
-				 Cluster with KPrototypes and visualize costs as a function of number of clusters.
-				 <p> 
-				 <p> 
-				 {{ kproto_cost.k.label }} 
-				 {{ kproto_cost.k(size=1, class="form-control-sm") }} 
-				 {{ kproto_cost.timespan.label }}
-				 {{ kproto_cost.timespan(size=1, class="form-control-sm") }} 
-				 {{ kproto_cost.submit(size=1, class="btn-sm") }} 
-				 </p>
+							method="post" target="_blank">
+				 {{ kmodes_elbow.hidden_tag() }}
+				 <b>Cluster with KPrototypes and visualize costs as a function of number of clusters.</b>
+				 <table> 
+					<tr>
+					<td>{{ kmodes_elbow.timespan.label }} </td> <td>{{ kmodes_elbow.timespan}} </td>
+
+				 		<td>{{ kmodes_elbow.init.label }} {{ kmodes_elbow.init}} </td>
+					<td>{{ kmodes_elbow.fit.label }} {{ kmodes_elbow.fit}} </td>
+					<td>{{ kmodes_elbow.freq_threshold.label }}</td>
+					<td>{{ kmodes_elbow.freq_threshold(size=1, class="form-control-sm") }} </td>
+				 		<td>{{ kmodes_elbow.d_set.label }} {{ kmodes_elbow.d_set }} </td>
+					<td>{{ kmodes_elbow.submit (size=1, class="btn") }} </td>
+					 </tr>
+				 </table>
 			 </form>
 
+			<br>
 	  <h4>Descriptive statistics</h4>
 			<a href={{ url_for('data_analysis.plots', target='eigen') }} 
 				 target="_blank">Eigendays</a> <br>

@@ -22,7 +22,9 @@ def save_results(path, results, key='null'):
     else:
         with open(path, 'w') as file:
             result = { key : results }
-            print(result)
+            print("Saving results")
+            print(len(result[key]))
+            print("For key: ", key)
             json.dump(result, file)
 
 def L2(x, y):

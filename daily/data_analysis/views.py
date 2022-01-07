@@ -1,7 +1,8 @@
 from daily.data_analysis import bp
 from daily import db
 from daily.models import User, Rating, Tag, rating_as, event_as
-from daily.data_analysis.forms import KPrototypes_network_form, KPrototypes_cost_form
+from daily.data_analysis.forms import (KPrototypes_network_form,
+            Kmodes_elbow_form)
 
 from flask import Response, jsonify
 from flask import (render_template, redirect, flash,
@@ -42,10 +43,10 @@ from daily.data_analysis.helpers import plot_img
 def index():
 
     kproto_network_form = KPrototypes_network_form()
-    kproto_cost_form = KPrototypes_cost_form()
+    kmodes_elbow_form = Kmodes_elbow_form()
     return render_template("data_analysis/index.html",
             kproto_network = kproto_network_form,
-            kproto_cost = kproto_cost_form)
+            kmodes_elbow=kmodes_elbow_form)
 
 @bp.route("/plots", methods=["GET", "POST"])
 def plots():
@@ -53,7 +54,7 @@ def plots():
     target = request.args.get('target')
 
     kproto_network_form = KPrototypes_network_form()
-    kproto_cost_form = KPrototypes_cost_form()
+    kmodes_elbow_form = Kmodes_elbow_form()
 
     if target == 'tag_freq':
         return tag_freq(engine)
@@ -66,51 +67,116 @@ def plots():
     elif target == 'polar_heat':
         return polar_nice(engine)
     elif target == 'kmodes_network':
-
         THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-        path = os.path.join(THIS_FOLDER, 'kmodes_cluster.json')
 
-        #path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+        form = kproto_network_form
         #TODO: Add support for range of k plots returned.
-        k = kproto_network_form.k.data
-        timespan = kproto_network_form.timespan.data
+        k = form.k.data
+        timespan = form.timespan.data
+        version = form.version.data
+        fit = form.fit.data
+        freq_threshold = form.freq_threshold.data
+        d_set = form.d_set.data
 
-        # TODO Add tickbox for retraining.
-        retrain=True
-        if retrain: 
-            #kmodes_cluster(engine, path = path, timespan=timespan,freq_threshold=4)
-            kprototypes_cluster(engine,path = path,
-                    k=k,timespan=timespan,freq_threshold=2)
-        with open(path,"r") as file: 
-            clusters = json.load(file)
-        G = nx.Graph()
+        path = os.path.join(THIS_FOLDER, f'results/kmodes_clusters.json')
+        if fit: kprototypes_cluster(engine,path = path, d_set=d_set,
+                    k=k,timespan=timespan,freq_threshold=freq_threshold)
+
+        try:
+            with open(path,"r") as file: 
+                clusters = json.load(file)
+                # TODO: Why is data not len() == k after reading but is len() == 5
+                # during saving.
+                #data=clusters[f'k{k}'][0],
+                data=clusters[f'k{k}'],
+                data = data[0]
+                frequencies=clusters[f'k{k}_counts']
+
+                if len(data) != k: raise KeyError # Related to the above comment.
+        except (FileNotFoundError, KeyError) as e:
+            flash("Data not found, please train the model")
+            return redirect( url_for('data_analysis.index', code=301))
+
         #G = nx.cubical_graph()
+        G = nx.Graph()
+
         fig = plt.figure(figsize=(10,10))
-        #return create_graph(G=G,fig=fig,
-        #        clusters=clusters[f'k{k}'],
-        #        weights=clusters[f'k{k}_counts'])
-        return create_graph_v2(G=G,fig=fig,
-                clusters=clusters[f'k{k}'],
-                frequencies=clusters[f'k{k}_counts'])
+
+        if version == 1:
+            return create_graph(G=G,fig=fig,
+                    clusters=data,
+                    frequencies=frequencies)
+        elif version == 2:
+            return create_graph_v2(G=G,fig=fig,
+                    clusters=data,
+                    frequencies=frequencies)
+
     elif target == 'kmodes_elbow':
-        path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+        THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(THIS_FOLDER, f'results/{target}.json')
 
         # TODO: Add retrain flag to decide whether to serve and old or newly trained img.
-        return kmodes_elbow_cost(engine)
+        form = kmodes_elbow_form
+        timespans = form.timespan.data
+        freq_threshold = form.freq_threshold.data
+        fit = form.fit.data
+        init = form.init.data
+        fig_count = len(timespans)
+
+        if fig_count <= 2:
+            n_row = fig_count
+            fig, axs = plt.subplots(n_row,figsize=(12,8))
+            #fig, axs = plt.subplots(1,n_row)
+            fig.suptitle("Cost curves")
+
+            if fig_count == 1:
+                axs = [axs]
+        elif fig_count % 2 == 0:
+            n_row = 2
+            n_col = int(fig_count/n_row)
+            fig, axs = plt.subplots(n_row, n_col,figsize=(12,8))
+            axs = axs.flatten()
+        elif fig_count == 3:
+            n_row = fig_count
+            fig, axs = plt.subplots(n_row, figsize=(12,8))
+            axs = axs.flatten()
+
+        for ax, timespan in zip(axs, timespans):
+            key=f'kmodes_{init}_elbow_dT_{timespan}'
+            if fit:
+                kmodes_elbow_cost(engine,fig=fig,axis=ax, path=path, 
+                        key=key, init=init,timespan=timespan, d_set='binary',
+                        freq_threshold=freq_threshold)
+            try:
+                # TODO: Is it bad to open and close the file within the loop? Performance?
+                with open(path,"r") as file: 
+                    costs = json.load(file)
+            
+                x = list(costs[key].keys())
+                y = list(costs[key].values())
+                ax.plot(x,y)
+                ax.set_title( f"Days: {timespan}, Init: {init}",fontsize='small')
+                ax.set_xlabel('K'); ax.set_ylabel('Cost')
+                #return redirect( url_for('data_analysis.index', code=301))
+
+            except (FileNotFoundError, KeyError) as e:
+                flash("Data not found, please train the model")
+                return redirect( url_for('data_analysis.index', code=301))
+
+        return plot_img(fig)
 
     return render_template("data_analysis/index.html",
             kproto_network = kproto_network_form,
-            kproto_cost = kproto_cost_form)
+            kmodes_elbow=kmodes_elbow_form)
 
-
-@bp.route("/data/kmodes_data", methods=["GET"])
-def kmodes_data():
-    """ Endpoint for data queries for kmodes """
-
-    path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
-    with open(path,"r") as file: 
-        clusters = json.load(file)
-    return jsonify(clusters)
+#@bp.route("/data/kmodes_data", methods=["GET"])
+#def kmodes_data():
+#    """ Endpoint for data queries for kmodes """
+#
+#    path = os.getcwd() +'/daily/data_analysis/kmodes_clusters.json'
+#    with open(path,"r") as file: 
+#        clusters = json.load(file)
+#    return jsonify(clusters)
 
 @bp.route("/data", methods=["GET", "POST"])
 def data():
@@ -121,7 +187,9 @@ def data():
     target = request.args.get('target')
     if target == 'nbayes':
         re_train = args.get('re_train')
-        path = os.getcwd() +'/daily/data_analysis/summary.json'
+        THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(THIS_FOLDER, f'results/{target}_summary.json')
+
         sk_naive_bayes_multinomial(engine, 
             save_path=path, evaluate_model=re_train)
         #naive_bayes(engine)
@@ -140,13 +208,12 @@ def data():
         return kmodes_elbow_cost(engine)
 
     kproto_network_form = KPrototypes_network_form()
-    kproto_cost_form = KPrototypes_cost_form()
+    kmodes_elbow_form = Kmodes_elbow_form()
     return render_template("data_analysis/index.html",
             kproto_network = kproto_network_form,
-            kproto_cost = kproto_cost_form)
+            kmodes_elbow=kmodes_elbow_form,
+            summary=summary)
                 
-
-    return redirect(url_for('data_analysis.index'))
 def save_plot(fig, name, form=None):
 
     path = "plots/"

@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+	Data analysis
+{% endblock %}
+
+{% block main %}
+	  <h2>Some visualizations</h2>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<div id="kmodes_network"> 
+<script type="text/javascript" 
+				src="{{ url_for('static', filename='js/data_analysis/kmodes_network.js') }}">
+</script>
+</div>
+
+
+{% endblock %}

@@ -310,7 +310,9 @@ def get_kmodes_data(engine, timespan=14, freq_threshold=5):
     ratings = pd.read_sql('rating',engine,index_col='id')
     ratings['id'] = ratings.index
     #ratings = ratings[ratings['user_id'] == user_id_][['id', 'date','user_id']]
-    ratings = ratings[ratings['user_id'] == user_id_].iloc[-timespan:]
+
+    if timespan != 0:
+        ratings = ratings[ratings['user_id'] == user_id_].iloc[-timespan:]
 
     ratings.columns = ratings.columns.str.replace('id','rating_id')
 
@@ -365,7 +367,8 @@ def get_kmodes_data(engine, timespan=14, freq_threshold=5):
 
     return df.to_numpy(), tag_names
 
-def kprototypes_cluster(engine,k=5,path=None, timespan=30, freq_threshold=5):
+def kprototypes_cluster(engine, path=None, d_set='binary',
+        k=5, timespan=30, freq_threshold=5):
     """ Find clusters for some k atm predefined.
         TODO: Add options.
         freq_threshold: Ignore  entries with less than 'this' occurrences.
@@ -375,19 +378,18 @@ def kprototypes_cluster(engine,k=5,path=None, timespan=30, freq_threshold=5):
     # Get data for clustering. Rows are measurements and columns features.
     # First n columns are categorical tags and last 3 (?) numeric.
     # TODO: Change to K-prototypes.
-    data_counts, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
+    data, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
     categ_idx = len(tag_names)
 
-    # Set all above unity frequencies to unity.
-    data_binary = np.zeros_like(data_counts)
-    data_binary[data_counts > 1] = 1
+    if d_set == 'binary':
+        # Set all above unity frequencies to unity.
+        data[data > 1] = 1
 
-    D = [data_counts, data_binary]
     inits= ['Huang', 'Cao']
 
     #kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=4, verbose=1)
     kproto = KPrototypes(n_clusters=k, init=inits[1], n_jobs=1)
-    kproto.fit(D[0], categorical=list(range(categ_idx)))
+    kproto.fit(data, categorical=list(range(categ_idx)))
     centroids = (kproto.cluster_centroids_)
 
     clusters = []
@@ -410,17 +412,17 @@ def kprototypes_cluster(engine,k=5,path=None, timespan=30, freq_threshold=5):
         clusters.append(cluster.tolist())
         weights_.append(center[np.nonzero(center[:categ_idx])].tolist())
 
-    print("CENTROIDS")
-    for cent in centroids: print(cent)
-    print("CLUSTERS")
-    for clus in clusters: print(clus)
+    #print("CENTROIDS")
+    #for cent in centroids: print(cent)
+    #print("CLUSTERS")
+    #for clus in clusters: print(clus)
 
     # TODO: Re use for saving image?
     save_results(path, key=f'k{k}', results=clusters)
 
-    print("WEIGJTS")
-    print(weights_)
-    #save_results(path, key=f'k{k}_counts', results=weights_.tolist())
+    #print("WEIGJTS")
+    #print(weights_)
+    ##save_results(path, key=f'k{k}_counts', results=weights_.tolist())
     save_results(path, key=f'k{k}_counts', results=weights_)
 
 def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
@@ -468,50 +470,30 @@ def kmodes_cluster(engine,path=None, timespan=30, freq_threshold=5):
     for cl in clusters: print(cl)
 
 # Use the venn2 function
-def kmodes_elbow_cost(engine):
+def kmodes_elbow_cost(engine,fig, axis, path, init='Huang', key="none",
+        timespan=30, freq_threshold=5, d_set='binary',):
     
-    timespan=30
-    freq_threshold = 5
-
     data, tag_names = get_kmodes_data(engine, timespan, freq_threshold)
 
-    fig, ax = plt.subplots(2,1, figsize=(8,8))
+    if d_set == 'binary':
+        # Set all above unity frequencies to unity.
+        data[data > 1] = 1
 
-    ax = ax.flatten()
+    upper = 30
+    if 0 < timespan and timespan < upper:
+        upper = timespan - 1
+    K = list(range(1,upper,2))
 
-    # Set all above unity frequencies to unity.
-    data1 = np.zeros_like(data)
-    data1[data > 1] = 1
+    costs = {}
+    for k in K:
 
-    D = [data, data1]
-    #inits= ['Huang', 'Cao']
-    inits= ['Huang', 'Huang']
-    #inits= ['Cao', 'Cao']
+        #kmodes = KModes(n_clusters=k, init=inits[idx], n_jobs=1, verbose=1)
+        kmodes = KModes(n_clusters=k, init=init, n_jobs=1)
+        kmodes.fit(data)
+        centroids = (kmodes.cluster_centroids_)
+        costs[k] = kmodes.cost_
 
-    K = list(range(1,20,2))
-
-    for idx, axis in enumerate(ax):
-        costs = []
-        for k in K:
-            kmodes = KModes(n_clusters=k, init=inits[idx], n_jobs=1, verbose=1)
-            kmodes.fit(D[idx])
-            centroids = (kmodes.cluster_centroids_)
-            costs.append(kmodes.cost_)
-            print("Centroids: ")
-            for center in centroids:
-                #center_names = tag_names[np.nonzero(center[:-3])]
-                foo = tag_names[np.nonzero(center[:-3])]
-                cluster = np.concatenate((foo,center[-3:]), axis=0)
-                print(cluster)
-                #clusters[idx].append(cluster)
-        axis.plot(K, costs)
-        axis.set_title(f"Days: {data.shape[0]}, Dim: {len(tag_names)}, " \
-                        f"Init: {inits[idx]}, " \
-                        f"number of iterations: {kmodes.n_iter_}")
-
-    # TODO: Re use for saving image?
-    #if path: save_results(path, key=f'k{k}', results=summary)
-    return plot_img(fig)
+    save_results(path, key=key, results=costs)
 
 def cluster(engine):
 

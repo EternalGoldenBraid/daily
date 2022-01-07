@@ -185,88 +185,39 @@ def get_tag_sleep_day_data(engine):
 
     return rating_id_tags, labels
 
-def create_graph(G, fig, clusters, weights):
+def create_graph(G, fig, clusters, frequencies):
 
+    print("Frequency")
+    print(frequencies)
 
-    weights = weights[1:3]
-    clusters = clusters[1:3]
-    for w in weights: print(w)
-
-    #fig = plt.figure(figsize=(10,10))
-    #for cluster in clusters[1:5]:
-
-    # Color generator https://coolors.co/c97b84-a85751-7d2e68-251351-040926
-    #colors = ['#000052','#0c44ac','#faf0ca','#ed0101','#970005']
-    #colors = ["#04151f","#183a37","#efd6ac","#c44900","#432534"]
-    colors = ["#c97b84","#a85751","#7d2e68","#251351","#040926"]
-    cm = LinearSegmentedColormap.from_list('custom', colors,N=10)
-    cm.set_bad(color='white')
     count = 0
     for c in clusters: count += len(c)
     color_map = np.empty(count)
 
-
-    duplicates = True
     labels = {}
 
     color_idx = -1
     for cluster_idx, cluster in enumerate(clusters):
         # Create cluster
         color_idx += 1
-        #color_map[color_idx] = cm(cluster_idx/len(clusters))
-        #color_map[color_idx] = (cluster_idx/len(clusters))
 
         # TODO: Circumvent this magic number. 
         # Purpose: Ignore non-string labels. i.e. ratings and meditation.
         cluster = cluster[:-3]
-        cluster_weights = weights[cluster_idx][:-3]
-        print(cluster)
+        cluster_frequencies = frequencies[cluster_idx][:-3]
+        G.add_nodes_from(cluster)
 
-        #G = nx.Graph()
-    
-        if duplicates == True:
-            # Add unique indetifier to allow duplicate labels.
-            nodes_ = {i: f"{l}_{cluster_idx}" for i, l in enumerate(cluster)}
-            labels[f"cluster{cluster_idx}"] = nodes_
-            print("NODES_")
-            print(nodes_.values())
-            #print("LABELS")
-            #print(labels)
-
-            G.add_nodes_from(nodes_.values())
-
-            edges = []
-            # TODO: This add multiple edges in both direction. Is that a problem?
-
-            # Create edges for cluster
-            #for idx, node in enumerate(nodes_.values()):
-            #    for adj_node in cluster[:idx]:
-            #        edges.append((cluster[idx], adj_node))
-                    #edges.append((cluster[idx], adj_node, weights[cluster_idx][idx]))
-
-        else:
-            G.add_nodes_from(cluster)
-
-            edges = []
-            # TODO: This add multiple edges in both direction. Is that a problem?
-
-            # Create edges for cluster
-            for idx, node in enumerate(cluster):
-                for adj_node in cluster[:idx]:
-                    edges.append((cluster[idx], adj_node))
-                    #edges.append((cluster[idx], adj_node, weights[cluster_idx][idx]))
-
+        edges = []
+        fully_connect_cluster(G, cluster, color ='r', weight=10)
         
-        G.add_edges_from(edges)
-        #G.add_weighted_edges_from(edges)
-
-
-    print("LABELS")
-    print(labels)
-
     pos = nx.spring_layout(G, k=.5, iterations=20)
+    #pos = nx.circular_layout(G)
     nx.draw(G, pos, with_labels=True,
-            alpha=0.7, node_size=1000)
+            alpha=0.7, node_size=3000)
+
+    #nx.draw(G, pos, 
+    #        edge_color=colors, width=50*list(weights),
+    #        alpha=0.7,node_size=3000*nodes[:,1], labels=label_map)
 
     #print(color_map)
             #alpha=0.7, node_size=1000, node_color=color_map)
@@ -281,8 +232,6 @@ def fully_connect_cluster(G, nodes, color='r', weight=10):
     """ Fully connect node cluster.
     first column is node labels.
     """
-    print("Edging")
-    print(nodes)
     edges = []
     for idx, node in enumerate(nodes):
         for adj_node in nodes: 
