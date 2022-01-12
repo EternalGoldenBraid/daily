@@ -4,8 +4,11 @@ from flask_login import current_user
 
 #import matplotlib
 #matplotlib.use("Agg")
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
+import networkx as nx
 
 import math
 import numpy as np
@@ -21,10 +24,11 @@ from sklearn.pipeline import Pipeline
 import joblib
 import json
 from collections import Counter
+from itertools import combinations
 import os
-
 import io
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FC
+
+
 import datetime
 
 from daily.data_analysis.helpers import save_results
@@ -180,6 +184,160 @@ def get_tag_sleep_day_data(engine):
     # Or is it guaranteed to be preserved by drop_duplicates? I think so but not sure.
 
     return rating_id_tags, labels
+
+def create_graph(G, fig, clusters, frequencies):
+
+    print("Frequency")
+    print(frequencies)
+
+    count = 0
+    for c in clusters: count += len(c)
+    color_map = np.empty(count)
+
+    labels = {}
+
+    color_idx = -1
+    for cluster_idx, cluster in enumerate(clusters):
+        # Create cluster
+        color_idx += 1
+
+        # TODO: Circumvent this magic number. 
+        # Purpose: Ignore non-string labels. i.e. ratings and meditation.
+        cluster = cluster[:-3]
+        cluster_frequencies = frequencies[cluster_idx][:-3]
+        G.add_nodes_from(cluster)
+
+        edges = []
+        fully_connect_cluster(G, cluster, color ='r', weight=10)
+        
+    pos = nx.spring_layout(G, k=.5, iterations=20)
+    #pos = nx.circular_layout(G)
+    nx.draw(G, pos, with_labels=True,
+            alpha=0.7, node_size=3000)
+
+    #nx.draw(G, pos, 
+    #        edge_color=colors, width=50*list(weights),
+    #        alpha=0.7,node_size=3000*nodes[:,1], labels=label_map)
+
+    #print(color_map)
+            #alpha=0.7, node_size=1000, node_color=color_map)
+
+    output = io.BytesIO() # file-like object for the image
+    plt.savefig(output) # save the image to the stream
+    output.seek(0) # writing moved the cursor to the end of the file, reset
+    plt.clf() # clear pyplot
+    return Response(output, mimetype='image/png')
+
+def fully_connect_cluster(G, nodes, color='r', weight=10):
+    """ Fully connect node cluster.
+    first column is node labels.
+    """
+    edges = []
+    for idx, node in enumerate(nodes):
+        for adj_node in nodes: 
+
+            # Skip self loops
+            if node == adj_node: continue
+            edges.append((node, adj_node))
+        
+    G.add_edges_from(edges, color=color, weight=weight)
+
+
+def create_graph_v2(G, fig, clusters, frequencies):
+
+    #frequencies = frequencies[1:3]
+    #clusters = clusters[1:3]
+    c_ =0
+    for f in frequencies: c_+=len(f)
+    print("Freq count: ", c_)
+
+    node_count = 0
+    for c in clusters: node_count += len(c[:-3])
+
+
+    # Nodes with columns: Node id, Frequency, Cluster_idx, #TODO: numerical attributes...
+    nodes = np.empty((node_count, 3), dtype=int)
+    labels = np.empty(node_count, dtype=object)
+    label_map = {}
+
+    node_idx = 0
+    start=0
+    for cluster_idx, c in enumerate(clusters): 
+        cluster = c[:-3]
+
+        for in_cluster_idx, node in enumerate(cluster):
+
+            # Add label and frequencies.
+            nodes[node_idx,0] = node_idx
+            nodes[node_idx,1] = frequencies[cluster_idx][in_cluster_idx]
+            labels[node_idx] = node
+            label_map[node_idx] = node
+            node_idx += 1
+
+        # Add cluster id.
+        nodes[start:node_idx,2] = cluster_idx
+        start = node_idx
+
+    print("FREQUENCIES")
+    #print(frequencies)
+    #[cluster_idx][in_cluster_idx]
+    print("NODES")
+    print(nodes)
+    print(nodes.shape)
+    print("LABELS")
+    #print(labels)
+    print(labels.shape)
+
+
+    G.add_nodes_from(nodes[:,0])
+
+    low, high = nodes[0,2], nodes[-1,2]+1
+    norm = mpl.colors.Normalize(vmin=low, vmax=high, clip=True)
+    mapper = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.coolwarm)
+    #mapper = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.summer)
+    
+    # Fully connect groups.
+    nodes = nodes[nodes[:, 2].argsort()]
+    grouped = np.split(nodes[:,0], np.unique(nodes[:, 2], return_index=True)[1][1:])
+    for cluster_idx, cluster in enumerate(grouped):
+        fully_connect_cluster(G=G, nodes=cluster, 
+                color=mapper.to_rgba(cluster_idx), weight=20)
+
+    #nx.draw(G, pos, 
+    #        alpha=0.7, node_size=1000)
+
+    edges = []
+
+    labels_unique = np.unique(labels)
+    for label in labels_unique:
+        doubles = (np.nonzero(label==labels))
+        comb = (list(combinations(*doubles,2)))
+        for edge in comb: edges.append(edge)
+
+    G.add_edges_from(edges, color=mapper.to_rgba(cluster_idx+1), weight=2)
+
+    colors = nx.get_edge_attributes(G,'color').values()
+    weights = nx.get_edge_attributes(G,'weight').values()
+
+
+    #pos = nx.spring_layout(G, k=.2, iterations=20)
+    pos = nx.circular_layout(G)
+    nx.draw(G, pos, 
+            edge_color=colors, width=50*list(weights),
+            alpha=0.7,node_size=3000*nodes[:,1], labels=label_map)
+
+    #nx.draw(G, pos, edge_color=colors, width=list(weights))
+    #plt.show()
+    #nx.draw(G)
+
+    #print(color_map)
+            #alpha=0.7, node_size=1000, node_color=color_map)
+
+    output = io.BytesIO() # file-like object for the image
+    plt.savefig(output) # save the image to the stream
+    output.seek(0) # writing moved the cursor to the end of the file, reset
+    plt.clf() # clear pyplot
+    return Response(output, mimetype='image/png')
 
 
 def time_series(engine):
