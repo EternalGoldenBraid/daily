@@ -125,11 +125,6 @@ def tag_freq(engine):
 def get_tag_sleep_day_data(engine):
     """
     Return data to be used in naive bayes model.
-    priors_tags: counts for all tags.
-    priors_rating_sleep: counts for each sleep rating label.
-    priors_rating_day: counts for each day rating label.
-    posteriors_sleep: tags that occur given each sleep rating label.
-    posteriors_day: tags that occur given each day rating label.
     """
 
     RATING_DAY_MAX = 2
@@ -184,11 +179,16 @@ def get_tag_sleep_day_data(engine):
 from sklearn.naive_bayes import GaussianNB, ComplementNB
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
-def sk_naive_bayes_multinomial(engine, save_path, evaluate_model=True, classifier='nbayes', ):
+def sk_naive_bayes_multinomial(engine, path_summary, path_model,
+        fit=True, classifier='nbayes', ):
 
     rating_id_tags, labels = get_tag_sleep_day_data(engine)
     features = rating_id_tags.apply(lambda x: " ".join(x))
     y = labels
+
+    print(rating_id_tags)
+    print(features)
+    print(y)
 
     labels_names = ['rating_sleep', 'rating_day']
 
@@ -201,7 +201,7 @@ def sk_naive_bayes_multinomial(engine, save_path, evaluate_model=True, classifie
         (clf),
         ])
 
-    if evaluate_model: 
+    if fit: 
         summary = { 'Accuracy' : {},
                     'std':  {},
                     }
@@ -210,8 +210,13 @@ def sk_naive_bayes_multinomial(engine, save_path, evaluate_model=True, classifie
             summary['Accuracy'][label] = f'{score.mean():.2f}%'
             summary['std'][label] = f'{score.std():.2f}'
         
-        save_results(save_path, key='nbayes', results=summary)
-        return 
+        save_results(path_summary, key='nbayes', results=summary)
+        joblib.dump(clf, path_model)
+
+    if predict:
+        clf2 = joblib.load(path_model)
+
+    return 
 
 def time_series(engine):
     rng = default_rng()

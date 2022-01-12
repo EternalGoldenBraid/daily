@@ -59,11 +59,12 @@ def data():
     target = request.args.get('target')
     if target == 'nbayes':
         re_train = args.get('re_train')
-        path = os.getcwd() +'/daily/data_analysis/summary.json'
+        path_summary = os.getcwd() +'/daily/data_analysis/nbayes_summary.json'
+        path_model = os.getcwd() +'/daily/data_analysis/nbayes_model.json'
         sk_naive_bayes_multinomial(engine, 
-            save_path=path, evaluate_model=re_train)
+            path_summary=path_summary, fit=re_train)
         #naive_bayes(engine)
-        with open(path,"r") as file: 
+        with open(path_summary,"r") as file: 
             summary = json.load(file)
 
     print(summary)
