@@ -321,6 +321,19 @@ card .space::before {
   cursor: pointer; /* Mouse pointer on hover */
 }
 
+.btn-sm {
+  background-color: #eabaac; /* Blue background */
+  border: none; /* Remove borders */
+  color: #be3400;
+  padding: 2px 4px; /* Some padding */
+  font-size: 16px; /* Set a font size */
+  cursor: pointer; /* Mouse pointer on hover */
+  height: 5% !important;
+  width: 5% !important;
+  line-height: 5%;
+  text-align: center;
+}
+
 /* Darker background on mouse-over */
 .btn:hover {
   background-color: #015045;
