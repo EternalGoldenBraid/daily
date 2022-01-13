@@ -192,7 +192,7 @@ from daily.data_analysis.data_models import get_kmodes_data
 def make_tag_network(engine, G, fig):
 
     # Fetch 2D array of tag frequencies and attributes (last 3 cols).
-    data, nodes = get_kmodes_data(engine, timespan=90, freq_threshold=4)
+    data, nodes = get_kmodes_data(engine, timespan=90, freq_threshold=10)
     attributes = data[:,-3:]
     data = data[:,:-3]
 
