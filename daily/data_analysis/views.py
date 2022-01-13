@@ -35,7 +35,8 @@ from daily.data_analysis.data_models import (tag_freq,
 
 from daily.data_analysis.plots import (
             polar, polar_nice,
-            create_graph, create_graph_v2)
+            create_graph, create_graph_v2,
+            make_tag_network)
 
 from daily.data_analysis.helpers import plot_img
 
@@ -60,8 +61,7 @@ def plots():
         return tag_freq(engine)
     elif target == 'eigen':
         #return cluster(engine)
-        #cluster(engine)
-        return render_template("data_analysis/kmodes.html")
+        cluster(engine)
     elif target == 'polar':
         return polar(engine)
     elif target == 'polar_heat':
@@ -164,6 +164,10 @@ def plots():
                 return redirect( url_for('data_analysis.index', code=301))
 
         return plot_img(fig)
+    elif target == 'tag_network':
+        G = nx.Graph()
+        fig = plt.figure(figsize=(24,24))
+        return make_tag_network(engine, G, fig)
 
     return render_template("data_analysis/index.html",
             kproto_network = kproto_network_form,
@@ -188,9 +192,10 @@ def data():
     if target == 'nbayes':
         re_train = args.get('re_train')
         THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-        path = os.path.join(THIS_FOLDER, f'results/{target}_summary.json')
+        path_summary = os.path.join(THIS_FOLDER, f'results/{target}_summary.json')
+        path_model = os.path.join(THIS_FOLDER, f'results/{target}_model.json')
         sk_naive_bayes_multinomial(engine, 
-            path_summary=path_summary, fit=re_train)
+            path_summary=path_summary, path_model=path_model, fit=re_train)
         #naive_bayes(engine)
         with open(path_summary,"r") as file: 
             summary = json.load(file)

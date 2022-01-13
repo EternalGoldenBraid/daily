@@ -353,15 +353,15 @@ def get_kmodes_data(engine, timespan=14, freq_threshold=5):
     tag_list = rt_m2m.groupby('rating_id').agg(list)
 
     all_tags = np.concatenate([np.array(i) for i in tag_list['tag_id'].values])
-    columns = np.unique(all_tags)
-    tag_names = tags.loc[columns]['tag_name'].values
+    tag_columns = np.unique(all_tags)
+    tag_names = tags.loc[tag_columns]['tag_name'].values
 
     # All ratings where first column is rating_id and rest are tags.
-    data = np.zeros((tag_list.shape[0], len(columns)))
+    data = np.zeros((tag_list.shape[0], len(tag_columns)))
     for row_idx, entry in enumerate(tag_list.values):
         mapping = Counter(entry[0])
         for col_idx, key in enumerate(mapping):
-            data[row_idx][columns == key] = mapping[key]
+            data[row_idx][tag_columns == key] = mapping[key]
 
     # Bring ratings and meditation duration in as well.
     ratings_columns = ['rating_sleep', 'rating_day', 'meditation']
@@ -536,6 +536,8 @@ def cluster(engine):
     tag_list = rt_m2m.groupby('rating_id').agg(list)
     #tag_list = tag_list.loc[:30]
 
+    print(tag_list)
+
     # TODO: Add switch? The choice for rating_id_tag_id matrix dimensions
     # dictates whether the tag vector spans history of all tags or just the
     # timespane one is observing.
@@ -559,8 +561,8 @@ def cluster(engine):
     #ax.imshow(np.dot(data.T, data))
     #plt.show()
 
-    k=6
-    centers = kmeans(data,k)
+    #k=6
+    #centers = kmeans(data,k)
 
     #ax.hist2d(rating_id_tag_id)
 

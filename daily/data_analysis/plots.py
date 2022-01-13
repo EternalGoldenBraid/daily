@@ -1,6 +1,8 @@
 from daily.models import User, Rating, Tag, rating_as, event_as
 from flask import Response, redirect, url_for, flash
 from flask_login import current_user
+from daily.data_analysis.data_models import get_tag_sleep_day_data
+
 
 #import matplotlib
 #matplotlib.use("Agg")
@@ -48,7 +50,8 @@ def plot_img(fig):
     FC(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
-def create_subplots(ax, labels):
+def create_subplots(ax, labels:np.array):
+    """ Add rotated labels up and down """
     ax.set_xticks(range(labels.shape[0]))
     ax.set_xticklabels(labels, rotation=45,fontsize=10)
     ax.tick_params(axis='x', bottom=True, top=True,
@@ -184,6 +187,110 @@ def get_tag_sleep_day_data(engine):
     # Or is it guaranteed to be preserved by drop_duplicates? I think so but not sure.
 
     return rating_id_tags, labels
+
+from daily.data_analysis.data_models import get_kmodes_data
+def make_tag_network(engine, G, fig):
+
+    # Fetch 2D array of tag frequencies and attributes (last 3 cols).
+    data, nodes = get_kmodes_data(engine, timespan=90, freq_threshold=4)
+    attributes = data[:,-3:]
+    data = data[:,:-3]
+
+    #seed = 911
+    #seed = 11
+    #rng = default_rng(seed)
+    rng = default_rng()
+    rng.shuffle(data)
+    data = data[:]
+    
+    #print(nodes.shape)
+
+    A = np.zeros((data.shape[1], data.shape[1]))
+
+    nz_args = np.argwhere(data)
+    nz_args = list(map(np.argwhere, data))
+
+    print("#####")
+    print("data")
+    print(data)
+    print("NZ_ARGS: ")
+
+    # Complexity an issue here for large N? O(K(N^2)
+    # TODO: Note that A will be triangular so the full loop cycle is redundant.
+    for entry in nz_args:
+        for row in entry:
+            row = row[0]
+            for col in entry:
+                col = col[0]
+                if row != col:
+                    A[row][col] += 1
+
+    A_pd = pd.DataFrame(A, index=nodes,columns=nodes).astype(int)
+
+    print("Adjacency matrix: ")
+    print(A)
+    #G.add_nodes_from(nodes)
+    G = nx.from_pandas_adjacency(A_pd, create_using = nx.MultiGraph())
+
+    weights = nx.get_edge_attributes(G,'weight').values()
+    w = list(weights)
+    a = 10
+    sigm = lambda x: 1/1+np.exp(-a*x)
+    w = list(map(sigm,w))
+    print("weights")
+    #print(w)
+    #print(weights)
+
+    pos = nx.spring_layout(G, k=0.5, iterations=10)
+    #pos = nx.circular_layout(G)
+    #pos = nx.shell_layout(G)
+    #pos = nx.bipartite_layout(G, nodes)
+    #pos = nx.kamada_kawai_layout(G)
+    #pos = nx.spectral_layout(G)
+    #pos = nx.spiral_layout(G, scale=0.1, center=None, 
+    #        dim=2, resolution=0.35, equidistant=False) # Nice one
+
+    # Create a gridspec for adding subplots of different sizes
+    axgrid = fig.add_gridspec(5, 4)
+    ax0 = fig.add_subplot(axgrid[0:3, :])
+    nx.draw_networkx(G,pos=pos, ax=ax0,
+            alpha=0.7, node_size=3000,
+            #width=list(weights),
+            width=w,
+            edge_color = 'r',
+            connectionstyle="arc3,rad=0.4")
+    ax0.set_title(nx.info(G))
+    ax0.set_axis_off()
+
+    ### DEGREE PLOTS
+    # Unpack degree info (dict) from G to desc sorted lists of degree values and labels.
+    degree_sequence = sorted(G.degree, key=lambda tple: tple[1], reverse=True)
+    degree_labels, degrees = list(map(list, list(zip(*degree_sequence))))
+
+    ax1 = fig.add_subplot(axgrid[3:, :2])
+    ax1.plot(degrees, "b-", marker="o")
+    ax1.set_title("Degree Rank Plot")
+    ax1.set_ylabel("Degree")
+    ax1.set_xlabel("Rank")
+    create_subplots(ax1, np.array(degree_labels))
+    ax1.grid(axis='x')
+
+
+    ax2 = fig.add_subplot(axgrid[3:, 2:])
+    ax2.bar(*np.unique(degrees, return_counts=True))
+    ax2.set_title("Degree histogram")
+    ax2.set_xlabel("Degree")
+    ax2.set_ylabel("# of Nodes")
+
+    output = io.BytesIO() # file-like object for the image
+    fig.tight_layout()
+    #plt.savefig(output, aspect='auto') # save the image to the stream
+    plt.savefig(output) # save the image to the stream
+    output.seek(0) # writing moved the cursor to the end of the file, reset
+    plt.clf() # clear pyplot
+    return Response(output, mimetype='image/png')
+
+    #G.add_edges_from(edges, weight=2)
 
 def create_graph(G, fig, clusters, frequencies):
 
