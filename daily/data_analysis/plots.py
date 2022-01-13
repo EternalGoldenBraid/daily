@@ -199,12 +199,10 @@ def make_tag_network(engine, G, fig):
     #seed = 911
     #seed = 11
     #rng = default_rng(seed)
-    rng = default_rng()
-    rng.shuffle(data)
-    data = data[:]
+    #rng = default_rng()
+    #rng.shuffle(data)
+    #data = data[:90]
     
-    #print(nodes.shape)
-
     A = np.zeros((data.shape[1], data.shape[1]))
 
     nz_args = np.argwhere(data)
@@ -230,42 +228,49 @@ def make_tag_network(engine, G, fig):
     print("Adjacency matrix: ")
     print(A)
     #G.add_nodes_from(nodes)
-    G = nx.from_pandas_adjacency(A_pd, create_using = nx.MultiGraph())
+    G = nx.from_pandas_adjacency(A_pd,create_using = nx.MultiGraph())
+    # Unpack degree info (dict) from G to desc sorted lists of degree values and labels.
+    degree_sequence = sorted(G.degree, key=lambda tple: tple[1], reverse=True)
+    degree_labels, degrees = list(map(list, list(zip(*degree_sequence))))
 
     weights = nx.get_edge_attributes(G,'weight').values()
     w = list(weights)
-    a = 10
-    sigm = lambda x: 1/1+np.exp(-a*x)
+    a = 1
+    sigm = lambda x: a/1+np.exp(-a*x)
     w = list(map(sigm,w))
     print("weights")
     #print(w)
     #print(weights)
 
-    pos = nx.spring_layout(G, k=0.5, iterations=10)
+    #pos = nx.spring_layout(G, k=0.5, iterations=5)
+    pos = nx.spring_layout(G, k=None, iterations=10) # default values
     #pos = nx.circular_layout(G)
     #pos = nx.shell_layout(G)
     #pos = nx.bipartite_layout(G, nodes)
     #pos = nx.kamada_kawai_layout(G)
     #pos = nx.spectral_layout(G)
     #pos = nx.spiral_layout(G, scale=0.1, center=None, 
-    #        dim=2, resolution=0.35, equidistant=False) # Nice one
+            #dim=2, resolution=0.35, equidistant=False) # Nice one
 
     # Create a gridspec for adding subplots of different sizes
     axgrid = fig.add_gridspec(5, 4)
     ax0 = fig.add_subplot(axgrid[0:3, :])
+    #colors = ["#c97b84","#a85751","#7d2e68","#251351","#040926"]
+    colors = ['#000052','#0c44ac','#faf0ca','#ed0101','#970005'] 
+    #colors = ["#04151f","#183a37","#efd6ac","#c44900","#432534"]
     nx.draw_networkx(G,pos=pos, ax=ax0,
-            alpha=0.7, node_size=3000,
+            alpha=0.7,
+            node_size= 50*np.array(degrees),
             #width=list(weights),
             width=w,
-            edge_color = 'r',
+            font_color="black",
+            node_color = colors[2],
+            edge_color = colors[1],
             connectionstyle="arc3,rad=0.4")
     ax0.set_title(nx.info(G))
     ax0.set_axis_off()
 
     ### DEGREE PLOTS
-    # Unpack degree info (dict) from G to desc sorted lists of degree values and labels.
-    degree_sequence = sorted(G.degree, key=lambda tple: tple[1], reverse=True)
-    degree_labels, degrees = list(map(list, list(zip(*degree_sequence))))
 
     ax1 = fig.add_subplot(axgrid[3:, :2])
     ax1.plot(degrees, "b-", marker="o")
