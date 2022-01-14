@@ -109,6 +109,27 @@
 	  <h4> Other </h4>
 			<a href={{ url_for('data_analysis.plots', target='tag_network') }} 
 				 target="">Tag networks</a> <br>
+
+			 <form 
+				 action={{ url_for('data_analysis.plots', target='tag_network') }}
+										method="post" target="">
+				 {{ tag_network.hidden_tag() }}
+				 <b>Tag networks.</b>
+				 <table> 
+					<tr>
+						<td>{{ tag_network.version.label }} 
+							{{ tag_network.version(size=1, class="form-control-sm") }} </td>
+				 		<td>{{ tag_network.timespan.label }} 
+							{{ tag_network.timespan(size=1, class="form-control-sm") }} </td>
+						<td>{{ tag_network.freq_threshold.label }} 
+							{{ tag_network.freq_threshold(size=1, class="form-control-sm") }} </td>
+
+					</tr>
+						<tr>
+				 		<td>{{ tag_network.submit(size=1, class="btn") }} </td>
+					</tr>
+				 </table>
+			 </form>
 </body>
 {% endblock %}
 

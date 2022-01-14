@@ -64,3 +64,20 @@ class Kmodes_elbow_form(FlaskForm):
                 default='huang',
                 validators=[DataRequired()])
     submit=SubmitField('OK')
+
+class Tag_network_form(FlaskForm):
+    timespan=IntegerField("Days",
+            render_kw={'placeholder': 'dT'},
+            validators=[NumberRange(min=0, max=999, message='Must be positive'),
+                DataRequired(),
+                ],
+            default=10)
+    freq_threshold=IntegerField("Threshold",
+            render_kw={'placeholder': 'f'}, validators=[NumberRange(min=0, max=999, 
+                message='Must be positive'), DataRequired()], default=4)
+    version = RadioField('Version',
+                coerce=int,
+                choices = [ (1, u'Date based'), 
+                            (2, u'Event based'),], default=2)
+    fit = BooleanField('Check to retrain and not load from file.')
+    submit=SubmitField('OK')

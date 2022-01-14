@@ -188,13 +188,23 @@ def get_tag_sleep_day_data(engine):
 
     return rating_id_tags, labels
 
-from daily.data_analysis.data_models import get_kmodes_data
-def make_tag_network(engine, G, fig):
+from daily.data_analysis.data_models import get_kmodes_data, get_event_tag_data
+def plot_tag_graph(engine, fig, version='date_based', timespan=10, freq_threshold=10):
 
-    # Fetch 2D array of tag frequencies and attributes (last 3 cols).
-    data, nodes = get_kmodes_data(engine, timespan=90, freq_threshold=10)
-    attributes = data[:,-3:]
-    data = data[:,:-3]
+    attributes=None
+    if version==1:
+        # Fetch 2D array of tag frequencies and attributes (last 3 cols).
+        data, labels = get_kmodes_data(engine, timespan=timespan, freq_threshold=freq_threshold)
+        attributes = data[:,-3:]
+        data = data[:,:-3]
+        #elif version=='event_based':
+    else:
+        data, labels = get_event_tag_data(engine, timespan=timespan, freq_threshold=freq_threshold)
+        #print(data)
+
+    return make_tag_network(fig, data, labels, attributes)
+    
+def make_tag_network(fig, data, nodes, attributes=None):
 
     #seed = 911
     #seed = 11
@@ -204,14 +214,8 @@ def make_tag_network(engine, G, fig):
     #data = data[:90]
     
     A = np.zeros((data.shape[1], data.shape[1]))
-
     nz_args = np.argwhere(data)
     nz_args = list(map(np.argwhere, data))
-
-    print("#####")
-    print("data")
-    print(data)
-    print("NZ_ARGS: ")
 
     # Complexity an issue here for large N? O(K(N^2)
     # TODO: Note that A will be triangular so the full loop cycle is redundant.
@@ -226,7 +230,7 @@ def make_tag_network(engine, G, fig):
     A_pd = pd.DataFrame(A, index=nodes,columns=nodes).astype(int)
 
     print("Adjacency matrix: ")
-    print(A)
+    #print(A)
     #G.add_nodes_from(nodes)
     G = nx.from_pandas_adjacency(A_pd,create_using = nx.MultiGraph())
     # Unpack degree info (dict) from G to desc sorted lists of degree values and labels.
@@ -235,15 +239,16 @@ def make_tag_network(engine, G, fig):
 
     weights = nx.get_edge_attributes(G,'weight').values()
     w = list(weights)
-    a = 1
+    a = 0.1
     sigm = lambda x: a/1+np.exp(-a*x)
     w = list(map(sigm,w))
     print("weights")
     #print(w)
     #print(weights)
-
+    
+    pos=None
     #pos = nx.spring_layout(G, k=0.5, iterations=5)
-    pos = nx.spring_layout(G, k=None, iterations=10) # default values
+    pos = nx.spring_layout(G, k=None, iterations=20) # default values
     #pos = nx.circular_layout(G)
     #pos = nx.shell_layout(G)
     #pos = nx.bipartite_layout(G, nodes)
@@ -260,7 +265,8 @@ def make_tag_network(engine, G, fig):
     #colors = ["#04151f","#183a37","#efd6ac","#c44900","#432534"]
     nx.draw_networkx(G,pos=pos, ax=ax0,
             alpha=0.7,
-            node_size= 50*np.array(degrees),
+            node_size= 80*np.array(degrees),
+
             #width=list(weights),
             width=w,
             font_color="black",
@@ -288,7 +294,7 @@ def make_tag_network(engine, G, fig):
     ax2.set_ylabel("# of Nodes")
 
     output = io.BytesIO() # file-like object for the image
-    fig.tight_layout()
+    #fig.tight_layout()
     #plt.savefig(output, aspect='auto') # save the image to the stream
     plt.savefig(output) # save the image to the stream
     output.seek(0) # writing moved the cursor to the end of the file, reset

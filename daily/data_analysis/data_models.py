@@ -304,6 +304,83 @@ def get_rating_events_tags(engine, columns):
 
     return rating_events_tags[columns]
 
+def get_event_tag_data(engine, timespan=14, freq_threshold=5):
+    # Allows demoers to view plots generated from my data.
+    user_id_ = get_user_id_()
+
+    # Merge ratings, events and tags to get a df of dates with combinations of tags.
+    
+    # Read ratings for user
+    #ratings = pd.read_sql('rating',engine,index_col='id')
+
+    if timespan != 0:
+        #query = f'SELECT * FROM rating WHERE user_id={user_id_} and date > CURRENT_DATE()-{timespan}'
+        query = f'SELECT * FROM rating WHERE user_id={user_id_} ORDER BY date desc LIMIT {timespan}'
+
+    else: 
+        query = f'SELECT * FROM rating WHERE user_id={user_id_}'
+    ratings = pd.read_sql(query, engine,index_col='id')
+    ratings['rating_id'] = ratings.index
+
+    # Read all tags.
+    # TODO: Inefficient, fetch only for user, or set lazy=true?.
+    # TODO: Add manual sql query.
+    tags = pd.read_sql('tag',engine,index_col='id')
+    #tags.columns = tags.columns.str.replace('id','tag_id')
+
+    # Read all rating event associations.
+    # TODO: Add manual sql query.
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    #query = f'SELECT * FROM rating_events WHERE rating_id={ratings.index}'
+    #re_m2m = pd.read_sql(query,engine,index_col=False)
+    re_m2m = pd.read_sql('rating_events',engine,index_col=False)
+    re_m2m = re_m2m[re_m2m['rating_id'].isin(ratings.index)]
+
+    # Read all event tag associations.
+    # Not all events have tags, thus merge innner vs. left
+    # dictates whether null tags are included.
+    # TODO: Inefficient, fetch only for user, or lazy=dynamic.
+    et_m2m = pd.read_sql('event_tags',engine, index_col=False)
+    et_m2m = re_m2m \
+            .merge(et_m2m,how='inner',on='event_id')[['event_id', 'tag_id']]
+
+    foo = re_m2m \
+            .merge(et_m2m,how='inner',on='event_id')[['rating_id', 'event_id', 'tag_id']]
+
+    foo = foo.merge(ratings,how='inner',on='rating_id')
+    print(foo.groupby('rating_id').agg(list)['date'])
+
+
+
+    #rt_m2m = rt_m2m['rating_id'][rt_m2m['rating_id'].isin(ratings.index)]
+    #rt_m2m = rt_m2m[rt_m2m['rating_id'].isin(ratings.index)]
+
+    # Clean data. Remove rows there tag_id doesn't occur >= n times
+    et_m2m = et_m2m[et_m2m.groupby('tag_id')['tag_id'] \
+            .transform('count').ge(freq_threshold)]
+
+    tag_list = et_m2m.groupby('event_id').agg(list)
+
+    all_tags = np.concatenate([np.array(i) for i in tag_list['tag_id'].values])
+    tag_id_columns = np.unique(all_tags)
+    tag_names = tags.loc[tag_id_columns]['tag_name'].values
+
+    # All events where first column is event and rest are tags.
+    data = np.zeros((tag_list.shape[0], len(tag_id_columns)))
+    for row_idx, entry in enumerate(tag_list.values):
+        mapping = Counter(entry[0])
+        for col_idx, key in enumerate(mapping):
+            data[row_idx][tag_id_columns == key] = mapping[key]
+
+    # Bring ratings and meditation duration in as well.
+    #ratings_columns = ['rating_sleep', 'rating_day', 'meditation']
+    #ratings_ = ratings[ratings_columns]
+    #df = pd.DataFrame(data, columns=tag_names)
+    #df.index = tag_list.index
+    #df[ratings_columns] = ratings_[ratings_columns]
+
+    return data, tag_names
+
 def get_kmodes_data(engine, timespan=14, freq_threshold=5):
     # Allows demoers to view plots generated from my data.
     user_id_ = get_user_id_()

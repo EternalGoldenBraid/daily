@@ -2,9 +2,9 @@ from daily.data_analysis import bp
 from daily import db
 from daily.models import User, Rating, Tag, rating_as, event_as
 from daily.data_analysis.forms import (KPrototypes_network_form,
-            Kmodes_elbow_form)
+        Kmodes_elbow_form, Tag_network_form)
 
-from flask import Response, jsonify
+from flask import Response, jsonify, session
 from flask import (render_template, redirect, flash,
         url_for, request)
 from flask_login import (current_user, login_user,
@@ -36,18 +36,23 @@ from daily.data_analysis.data_models import (tag_freq,
 from daily.data_analysis.plots import (
             polar, polar_nice,
             create_graph, create_graph_v2,
-            make_tag_network)
+            plot_tag_graph)
 
 from daily.data_analysis.helpers import plot_img
 
 @bp.route("/data/index")
 def index():
 
+    if not 'summary' in session.keys(): summary=None
+
     kproto_network_form = KPrototypes_network_form()
     kmodes_elbow_form = Kmodes_elbow_form()
+    tag_network_form = Tag_network_form()
     return render_template("data_analysis/index.html",
             kproto_network = kproto_network_form,
-            kmodes_elbow=kmodes_elbow_form)
+            kmodes_elbow=kmodes_elbow_form,
+            tag_network=tag_network_form,
+            summary=session['summary'])
 
 @bp.route("/plots", methods=["GET", "POST"])
 def plots():
@@ -165,13 +170,20 @@ def plots():
 
         return plot_img(fig)
     elif target == 'tag_network':
-        G = nx.Graph()
-        fig = plt.figure(figsize=(24,24))
-        return make_tag_network(engine, G, fig)
+        form = Tag_network_form()
+        version = form.version.data
+        timespan = form.timespan.data
+        freq_threshold = form.freq_threshold.data
 
-    return render_template("data_analysis/index.html",
-            kproto_network = kproto_network_form,
-            kmodes_elbow=kmodes_elbow_form)
+        fig = plt.figure(figsize=(14,14))
+        return plot_tag_graph(engine, fig, 
+                version=version, timespan=timespan, freq_threshold=freq_threshold,
+                )
+        #plot_tag_graph(engine, fig, 
+        #        version=version, timespan=timespan, freq_threshold=freq_threshold,
+        #        )
+
+    return redirect(url_for("data_analysis.index"))
 
 #@bp.route("/data/kmodes_data", methods=["GET"])
 #def kmodes_data():
@@ -184,6 +196,7 @@ def plots():
 
 @bp.route("/data", methods=["GET", "POST"])
 def data():
+    """ Runs models for numerical output, no plots """
     engine = db.get_engine()
     args = request.args
     summary = None
@@ -213,10 +226,9 @@ def data():
 
     kproto_network_form = KPrototypes_network_form()
     kmodes_elbow_form = Kmodes_elbow_form()
-    return render_template("data_analysis/index.html",
-            kproto_network = kproto_network_form,
-            kmodes_elbow=kmodes_elbow_form,
-            summary=summary)
+    session['summary'] = summary
+
+    return redirect( url_for('data_analysis.index', code=200))
                 
 def save_plot(fig, name, form=None):
 
