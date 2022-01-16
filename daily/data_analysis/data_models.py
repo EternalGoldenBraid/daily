@@ -423,7 +423,6 @@ def get_kmodes_data(engine, timespan=14, freq_threshold=5):
     rt_m2m = rt_m2m[rt_m2m['rating_id'].isin(ratings.index)]
 
     # Clean data. Remove rows there tag_id doesn't occur >= n times
-    freq_threshold=5
     rt_m2m = rt_m2m[rt_m2m.groupby('tag_id')['tag_id'] \
             .transform('count').ge(freq_threshold)]
 
