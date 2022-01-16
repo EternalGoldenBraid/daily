@@ -44,6 +44,7 @@ from daily.data_analysis.helpers import plot_img
 def index():
 
     if not 'summary' in session.keys(): summary=None
+    else: summary = session['summary']
 
     kproto_network_form = KPrototypes_network_form()
     kmodes_elbow_form = Kmodes_elbow_form()
@@ -52,7 +53,7 @@ def index():
             kproto_network = kproto_network_form,
             kmodes_elbow=kmodes_elbow_form,
             tag_network=tag_network_form,
-            summary=session['summary'])
+            summary=summary)
 
 @bp.route("/plots", methods=["GET", "POST"])
 def plots():
