@@ -176,10 +176,12 @@ def plots():
         timespan = form.timespan.data
         freq_threshold = form.freq_threshold.data
 
-        fig = plt.figure(figsize=(14,14))
-        return plot_tag_graph(engine, fig, 
+        fig = plt.figure(figsize=(24,14))
+        resp = plot_tag_graph(engine, fig, 
                 version=version, timespan=timespan, freq_threshold=freq_threshold,
                 )
+        if resp: return resp
+        else: flash("Error occured fetching nodes, try with less data")
         #plot_tag_graph(engine, fig, 
         #        version=version, timespan=timespan, freq_threshold=freq_threshold,
         #        )

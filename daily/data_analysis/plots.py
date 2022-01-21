@@ -68,9 +68,6 @@ def create_subplots(ax, labels:np.array):
         if idx % 2 == 1: tick.set_visible(False)
     plt.setp(ticks_top, ha='left' )
 
-    ax.grid(True)
-    plt.tight_layout()
-
 def tag_freq(engine):
     """ Return a runnig average of tag frequencies for
         the past week, month and all time.
@@ -293,15 +290,13 @@ def make_tag_network(fig, data, nodes, attributes=None):
     ax2.set_xlabel("Degree")
     ax2.set_ylabel("# of Nodes")
 
-    output = io.BytesIO() # file-like object for the image
-    #fig.tight_layout()
-    #plt.savefig(output, aspect='auto') # save the image to the stream
-    plt.savefig(output) # save the image to the stream
-    output.seek(0) # writing moved the cursor to the end of the file, reset
-    plt.clf() # clear pyplot
-    return Response(output, mimetype='image/png')
+    try:
+        resp = plot_img(fig)
+        return resp
+    except:
+        print("ERROR: error occured plotting tag_network")
+        return false
 
-    #G.add_edges_from(edges, weight=2)
 
 def create_graph(G, fig, clusters, frequencies):
 
