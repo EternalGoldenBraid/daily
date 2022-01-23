@@ -248,3 +248,10 @@ def display_plot():
             filename=request.args.get("filename")),
             code=301)
 
+from daily.data_analysis.gnn import get_data
+@bp.route("/data/pack", methods=["GET", "POST"])
+def data_pack():
+    target = request.args.get('target')
+    engine = db.engine
+    get_data.get_event_tag_data(engine)
+    return redirect( url_for('data_analysis.index', code=200))
