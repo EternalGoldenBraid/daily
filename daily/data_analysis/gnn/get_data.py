@@ -74,31 +74,66 @@ def get_event_tag_data(engine, timespan=0, freq_threshold=2):
 
     features = ['meditation', 'rating_sleep', 'rating_day', 'cw', 'screen']
     event_features = data[features]
+    event_features['event_id'] = event_features.index.values
     edges = []
+
     # Connect nodes u and v if edge exists.
     idx = 0
     f = np.zeros((len(all_tags),event_features.shape[1]+1)).astype(int)
+
+    # First create NxF matrix, N number of nodes F+1 number of features.
     for event_idx, event in enumerate(data['tag_id']):
         for u in event:
             f[idx,0] = u
             f[idx,1:] = event_features.iloc[event_idx].values
             idx += 1
+
+    # Associate each node of an edge with its corresponding index wrt. 
+    # feature matrix 
+    for event_idx, event in enumerate(data['tag_id']):
+        event_id = event_features['event_id'].iloc[event_idx]
+        for u in event:
+            locations = np.array(*np.where(u==f[:,0]))
+            is_same_event = np.array(f[np.where(u==f[:,0])][:,-1] == event_id)
+            u_idx = locations[is_same_event].squeeze()
             for v in event:
                 if u == v: continue
-                edges.append(np.array([u, v]))
+                locations = np.array(*np.where(v==f[:,0]))
+                is_same_event = np.array(f[np.where(v==f[:,0])][:,-1] == event_id)
+                v_idx = locations[is_same_event].squeeze()
+                edges.append(np.array([u_idx, v_idx]))
+    print(f"Edges within events {len(edges)}.")
+    
 
+
+    # Add edges connecting event graphs across days and events.
+    print(f)
+    nodes = f[:,0]
+    cross_edges = []
+    print(nodes)
+    processed = []
+    for u_idx, node in enumerate(nodes):
+        v_idxs = np.array(*np.where(node==nodes))
+        for v_idx in v_idxs:
+            # Skip self loop and same event nodes.
+            if v_idx == u_idx or f[u_idx,-1] == f[v_idx,-1]: continue
+            cross_edges.append(np.array([u_idx,v_idx]))
+
+    print(f"Edges cross events {len(cross_edges)}.")
+
+    # Drop the event_id 
+    f = (np.delete(f,-1,1))
     edges = np.array(edges)
-    print(edges.shape)
-    print(edges.max())
-    print(tag_names)
-    PIK = "event_tag_graph.dat"
+    cross_edges = np.array(cross_edges)
 
     print(f"Saving data, features dim {f.shape}, edges dim {len(edges)}.")
     features = pd.DataFrame(f, columns = np.concatenate((['tag_id'], features)))
+
+    PIK = "event_tag_graph.dat"
     THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(THIS_FOLDER, PIK)
     with open(path, "wb") as f:
-        pickle.dump([event_features, edges], f)
+        pickle.dump([features, edges, cross_edges], f)
 
     print("Data packed")
     return data, tag_names
