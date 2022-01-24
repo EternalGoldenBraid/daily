@@ -20,6 +20,10 @@
 				{{ form.password_confirm.label }}<br>
 				{{ form.password_confirm(size=32) }}
 		</p>
+		<p>
+				{{ form.email.label }}<br>
+				{{ form.email(size=32) }}
+		</p>
 		
 		<p> {{ form.remember_me() }} {{ form.remember_me.label }} </p>
 		<p> {{ form.submit() }} </p>

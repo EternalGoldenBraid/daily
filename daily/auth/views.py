@@ -1,11 +1,15 @@
+from daily import db
 from daily.models import User
-from daily.auth.forms import LoginForm
+from daily.auth.forms import LoginForm, RegisterForm
 from flask import (render_template, redirect, flash,
         url_for, request)
 from flask_login import (current_user, login_user,
                     logout_user, login_required)
 from werkzeug.urls import url_parse
 from daily.auth import bp
+from sqlalchemy.exc import (SQLAlchemyError, IntegrityError,
+                InvalidRequestError)
+
 
 
 
@@ -15,8 +19,10 @@ def login():
     Logs user in
     """
 
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+    #if current_user.is_authenticated:
+    #    #print(current_user)
+    #    #input()
+    #    return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
     # Check if request was a POST request
@@ -47,45 +53,52 @@ def login():
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
-    """
-    Registers user 
-    """
 
     # Awaiting rating table modification for multi user support
-    return url_for('auth.register')
 
-        #if form.password != form.password_confimation:
-        #    flash("Passwords don't match")
-        #    return redirect(url_for('auth.register'))
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = RegisterForm()
+    if form.validate_on_submit():         
+    # Check if request was a POST request 
+
+        if form.password.data != form.password_confirm.data:
+            flash("Passwords don't match")
+            return redirect(url_for('auth.register'))
     
-        #if current_user.is_authenticated:
-        #    return redirect(url_for('main.index'))
-        #form = RegisterForm()
-        #if form.validate_on_submit():         
-        ## Check if request was a POST request 
+        # Check if user already exists
+        username = form.username.data
+        user = User.query.filter_by(username=username).first()
+
+        if user is not None:
+            flash('Username already exists')
+            return redirect(url_for('auth.register'))
     
-        #    # Check if user already exists
-        #    username = form.username.data
-        #    user = User.query.filter_by(username=username).first()
+        # Create user
+        u = User(username=username, email=form.email.data)
+        u.set_password(form.password.data)
+
+        try:
+            db.session.add(u)
+            db.session.commit()
+        except (SQLAlchemyError, InvalidRequestError) as e:
+            print(e)
+            db.session.rollback()
+            flash("New entry overlaps with old one")
+            return redirect(url_for('main.index')), 409
+
     
-        #    if user is not None:
-        #        flash('Username already exists')
-        #        return redirect(url_for('auth.register'))
+        login_user(u, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        
+        # Forward to the page the attempted to get at before authentication
+        if not next_page or url_parse(next_page) != '':
+            return redirect(url_for('main.index'))
     
-        #    # Create user
-        #    u = User(username=username, email=#TODO)
-        #    u.set_password(form.password.data)
-    
-        #    login_user(user, remember=form.remember_me.data)
-        #    next_page = request.args.get('next')
-        #    
-        #    # Forward to the page the attempted to get at before authentication
-        #    if not next_page or url_parse(next_page) != '':
-        #        return redirect(url_for('main.index'))
-    
-        #    return redirect(next_page)
-    
-        #return render_template('login.html', title='Log In', form=form)
+        return redirect(next_page)
+    else:
+        return render_template('auth/register.html', title='Register', form=form)
 
 
 # Route for loggine the user out

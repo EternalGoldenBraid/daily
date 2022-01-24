@@ -121,7 +121,8 @@ class BufferEdit(db.Model):
 # the user from session
 @login.user_loader
 def load_user(id):
-    return User.query.get(int(id))
+    if not id == 'None': 
+        return User.query.get(int(id))
 
 
 # SQLite3 foreign key constraints to be enforced on engine connect
