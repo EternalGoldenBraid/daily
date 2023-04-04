@@ -304,7 +304,7 @@ def get_rating_events_tags(engine, columns):
 
     return rating_events_tags[columns]
 
-def get_event_tag_data(engine, timespan=14, freq_threshold=5):
+def get_event_tag_data(engine, timespan=0, freq_threshold=2, blacklist=None):
     # Allows demoers to view plots generated from my data.
     user_id_ = get_user_id_()
 
@@ -365,12 +365,24 @@ def get_event_tag_data(engine, timespan=14, freq_threshold=5):
     tag_id_columns = np.unique(all_tags)
     tag_names = tags.loc[tag_id_columns]['tag_name'].values
 
-    # All events where first column is event and rest are tags.
+    print(f"DEBUG events tags:")
+    print(et_m2m)
+    print(f"DEBUG tag_list:")
+    print(tag_list)
+    print(f"DEBUG tag_id_columns:")
+    print(tag_id_columns)
+    print(f"DEBUG tag_name:")
+    print(tag_names)
+
+    # Data matrix where columns are tags and rows are entries.
+    # TODO: This data structure will not scale. Too sparse!
     data = np.zeros((tag_list.shape[0], len(tag_id_columns)))
     for row_idx, entry in enumerate(tag_list.values):
         mapping = Counter(entry[0])
         for col_idx, key in enumerate(mapping):
             data[row_idx][tag_id_columns == key] = mapping[key]
+    print(data)
+    input()
 
     # Bring ratings and meditation duration in as well.
     #ratings_columns = ['rating_sleep', 'rating_day', 'meditation']

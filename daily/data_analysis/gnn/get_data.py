@@ -15,7 +15,18 @@ def get_user_id_():
 
     return user_id
 
-def get_event_tag_data(engine, timespan=0, freq_threshold=2):
+def get_event_tag_data(engine, timespan=0, freq_threshold=2,
+        to_save=True, filename='data_dump'):
+    """
+    This function merges together three SQL tables consiting of:
+    -Rating: attributes of a given day.
+    -Events: posts of all the days.
+    -Tags: Tags of all the posts.
+
+    This is achieved by utilizing the association tables associating
+    Rating id's with event id's and event id's with tag id's
+    """
+
     # Allows demoers to view plots generated from my data.
     user_id_ = 1
 
@@ -23,7 +34,6 @@ def get_event_tag_data(engine, timespan=0, freq_threshold=2):
     
     # Read ratings for user
     #ratings = pd.read_sql('rating',engine,index_col='id')
-
     if timespan != 0:
         #query = f'SELECT * FROM rating WHERE user_id={user_id_} and date > CURRENT_DATE()-{timespan}'
         query = f'SELECT * FROM rating WHERE user_id={user_id_} ORDER BY date desc LIMIT {timespan}'
@@ -42,11 +52,31 @@ def get_event_tag_data(engine, timespan=0, freq_threshold=2):
     # Read all rating event associations.
     # TODO: Add manual sql query.
     # TODO: Inefficient, fetch only for user, or lazy=dynamic.
-    #query = f'SELECT * FROM rating_events WHERE rating_id={ratings.index}'
-    #re_m2m = pd.read_sql(query,engine,index_col=False)
     re_m2m = pd.read_sql('rating_events',engine,index_col=False)
+    ### Improvement
+    #query = 'SELECT * FROM rating_events WHERE rating_id IN '+str(tuple(ratings.index))
+    #query = 'SELECT * FROM rating_events WHERE rating_id IN '+str((414,1))
+    #query = 'SELECT * FROM rating_events'
+    #query = 'SELECT * FROM rating'
+    #re_m2m = pd.read_sql(sql=query, con=engine,index_col=False,
+                #columns=['rating_id', 'event_id'],
+    #)
+    ### END Improvement
+
     re_m2m = re_m2m[re_m2m['rating_id'].isin(ratings.index)]
 
+    # Read event stories.
+    ### TODO: Improvement
+    #query = 'SELECT * FROM event WHERE id IN '+str(tuple(re_m2m['event_id']))
+    #import pdb; pdb.set_trace()
+    #stories = pd.read_sql(sql=query, con=engine,index_col=False)
+    stories = pd.read_sql(sql='event', con=engine, index_col='id')\
+            .filter(items=re_m2m['event_id'].values, axis=0)['story']
+    stories.index.names=['event_id']
+
+    # TODO: DEBUG THIS UNDER. HOW DO M2M RELATIONS GET CREATED
+    # UNDER THREE PERMUTATIONS:
+    # EVENT-NO_TAGS, EVENT_TAGS, ...
     # Read all event tag associations.
     # Not all events have tags, thus merge innner vs. left
     # dictates whether null tags are included.
@@ -67,73 +97,41 @@ def get_event_tag_data(engine, timespan=0, freq_threshold=2):
     data['rating_id'] = data['rating_id'].apply(lambda x: x[0])
     data = data.merge(ratings,how='inner',on='rating_id')
 
+    THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(THIS_FOLDER, filename+'.h5')
+    data.to_hdf(path+"test", key='data_test', mode='w')
+    stories.to_hdf(path+"test", key='stories', mode='a')
+    import pdb; pdb.set_trace()
     tag_list = et_m2m.groupby('event_id').agg(list)
     all_tags = np.concatenate([np.array(i) for i in tag_list['tag_id'].values])
     tag_id_columns = np.unique(all_tags)
     tag_names = tags.loc[tag_id_columns]['tag_name']
 
-    features = ['meditation', 'rating_sleep', 'rating_day', 'cw', 'screen']
+    #features = ['tag_id', 'meditation', 'rating_sleep', 'rating_day', 'cw', 'screen']
+    features = ['meditation', 'rating_sleep', 'rating_day', 'cw', 'screen', 'date']
+    import pdb; pdb.set_trace()
     event_features = data[features]
     event_features['event_id'] = event_features.index.values
     edges = []
 
-    # Connect nodes u and v if edge exists.
-    idx = 0
-    f = np.zeros((len(all_tags),event_features.shape[1]+1)).astype(int)
-
-    # First create NxF matrix, N number of nodes F+1 number of features.
-    for event_idx, event in enumerate(data['tag_id']):
-        for u in event:
-            f[idx,0] = u
-            f[idx,1:] = event_features.iloc[event_idx].values
-            idx += 1
-
-    # Associate each node of an edge with its corresponding index wrt. 
-    # feature matrix 
-    for event_idx, event in enumerate(data['tag_id']):
-        event_id = event_features['event_id'].iloc[event_idx]
-        for u in event:
-            locations = np.array(*np.where(u==f[:,0]))
-            is_same_event = np.array(f[np.where(u==f[:,0])][:,-1] == event_id)
-            u_idx = locations[is_same_event].squeeze()
-            for v in event:
-                if u == v: continue
-                locations = np.array(*np.where(v==f[:,0]))
-                is_same_event = np.array(f[np.where(v==f[:,0])][:,-1] == event_id)
-                v_idx = locations[is_same_event].squeeze()
-                edges.append(np.array([u_idx, v_idx]))
-    print(f"Edges within events {len(edges)}.")
-    
-
-
-    # Add edges connecting event graphs across days and events.
-    print(f)
-    nodes = f[:,0]
-    cross_edges = []
-    print(nodes)
-    processed = []
-    for u_idx, node in enumerate(nodes):
-        v_idxs = np.array(*np.where(node==nodes))
-        for v_idx in v_idxs:
-            # Skip self loop and same event nodes.
-            if v_idx == u_idx or f[u_idx,-1] == f[v_idx,-1]: continue
-            cross_edges.append(np.array([u_idx,v_idx]))
-
-    print(f"Edges cross events {len(cross_edges)}.")
-
-    # Drop the event_id 
-    f = (np.delete(f,-1,1))
-    edges = np.array(edges)
-    cross_edges = np.array(cross_edges)
-
     print(f"Saving data, features dim {f.shape}, edges dim {len(edges)}.")
-    features = pd.DataFrame(f, columns = np.concatenate((['tag_id'], features)))
+    features = pd.DataFrame(f, columns = np.concatenate((['tag_id'], features, ['event_id'])))
+    tag_names = tags.loc[features['tag_id'].values]
+    dates = data.loc[features['event_id'].values]['date']
+    dates.index = dates.index.set_names('event_id')
+    dates = pd.DataFrame({'event_id':dates.index, 'date':dates.values}).drop_duplicates().reset_index()
 
-    PIK = "event_tag_graph.dat"
-    THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(THIS_FOLDER, PIK)
-    with open(path, "wb") as f:
-        pickle.dump([features, edges, cross_edges], f)
+    import h5py
+
+    dates.drop('index', axis=1, inplace=True)
+
+    if to_save:
+        THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(THIS_FOLDER, filename+'.h5')
+        features.to_hdf(path, key='features', mode='w')
+        dates.to_hdf(path, key='dates', mode='a')
+        tag_names.to_hdf(path, key='tag_names', mode='a')
+        stories.to_hdf(path, key='stories', mode='a')
 
     print("Data packed")
     return data, tag_names

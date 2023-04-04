@@ -200,7 +200,6 @@ def plot_tag_graph(engine, fig, version='date_based', timespan=10, freq_threshol
         #elif version=='event_based':
     else:
         data, labels = get_event_tag_data(engine, timespan=timespan, freq_threshold=freq_threshold)
-        #print(data)
 
     return make_tag_network(fig, data, labels, attributes)
     
