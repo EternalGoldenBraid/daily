@@ -33,7 +33,7 @@ def index():
     page = request.args.get('page', 1, type=int)
     ratings = Rating.query.filter_by(user_id=current_user.id).order_by(
             Rating.date.desc()).paginate(
-            page, current_app.config['DAYS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['DAYS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.index', page=ratings.next_num) \
         if ratings.has_next else None
@@ -141,7 +141,7 @@ def index():
     # Get the updated ratings
     ratings = Rating.query.filter_by(user_id=current_user.id).order_by(
             Rating.date.desc()).paginate(
-            page, current_app.config['DAYS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['DAYS_PER_PAGE'], error_out=False)
 
     # DEBUG
     #$import logging

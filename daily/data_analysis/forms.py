@@ -3,7 +3,7 @@ from wtforms import (BooleanField, StringField, PasswordField, FormField,
     FieldList, SubmitField, TextAreaField, IntegerField,
     SelectField, SelectMultipleField, RadioField)
 from wtforms.validators import DataRequired, length, NumberRange
-from wtforms.fields.html5 import DateField
+from wtforms.fields import DateField
 from wtforms.widgets import ListWidget, CheckboxInput
 
 class MultiCheckboxField(SelectMultipleField):

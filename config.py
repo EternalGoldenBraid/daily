@@ -14,7 +14,10 @@ class Config(object):
     DAYS_PER_PAGE = 7
     EVENTS_PER_PAGE = 4
 
-    if os.environ.get('FLASK_ENV') == 'development':
+#     if os.environ.get('FLASK_ENV') == 'development':
+    flask_debug = os.environ.get('FLASK_DEBUG')
+    if flask_debug == True or flask_debug == 'True' \
+            or flask_debug == '1':
         #SQLALCHEMY_DATABASE_URI =  \
                 #'mysql+mysqldb://dev:test@localhost/dailydb'
         #SQLALCHEMY_DATABASE_URI = \
@@ -25,3 +28,5 @@ class Config(object):
                 'mysql+mysqldb://dailydev:dailydev@localhost/daily' # Home
         SECRET_KEY = 'asd'
         EXPLAIN_TEMPLATE_LOADING = True;
+
+#     import pdb; pdb.set_trace()
