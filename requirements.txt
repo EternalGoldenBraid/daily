@@ -23,7 +23,7 @@ pycparser==2.21
 PyGObject==3.42.0
 pyOpenSSL==21.0.0
 pyparsing==2.4.7
-requests==2.26.0
+requests==2.31.0
 resolvelib==0.5.5
 retrying==1.3.3
 six==1.16.0
